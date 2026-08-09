@@ -66,6 +66,7 @@ Since the mint isn't created yet, this is a fork in the road worth choosing deli
 
 The buy/sell (swap) path itself doesn't exist yet — it's the gated "BRUH token path" waiting on the mint. So this fee work naturally ships as part of building that path rather than as a separate patch.
 
-## Decision needed
+## Decision — locked
 
-Which collection model — app-level fee (Option A) or a Token-2022 mint-level fee (Option B)? The answer changes how the token is minted, so it's worth locking before launch.
+**Option A (app-level fee).** The mint stays a standard SPL token; the 1% is collected by BRUH's own buy and cash-out flows into your treasury wallet. Two things still needed from you before the fee can go live: the **treasury wallet address** and the **BRUH mint** (the swap path is gated on it). The fee code can be built and tested ahead of both.
+
