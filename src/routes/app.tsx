@@ -113,6 +113,8 @@ function MiniApp() {
   const [loading, setLoading] = useState(true);
   const [seasonId, setSeasonId] = useState<string | null>(null);
   const [boardWindow, setBoardWindow] = useState<"7d" | "30d" | "all">("all");
+  const [csv, setCsv] = useState("");
+
 
   const [tips, setTips] = useState<Awaited<ReturnType<typeof getTipsFn>>["tips"]>([]);
   const [mod, setMod] = useState<Awaited<ReturnType<typeof getModerationFn>> | null>(null);
