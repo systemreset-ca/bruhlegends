@@ -47,7 +47,11 @@ export function bruhScore(input: {
 }
 
 /** Group-scoped by construction: no cross-group aggregation ever happens. */
-export async function getLeaderboard(groupId: string, limit = 10): Promise<LeaderboardRow[]> {
+export async function getLeaderboard(
+  groupId: string,
+  limit = 10,
+  seasonId?: string | null,
+): Promise<LeaderboardRow[]> {
   const db = await admin();
   const { data: members } = await db
     .from("group_members")
@@ -55,11 +59,14 @@ export async function getLeaderboard(groupId: string, limit = 10): Promise<Leade
     .eq("group_id", groupId)
     .eq("is_banned", false);
 
-  const { data: calls } = await db
+  let callQuery = db
     .from("calls")
     .select("id, caller_membership_id, ath_multiple, status")
     .eq("group_id", groupId)
     .in("status", ["active", "rugged_or_illiquid", "archived"]);
+  if (seasonId) callQuery = callQuery.eq("season_id", seasonId);
+  const { data: calls } = await callQuery;
+
 
   const { data: milestones } = await db
     .from("milestones")
