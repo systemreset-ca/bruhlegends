@@ -15,6 +15,8 @@ import {
   settleDisputeFn,
   saveSettingsFn,
   getCallsFn,
+  importCallsFn,
+
   getProfileStatsFn,
   getTipTargetsFn,
   composeTipFn,
@@ -92,6 +94,8 @@ function MiniApp() {
   const settleDispute = useServerFn(settleDisputeFn);
   const saveSettings = useServerFn(saveSettingsFn);
   const getCalls = useServerFn(getCallsFn);
+  const importCalls = useServerFn(importCallsFn);
+
   const getProfileStats = useServerFn(getProfileStatsFn);
   const getTipTargets = useServerFn(getTipTargetsFn);
   const composeTip = useServerFn(composeTipFn);
@@ -108,6 +112,10 @@ function MiniApp() {
   const [status, setStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [seasonId, setSeasonId] = useState<string | null>(null);
+  const [boardWindow, setBoardWindow] = useState<"7d" | "30d" | "all">("all");
+  const [csv, setCsv] = useState("");
+
+
   const [tips, setTips] = useState<Awaited<ReturnType<typeof getTipsFn>>["tips"]>([]);
   const [mod, setMod] = useState<Awaited<ReturnType<typeof getModerationFn>> | null>(null);
   const [tab, setTab] = useState<TabId>("wallet");
@@ -177,10 +185,11 @@ function MiniApp() {
 
   useEffect(() => {
     if (!session || !selected) return;
-    getBoard({ data: { session, membershipId: selected, seasonId } })
+    getBoard({ data: { session, membershipId: selected, seasonId, window: boardWindow } })
       .then(setBoard)
       .catch(() => setBoard(null));
-  }, [session, selected, seasonId]);
+  }, [session, selected, seasonId, boardWindow]);
+
 
   useEffect(() => {
     if (!session || !selected) return;
@@ -255,6 +264,23 @@ function MiniApp() {
     anchor.click();
     URL.revokeObjectURL(url);
   }
+
+  async function handleImport() {
+    if (!session || !selected) return;
+    try {
+      const result = await importCalls({ data: { session, membershipId: selected, csv } });
+      setStatus(
+        `Imported ${result.inserted} call(s)${
+          result.skipped.length > 0 ? `, skipped ${result.skipped.length}` : ""
+        }.`,
+      );
+      if (result.inserted > 0) setCsv("");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Import failed.");
+    }
+  }
+
+
 
   async function handleForgetMe() {
     if (!session || !selected) return;
@@ -469,23 +495,36 @@ function MiniApp() {
       {tab === "board" && board && (
         <>
           <section className="mt-6 rounded-lg border border-border bg-card p-5">
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-lg font-semibold">Leaderboard</h2>
-              {board.seasons.length > 0 && (
+              <div className="flex items-center gap-2">
                 <select
-                  value={seasonId ?? ""}
-                  onChange={(event) => setSeasonId(event.target.value || null)}
+                  value={boardWindow}
+                  onChange={(event) =>
+                    setBoardWindow(event.target.value as "7d" | "30d" | "all")
+                  }
                   className="rounded-md border border-input bg-background px-2 py-1 text-xs"
                 >
-                  <option value="">All time</option>
-                  {board.seasons.map((season) => (
-                    <option key={season.id} value={season.id}>
-                      {season.name}
-                      {season.is_active ? " (live)" : ""}
-                    </option>
-                  ))}
+                  <option value="all">All time</option>
+                  <option value="30d">Last 30d</option>
+                  <option value="7d">Last 7d</option>
                 </select>
-              )}
+                {board.seasons.length > 0 && (
+                  <select
+                    value={seasonId ?? ""}
+                    onChange={(event) => setSeasonId(event.target.value || null)}
+                    className="rounded-md border border-input bg-background px-2 py-1 text-xs"
+                  >
+                    <option value="">All seasons</option>
+                    {board.seasons.map((season) => (
+                      <option key={season.id} value={season.id}>
+                        {season.name}
+                        {season.is_active ? " (live)" : ""}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
             </div>
             {board.leaderboard.length === 0 ? (
               <p className="mt-2 text-sm text-muted-foreground">No ranked callers yet.</p>
@@ -495,9 +534,15 @@ function MiniApp() {
                   <li key={row.membershipId} className="flex justify-between py-2 text-sm">
                     <span>
                       {index + 1}. {row.displayName}
+                      {!row.ranked && (
+                        <span className="ml-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                          low sample
+                        </span>
+                      )}
                     </span>
                     <span className="font-mono text-primary">{row.score}</span>
                   </li>
+
                 ))}
               </ol>
             )}
@@ -618,6 +663,30 @@ function MiniApp() {
       {tab === "admin" && mod && (
         <>
           <section className="mt-6 rounded-lg border border-border bg-card p-5">
+            <h2 className="text-lg font-semibold">Import historical calls</h2>
+            <p className="mt-2 text-xs text-muted-foreground">
+              CSV columns: mint, caller_telegram_id, baseline_price_usd, and optionally symbol,
+              peak_price_usd, called_at, note. Imported calls are shown as history and never counted
+              toward BRUH Score.
+            </p>
+            <textarea
+              value={csv}
+              onChange={(event) => setCsv(event.target.value)}
+              rows={4}
+              placeholder="mint,caller_telegram_id,baseline_price_usd,symbol"
+              className="mt-3 w-full rounded-md border border-input bg-background px-3 py-2 font-mono text-xs"
+            />
+            <button
+              onClick={handleImport}
+              disabled={csv.trim().length < 10}
+              className="mt-3 rounded-md bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground disabled:opacity-50"
+            >
+              Import calls
+            </button>
+          </section>
+
+          <section className="mt-6 rounded-lg border border-border bg-card p-5">
+
             <h2 className="text-lg font-semibold">Disputes</h2>
             {mod.disputes.length === 0 ? (
               <p className="mt-2 text-sm text-muted-foreground">Nothing open.</p>

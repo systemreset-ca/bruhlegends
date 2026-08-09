@@ -1,6 +1,13 @@
 import { admin, activeSeason, logAudit } from "./db.server";
-import { fetchTokenSnapshot } from "./market.server";
+import { fetchCheckedSnapshot, fetchTokenSnapshot } from "./market.server";
 import { MILESTONES } from "./bruh-config.server";
+
+/** Milestones a given multiple has reached, ascending. Pure. */
+export function milestonesFor(multiple: number): number[] {
+  if (!Number.isFinite(multiple) || multiple <= 0) return [];
+  return MILESTONES.filter((milestone) => multiple >= milestone);
+}
+
 
 const BASE58_TOKEN = /\b[1-9A-HJ-NP-Za-km-z]{32,44}\b/g;
 
@@ -41,12 +48,17 @@ export async function createCall(input: {
     return { ok: false, reason: "already_called", detail: existing.id };
   }
 
-  const snapshot = await fetchTokenSnapshot(input.mint);
-  if (!snapshot) return { ok: false, reason: "token_unresolved" };
+  const checked = await fetchCheckedSnapshot(input.mint);
+  if (!checked) return { ok: false, reason: "token_unresolved" };
+  // A baseline is immutable, so it must come from agreeing sources with real depth.
+  if (checked.crossCheck === "disagree") return { ok: false, reason: "provider_disagreement" };
+  const snapshot = checked.snapshot;
   if (snapshot.priceUsd === null) return { ok: false, reason: "no_price_source" };
-  if ((snapshot.liquidityUsd ?? 0) < input.minLiquidityUsd) {
+  if (snapshot.liquidityUsd === null) return { ok: false, reason: "no_liquidity_data" };
+  if (snapshot.liquidityUsd < input.minLiquidityUsd) {
     return { ok: false, reason: "insufficient_liquidity" };
   }
+
 
   const { data, error } = await db
     .from("calls")
@@ -117,16 +129,17 @@ export async function refreshCalls(limit = 40): Promise<{
   let quarantined = 0;
 
   for (const call of calls ?? []) {
-    const snapshot = await fetchTokenSnapshot(call.mint);
+    const checked = await fetchCheckedSnapshot(call.mint);
+    const snapshot = checked?.snapshot ?? null;
     const observedAt = new Date().toISOString();
 
     if (!snapshot || snapshot.priceUsd === null) {
       await db.from("market_observations").insert({
         call_id: call.id,
         observed_at: observedAt,
-        provider: "dexscreener",
+        provider: "none",
         quarantined: true,
-        quarantine_reason: "provider_unavailable",
+        quarantine_reason: "all_providers_unavailable",
       });
       quarantined += 1;
       continue;
@@ -138,7 +151,20 @@ export async function refreshCalls(limit = 40): Promise<{
       .eq("id", call.group_id)
       .maybeSingle();
     const floor = Number(group?.min_liquidity_usd ?? 0);
-    const suspicious = (snapshot.liquidityUsd ?? 0) < floor;
+
+    // Untrusted observations are recorded but never score: providers that
+    // disagree, a failover feed with no depth data, or liquidity under the floor.
+    const disagreement = checked?.crossCheck === "disagree";
+    const failoverOnly = snapshot.liquidityUsd === null;
+    const belowFloor = !failoverOnly && (snapshot.liquidityUsd ?? 0) < floor;
+    const reason = disagreement
+      ? "provider_price_disagreement"
+      : failoverOnly
+        ? "primary_provider_unavailable"
+        : belowFloor
+          ? "liquidity_below_group_floor"
+          : null;
+    const suspicious = reason !== null;
 
     await db.from("market_observations").insert({
       call_id: call.id,
@@ -148,7 +174,7 @@ export async function refreshCalls(limit = 40): Promise<{
       liquidity_usd: snapshot.liquidityUsd,
       provider: snapshot.provider,
       quarantined: suspicious,
-      quarantine_reason: suspicious ? "liquidity_below_group_floor" : null,
+      quarantine_reason: reason,
       raw: snapshot.raw as never,
     });
 
@@ -156,13 +182,18 @@ export async function refreshCalls(limit = 40): Promise<{
 
     if (suspicious) {
       quarantined += 1;
-      await db.from("calls").update({
-        status: "quarantined",
-        last_price_usd: snapshot.priceUsd,
-        last_observed_at: observedAt,
-      }).eq("id", call.id);
+      await db
+        .from("calls")
+        .update({
+          // A provider outage is not the call's fault: keep it active, just unscored.
+          ...(failoverOnly ? {} : { status: "quarantined" as const }),
+          last_price_usd: snapshot.priceUsd,
+          last_observed_at: observedAt,
+        })
+        .eq("id", call.id);
       continue;
     }
+
 
     const baseline = Number(call.baseline_price_usd ?? 0);
     const multiple = baseline > 0 ? snapshot.priceUsd / baseline : 0;
@@ -180,8 +211,8 @@ export async function refreshCalls(limit = 40): Promise<{
       })
       .eq("id", call.id);
 
-    for (const milestone of MILESTONES) {
-      if (multiple < milestone) continue;
+    // The unique (call_id, milestone) index makes a repeated observation a no-op.
+    for (const milestone of milestonesFor(multiple)) {
       const { error } = await db.from("milestones").insert({
         call_id: call.id,
         milestone,
@@ -190,6 +221,7 @@ export async function refreshCalls(limit = 40): Promise<{
       });
       if (!error) hits.push({ callId: call.id, milestone, multiple });
     }
+
   }
 
   return { refreshed, quarantined, milestones: hits };

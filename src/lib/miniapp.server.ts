@@ -128,13 +128,15 @@ export async function loadGroupBoard(input: {
   session: string;
   membershipId: string;
   seasonId?: string | null | undefined;
+  window?: "7d" | "30d" | "all" | undefined;
 }) {
   const { telegramUserId } = await requireSession(input.session);
   const membership = await ownedMembership(telegramUserId, input.membershipId);
   const db = await admin();
 
   const [board, calls, seasons] = await Promise.all([
-    getLeaderboard(membership.group_id, 10, input.seasonId ?? null),
+    getLeaderboard(membership.group_id, 10, input.seasonId ?? null, input.window ?? "all"),
+
     db
       .from("calls")
       .select("symbol, mint, baseline_price_usd, last_price_usd, ath_multiple, group_members(display_name)")
@@ -148,6 +150,8 @@ export async function loadGroupBoard(input: {
   return {
     seasons,
     seasonId: input.seasonId ?? null,
+    window: input.window ?? "all",
+
     leaderboard: board,
     calls: (calls.data ?? []).map((call: any) => ({
       symbol: (call.symbol ?? call.mint.slice(0, 6)) as string,
@@ -239,6 +243,22 @@ export async function saveSettings(input: {
   await updateGroupSettings(group.id, membership.id, input.patch);
   return { ok: true };
 }
+
+/** Admin-only bulk import of historical calls; stored as unscored history. */
+export async function importCalls(input: {
+  session: string;
+  membershipId: string;
+  csv: string;
+}) {
+  const { group, membership } = await requireGroupAdmin(input.session, input.membershipId);
+  const { importHistoricalCalls } = await import("./import.server");
+  return importHistoricalCalls({
+    groupId: group.id,
+    actorMembershipId: membership.id,
+    csv: input.csv,
+  });
+}
+
 
 export async function settleDispute(input: {
   session: string;

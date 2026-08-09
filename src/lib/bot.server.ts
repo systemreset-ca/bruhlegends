@@ -1,7 +1,7 @@
 import { admin, upsertGroup, upsertMember, migrateChatId, logAudit } from "./db.server";
 import { sendMessage, answerCallbackQuery, escapeHtml, isChatAdmin } from "./telegram.server";
 import { createCall, extractCandidateMints } from "./calls.server";
-import { getLeaderboard, getMemberStats } from "./scoring.server";
+import { getLeaderboard, getMemberStats, type LeaderboardWindow } from "./scoring.server";
 import { createTipIntent, confirmTip } from "./tips.server";
 import { getActiveWallet } from "./wallets.server";
 import { createLoginToken } from "./session.server";
@@ -206,7 +206,8 @@ async function handleCommand(message: TgMessage, text: string) {
     case "/calls":
       return handleCalls(message, group);
     case "/leaderboard":
-      return handleLeaderboard(message, group);
+      return handleLeaderboard(message, group, args);
+
     case "/stats":
       return handleStats(message, group, member);
     case "/wallet":
@@ -346,6 +347,10 @@ async function handleCall(message: TgMessage, group: any, member: any, args: str
       already_called: "That token is already an open call in this group.",
       token_unresolved: "I couldn't find a Solana market for that mint.",
       no_price_source: "No reliable price source for that token right now — call not recorded.",
+      provider_disagreement:
+        "Price sources disagree on that token right now — call not recorded. Try again shortly.",
+      no_liquidity_data: "No pool depth data for that token right now — call not recorded.",
+
       insufficient_liquidity: `Liquidity is below this group's floor ($${Number(group.min_liquidity_usd ?? 0).toLocaleString()}).`,
     };
     await sendMessage(message.chat.id, messages[result.reason] ?? "Call could not be recorded.", {
@@ -401,9 +406,13 @@ async function handleCalls(message: TgMessage, group: any) {
   });
 }
 
-async function handleLeaderboard(message: TgMessage, group: any) {
-  const rows = await getLeaderboard(group.id, 10);
+async function handleLeaderboard(message: TgMessage, group: any, args: string[] = []) {
+  const requested = (args[0] ?? "").toLowerCase();
+  const window: LeaderboardWindow =
+    requested === "7d" || requested === "30d" ? requested : "all";
+  const rows = await getLeaderboard(group.id, 10, null, window);
   if (rows.length === 0) {
+
     await sendMessage(message.chat.id, "No ranked callers yet in this group.", {
       replyToMessageId: message.message_id,
     });
@@ -411,13 +420,15 @@ async function handleLeaderboard(message: TgMessage, group: any) {
   }
   const lines = rows.map(
     (row, index) =>
-      `${index + 1}. <b>${escapeHtml(row.displayName)}</b> — ${row.score} pts · ${row.calls} calls · best ${row.bestMultiple.toFixed(2)}x`,
+      `${index + 1}. <b>${escapeHtml(row.displayName)}</b> — ${row.score} pts · ${row.calls} calls · best ${row.bestMultiple.toFixed(2)}x${row.ranked ? "" : " · low sample"}`,
   );
+  const label = window === "all" ? "all time" : `last ${window === "7d" ? "7" : "30"} days`;
   await sendMessage(
     message.chat.id,
-    `<b>BRUH Score — ${escapeHtml(group.title)}</b>\n\n${lines.join("\n")}\n\n<i>Group-scoped. Peak multiples use locked baselines.</i>`,
+    `<b>BRUH Score — ${escapeHtml(group.title)}</b>\n<i>${label}</i>\n\n${lines.join("\n")}\n\n<i>Group-scoped. Peak multiples use locked baselines. Try /leaderboard 7d or 30d.</i>`,
     { replyToMessageId: message.message_id },
   );
+
 }
 
 async function handleStats(message: TgMessage, group: any, member: any) {
