@@ -15,6 +15,8 @@ import {
   settleDisputeFn,
   saveSettingsFn,
   getCallsFn,
+  importCallsFn,
+
   getProfileStatsFn,
   getTipTargetsFn,
   composeTipFn,
