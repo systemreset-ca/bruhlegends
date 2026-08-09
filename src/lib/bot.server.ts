@@ -206,7 +206,8 @@ async function handleCommand(message: TgMessage, text: string) {
     case "/calls":
       return handleCalls(message, group);
     case "/leaderboard":
-      return handleLeaderboard(message, group);
+      return handleLeaderboard(message, group, args);
+
     case "/stats":
       return handleStats(message, group, member);
     case "/wallet":
