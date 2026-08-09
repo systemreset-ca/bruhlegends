@@ -9,7 +9,7 @@ import {
   getActiveWallet,
   revokeWallets,
 } from "./wallets.server";
-import { getLeaderboard } from "./scoring.server";
+import { getLeaderboard, getMemberStats } from "./scoring.server";
 import {
   listSeasons,
   listOpenDisputes,
@@ -18,8 +18,9 @@ import {
   type GroupSettingsPatch,
   type DisputeResolution,
 } from "./moderation.server";
-import { listPendingTips, confirmTip } from "./tips.server";
+import { listPendingTips, confirmTip, createTipIntent } from "./tips.server";
 import { isChatAdmin } from "./telegram.server";
+import { exportMemberData, forgetMember } from "./datarights.server";
 
 async function requireSession(session: string) {
   const resolved = await resolveSession(session);
@@ -221,7 +222,7 @@ export async function loadModeration(input: { session: string; membershipId: str
       minTokenAgeMinutes: Number(group.min_token_age_minutes ?? 0),
       allowRepeatCalls: Boolean(group.allow_repeat_calls),
       announceTips: Boolean(group.announce_tips),
-      announcementMode: (group.announcement_mode ?? "immediate") as "immediate" | "off",
+      announcementMode: (group.announcement_mode ?? "immediate") as "immediate" | "hourly" | "daily" | "off",
       quietHoursStart: group.quiet_hours_start as number | null,
       quietHoursEnd: group.quiet_hours_end as number | null,
       retentionDays: Number(group.raw_message_retention_days ?? 30),
@@ -256,4 +257,192 @@ export async function settleDispute(input: {
   });
   if (!result.ok) throw new Error("That dispute is already settled.");
   return { ok: true };
+}
+
+export type ExplorerCall = {
+  id: string;
+  symbol: string;
+  mint: string;
+  status: string;
+  note: string | null;
+  caller: string;
+  createdAt: string;
+  current: number;
+  peak: number;
+  peakAt: string | null;
+  liquidityUsd: number;
+};
+
+/** Full call list for the group, with the milestone timeline for one call. */
+export async function loadCalls(input: {
+  session: string;
+  membershipId: string;
+  callId?: string | null | undefined;
+}) {
+  const { telegramUserId } = await requireSession(input.session);
+  const membership = await ownedMembership(telegramUserId, input.membershipId);
+  const db = await admin();
+
+  const { data: calls } = await db
+    .from("calls")
+    .select(
+      "id, symbol, mint, status, note, created_at, baseline_price_usd, last_price_usd, ath_multiple, ath_at, baseline_liquidity_usd, group_members(display_name)",
+    )
+    .eq("group_id", membership.group_id)
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  let detail: {
+    id: string;
+    milestones: { milestone: number; reachedAt: string; priceUsd: number | null }[];
+    observations: { observedAt: string; priceUsd: number | null }[];
+  } | null = null;
+
+  if (input.callId) {
+    const owned = (calls ?? []).some((call: any) => call.id === input.callId);
+    if (owned) {
+      const [milestones, observations] = await Promise.all([
+        db
+          .from("milestones")
+          .select("milestone, reached_at, price_usd")
+          .eq("call_id", input.callId)
+          .order("milestone", { ascending: true }),
+        db
+          .from("market_observations")
+          .select("observed_at, price_usd")
+          .eq("call_id", input.callId)
+          .eq("quarantined", false)
+          .order("observed_at", { ascending: false })
+          .limit(24),
+      ]);
+      detail = {
+        id: input.callId,
+        milestones: (milestones.data ?? []).map((row: any) => ({
+          milestone: Number(row.milestone),
+          reachedAt: row.reached_at as string,
+          priceUsd: row.price_usd === null ? null : Number(row.price_usd),
+        })),
+        observations: (observations.data ?? []).map((row: any) => ({
+          observedAt: row.observed_at as string,
+          priceUsd: row.price_usd === null ? null : Number(row.price_usd),
+        })),
+      };
+    }
+  }
+
+  return {
+    detail,
+    calls: (calls ?? []).map((call: any): ExplorerCall => {
+      const base = Number(call.baseline_price_usd ?? 0);
+      return {
+        id: call.id as string,
+        symbol: (call.symbol ?? call.mint.slice(0, 6)) as string,
+        mint: call.mint as string,
+        status: call.status as string,
+        note: (call.note ?? null) as string | null,
+        caller: (call.group_members?.display_name ?? "member") as string,
+        createdAt: call.created_at as string,
+        current: base > 0 ? Number(call.last_price_usd ?? 0) / base : 0,
+        peak: Number(call.ath_multiple ?? 1),
+        peakAt: (call.ath_at ?? null) as string | null,
+        liquidityUsd: Number(call.baseline_liquidity_usd ?? 0),
+      };
+    }),
+  };
+}
+
+/** The caller's own record in this group, with the score inputs spelled out. */
+export async function loadProfileStats(input: { session: string; membershipId: string }) {
+  const { telegramUserId } = await requireSession(input.session);
+  const membership = await ownedMembership(telegramUserId, input.membershipId);
+  const stats = await getMemberStats(membership.group_id, input.membershipId);
+
+  const db = await admin();
+  const { data: member } = await db
+    .from("group_members")
+    .select("display_name, pseudonym, role, detection_opt_out, default_tip_privacy, joined_at")
+    .eq("id", input.membershipId)
+    .maybeSingle();
+
+  return {
+    rank: stats.rank,
+    total: stats.total,
+    row: stats.row,
+    member: {
+      displayName: (member?.display_name ?? "member") as string,
+      role: (member?.role ?? "member") as string,
+      detectionOptOut: Boolean(member?.detection_opt_out),
+      defaultTipPrivacy: (member?.default_tip_privacy ?? "public") as string,
+      joinedAt: (member?.joined_at ?? null) as string | null,
+    },
+  };
+}
+
+/** Members the caller can tip, plus the assets currently enabled for tipping. */
+export async function loadTipTargets(input: { session: string; membershipId: string }) {
+  const { telegramUserId } = await requireSession(input.session);
+  const membership = await ownedMembership(telegramUserId, input.membershipId);
+  const db = await admin();
+
+  const [members, assets] = await Promise.all([
+    db
+      .from("group_members")
+      .select("id, display_name")
+      .eq("group_id", membership.group_id)
+      .eq("is_banned", false)
+      .neq("id", input.membershipId)
+      .limit(200),
+    db.from("supported_assets").select("symbol").eq("is_tip_asset", true).eq("enabled", true),
+  ]);
+
+  return {
+    members: (members.data ?? []).map((row: any) => ({
+      membershipId: row.id as string,
+      displayName: (row.display_name ?? "member") as string,
+    })),
+    assets: (assets.data ?? []).map((row: any) => row.symbol as string),
+  };
+}
+
+export async function composeTip(input: {
+  session: string;
+  membershipId: string;
+  recipientMembershipId: string;
+  assetSymbol: string;
+  amount: number;
+}) {
+  const { telegramUserId } = await requireSession(input.session);
+  const membership = await ownedMembership(telegramUserId, input.membershipId);
+
+  const result = await createTipIntent({
+    groupId: membership.group_id,
+    senderMembershipId: input.membershipId,
+    recipientMembershipId: input.recipientMembershipId,
+    assetSymbol: input.assetSymbol.toUpperCase(),
+    amount: input.amount,
+  });
+
+  if (!result.ok) {
+    const messages: Record<string, string> = {
+      self_tip: "You can't tip yourself.",
+      invalid_amount: "That amount isn't valid.",
+      asset_unavailable: "That asset isn't available for tipping yet.",
+      recipient_wallet_missing: "That member hasn't linked a wallet in this group yet.",
+    };
+    throw new Error(messages[result.reason] ?? "Tip could not be prepared.");
+  }
+
+  return { tip: result.intent };
+}
+
+export async function exportMyData(input: { session: string; membershipId: string }) {
+  const { telegramUserId } = await requireSession(input.session);
+  await ownedMembership(telegramUserId, input.membershipId);
+  return { csv: await exportMemberData(input.membershipId) };
+}
+
+export async function forgetMe(input: { session: string; membershipId: string }) {
+  const { telegramUserId } = await requireSession(input.session);
+  await ownedMembership(telegramUserId, input.membershipId);
+  return forgetMember(input.membershipId);
 }

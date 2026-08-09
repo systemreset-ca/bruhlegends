@@ -139,7 +139,7 @@ export const saveSettingsFn = createServerFn({ method: "POST" })
           min_token_age_minutes: z.number().int().min(0).max(10_080).optional(),
           allow_repeat_calls: z.boolean().optional(),
           announce_tips: z.boolean().optional(),
-          announcement_mode: z.enum(["immediate", "off"]).optional(),
+          announcement_mode: z.enum(["immediate", "hourly", "daily", "off"]).optional(),
           quiet_hours_start: z.number().int().min(0).max(23).nullable().optional(),
           quiet_hours_end: z.number().int().min(0).max(23).nullable().optional(),
           raw_message_retention_days: z.number().int().min(1).max(365).optional(),
@@ -150,4 +150,80 @@ export const saveSettingsFn = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { saveSettings } = await import("./miniapp.server");
     return saveSettings(data);
+  });
+
+export const getCallsFn = createServerFn({ method: "POST" })
+  .inputValidator((input) =>
+    z
+      .object({
+        session: z.string().min(8).max(200),
+        membershipId: z.string().uuid(),
+        callId: z.string().uuid().nullable().optional(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data }) => {
+    const { loadCalls } = await import("./miniapp.server");
+    return loadCalls(data);
+  });
+
+export const getProfileStatsFn = createServerFn({ method: "POST" })
+  .inputValidator((input) =>
+    z
+      .object({ session: z.string().min(8).max(200), membershipId: z.string().uuid() })
+      .parse(input),
+  )
+  .handler(async ({ data }) => {
+    const { loadProfileStats } = await import("./miniapp.server");
+    return loadProfileStats(data);
+  });
+
+export const getTipTargetsFn = createServerFn({ method: "POST" })
+  .inputValidator((input) =>
+    z
+      .object({ session: z.string().min(8).max(200), membershipId: z.string().uuid() })
+      .parse(input),
+  )
+  .handler(async ({ data }) => {
+    const { loadTipTargets } = await import("./miniapp.server");
+    return loadTipTargets(data);
+  });
+
+export const composeTipFn = createServerFn({ method: "POST" })
+  .inputValidator((input) =>
+    z
+      .object({
+        session: z.string().min(8).max(200),
+        membershipId: z.string().uuid(),
+        recipientMembershipId: z.string().uuid(),
+        assetSymbol: z.string().min(2).max(10),
+        amount: z.number().positive().max(1_000_000_000),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data }) => {
+    const { composeTip } = await import("./miniapp.server");
+    return composeTip(data);
+  });
+
+export const exportMyDataFn = createServerFn({ method: "POST" })
+  .inputValidator((input) =>
+    z
+      .object({ session: z.string().min(8).max(200), membershipId: z.string().uuid() })
+      .parse(input),
+  )
+  .handler(async ({ data }) => {
+    const { exportMyData } = await import("./miniapp.server");
+    return exportMyData(data);
+  });
+
+export const forgetMeFn = createServerFn({ method: "POST" })
+  .inputValidator((input) =>
+    z
+      .object({ session: z.string().min(8).max(200), membershipId: z.string().uuid() })
+      .parse(input),
+  )
+  .handler(async ({ data }) => {
+    const { forgetMe } = await import("./miniapp.server");
+    return forgetMe(data);
   });

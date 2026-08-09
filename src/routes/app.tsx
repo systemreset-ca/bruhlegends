@@ -13,6 +13,12 @@ import {
   getModerationFn,
   settleDisputeFn,
   saveSettingsFn,
+  getCallsFn,
+  getProfileStatsFn,
+  getTipTargetsFn,
+  composeTipFn,
+  exportMyDataFn,
+  forgetMeFn,
 } from "@/lib/miniapp.functions";
 
 export const Route = createFileRoute("/app")({
@@ -39,6 +45,30 @@ export const Route = createFileRoute("/app")({
 
 const SESSION_KEY = "bruh_session";
 
+type ExplorerCall = {
+  id: string;
+  symbol: string;
+  mint: string;
+  status: string;
+  note: string | null;
+  caller: string;
+  createdAt: string;
+  current: number;
+  peak: number;
+  peakAt: string | null;
+  liquidityUsd: number;
+};
+
+type TabId = "wallet" | "board" | "calls" | "tips" | "profile" | "admin";
+
+const TABS: { id: TabId; label: string }[] = [
+  { id: "wallet", label: "Wallet" },
+  { id: "board", label: "Board" },
+  { id: "calls", label: "Calls" },
+  { id: "tips", label: "Tips" },
+  { id: "profile", label: "Profile" },
+];
+
 type GroupEntry = {
   membershipId: string;
   groupId: string;
@@ -59,6 +89,12 @@ function MiniApp() {
   const getModeration = useServerFn(getModerationFn);
   const settleDispute = useServerFn(settleDisputeFn);
   const saveSettings = useServerFn(saveSettingsFn);
+  const getCalls = useServerFn(getCallsFn);
+  const getProfileStats = useServerFn(getProfileStatsFn);
+  const getTipTargets = useServerFn(getTipTargetsFn);
+  const composeTip = useServerFn(composeTipFn);
+  const exportMyData = useServerFn(exportMyDataFn);
+  const forgetMe = useServerFn(forgetMeFn);
 
   const [session, setSession] = useState<string | null>(null);
   const [groups, setGroups] = useState<GroupEntry[]>([]);
@@ -72,6 +108,14 @@ function MiniApp() {
   const [seasonId, setSeasonId] = useState<string | null>(null);
   const [tips, setTips] = useState<Awaited<ReturnType<typeof getTipsFn>>["tips"]>([]);
   const [mod, setMod] = useState<Awaited<ReturnType<typeof getModerationFn>> | null>(null);
+  const [tab, setTab] = useState<TabId>("wallet");
+  const [explorer, setExplorer] = useState<Awaited<ReturnType<typeof getCallsFn>> | null>(null);
+  const [openCallId, setOpenCallId] = useState<string | null>(null);
+  const [profile, setProfile] = useState<Awaited<ReturnType<typeof getProfileStatsFn>> | null>(
+    null,
+  );
+  const [targets, setTargets] = useState<Awaited<ReturnType<typeof getTipTargetsFn>> | null>(null);
+  const [draft, setDraft] = useState({ recipient: "", asset: "SOL", amount: "" });
 
   useEffect(() => {
     (async () => {
@@ -87,6 +131,11 @@ function MiniApp() {
         }
         url.searchParams.delete("t");
         window.history.replaceState({}, "", url.toString());
+      }
+
+      const requestedTab = url.searchParams.get("tab");
+      if (requestedTab && ["wallet", "board", "calls", "tips", "profile"].includes(requestedTab)) {
+        setTab(requestedTab as TabId);
       }
 
       if (!active) {
@@ -124,6 +173,77 @@ function MiniApp() {
       .then(setMod)
       .catch(() => setMod(null));
   }, [session, selected]);
+
+  useEffect(() => {
+    if (!session || !selected) return;
+    if (tab !== "calls") return;
+    getCalls({ data: { session, membershipId: selected, callId: openCallId } })
+      .then(setExplorer)
+      .catch(() => setExplorer(null));
+  }, [session, selected, tab, openCallId]);
+
+  useEffect(() => {
+    if (!session || !selected) return;
+    if (tab !== "profile") return;
+    getProfileStats({ data: { session, membershipId: selected } })
+      .then(setProfile)
+      .catch(() => setProfile(null));
+  }, [session, selected, tab]);
+
+  useEffect(() => {
+    if (!session || !selected) return;
+    if (tab !== "tips") return;
+    getTipTargets({ data: { session, membershipId: selected } })
+      .then(setTargets)
+      .catch(() => setTargets(null));
+  }, [session, selected, tab]);
+
+  async function handleComposeTip() {
+    if (!session || !selected) return;
+    setStatus(null);
+    const amount = Number(draft.amount);
+    if (!draft.recipient || !Number.isFinite(amount) || amount <= 0) {
+      setStatus("Pick a member and a valid amount.");
+      return;
+    }
+    try {
+      await composeTip({
+        data: {
+          session,
+          membershipId: selected,
+          recipientMembershipId: draft.recipient,
+          assetSymbol: draft.asset,
+          amount,
+        },
+      });
+      setDraft({ recipient: "", asset: draft.asset, amount: "" });
+      setStatus("Tip request created — pay it below, then verify.");
+      await refreshTips();
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Tip could not be prepared.");
+    }
+  }
+
+  async function handleExport() {
+    if (!session || !selected) return;
+    const result = await exportMyData({ data: { session, membershipId: selected } });
+    const blob = new Blob([result.csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `bruh-my-data-${selected.slice(0, 8)}.csv`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function handleForgetMe() {
+    if (!session || !selected) return;
+    if (!window.confirm("Revoke your wallet and anonymise your record in this group?")) return;
+    const result = await forgetMe({ data: { session, membershipId: selected } });
+    setStatus(`Done — you now appear as ${result.pseudonym}.`);
+    await refreshProfile(session);
+    setProfile(null);
+  }
 
   async function refreshTips() {
     if (!session || !selected) return;
@@ -253,7 +373,25 @@ function MiniApp() {
         </select>
       </section>
 
-      {current && (
+      <nav className="mb-6 flex flex-wrap gap-2">
+        {[...TABS, ...(mod ? [{ id: "admin" as TabId, label: "Admin" }] : [])].map((entry) => (
+          <button
+            key={entry.id}
+            onClick={() => setTab(entry.id)}
+            className={`rounded-md border px-3 py-1.5 text-xs font-medium uppercase tracking-wide ${
+              tab === entry.id
+                ? "border-primary bg-primary/10 text-primary"
+                : "border-border text-muted-foreground hover:bg-secondary"
+            }`}
+          >
+            {entry.label}
+          </button>
+        ))}
+      </nav>
+
+      {status && <p className="mb-4 text-sm text-accent">{status}</p>}
+
+      {tab === "wallet" && current && (
         <section className="rounded-lg border border-border bg-card p-5">
           <h2 className="text-lg font-semibold">Wallet</h2>
           {current.wallet ? (
@@ -308,7 +446,7 @@ function MiniApp() {
         </section>
       )}
 
-      {board && (
+      {tab === "board" && board && (
         <>
           <section className="mt-6 rounded-lg border border-border bg-card p-5">
             <div className="flex items-center justify-between gap-3">
@@ -368,7 +506,56 @@ function MiniApp() {
         </>
       )}
 
-      {tips.length > 0 && (
+      {tab === "tips" && (
+        <section className="rounded-lg border border-border bg-card p-5">
+          <h2 className="text-lg font-semibold">Send a tip</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            BRUH builds the request. You approve it in your own wallet — nothing is ever held here.
+          </p>
+          <div className="mt-4 space-y-3">
+            <select
+              value={draft.recipient}
+              onChange={(event) => setDraft({ ...draft, recipient: event.target.value })}
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            >
+              <option value="">Choose a member…</option>
+              {(targets?.members ?? []).map((member: { membershipId: string; displayName: string }) => (
+                <option key={member.membershipId} value={member.membershipId}>
+                  {member.displayName}
+                </option>
+              ))}
+            </select>
+            <div className="flex gap-2">
+              <input
+                value={draft.amount}
+                onChange={(event) => setDraft({ ...draft, amount: event.target.value })}
+                placeholder="Amount"
+                inputMode="decimal"
+                className="flex-1 rounded-md border border-input bg-background px-3 py-2 font-mono text-sm"
+              />
+              <select
+                value={draft.asset}
+                onChange={(event) => setDraft({ ...draft, asset: event.target.value })}
+                className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                {(targets?.assets ?? ["SOL"]).map((asset: string) => (
+                  <option key={asset} value={asset}>
+                    {asset}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <button
+              onClick={handleComposeTip}
+              className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+            >
+              Create tip request
+            </button>
+          </div>
+        </section>
+      )}
+
+      {tab === "tips" && tips.length > 0 && (
         <section className="mt-6 rounded-lg border border-border bg-card p-5">
           <h2 className="text-lg font-semibold">Pending tips</h2>
           <ul className="mt-3 space-y-4">
@@ -408,7 +595,7 @@ function MiniApp() {
         </section>
       )}
 
-      {mod && (
+      {tab === "admin" && mod && (
         <>
           <section className="mt-6 rounded-lg border border-border bg-card p-5">
             <h2 className="text-lg font-semibold">Disputes</h2>
@@ -497,6 +684,8 @@ function MiniApp() {
                   className="rounded-md border border-input bg-background px-2 py-1"
                 >
                   <option value="immediate">Immediate</option>
+                  <option value="hourly">Hourly digest</option>
+                  <option value="daily">Daily digest</option>
                   <option value="off">Off</option>
                 </select>
               </Field>
@@ -547,7 +736,159 @@ function MiniApp() {
           </section>
         </>
       )}
+
+      {tab === "calls" && (
+        <section className="rounded-lg border border-border bg-card p-5">
+          <h2 className="text-lg font-semibold">Calls</h2>
+          {!explorer || explorer.calls.length === 0 ? (
+            <p className="mt-2 text-sm text-muted-foreground">No calls recorded yet.</p>
+          ) : (
+            <ul className="mt-3 divide-y divide-border">
+              {explorer.calls.map((call: ExplorerCall) => {
+                const detail =
+                  explorer.detail && explorer.detail.id === call.id ? explorer.detail : null;
+                return (
+                <li key={call.id} className="py-3">
+                  <button
+                    onClick={() => setOpenCallId(openCallId === call.id ? null : call.id)}
+                    className="flex w-full items-start justify-between gap-3 text-left text-sm"
+                  >
+                    <span>
+                      <span className="font-medium">{call.symbol}</span>{" "}
+                      <span className="text-muted-foreground">· {call.caller}</span>
+                      <span className="block text-xs text-muted-foreground">
+                        {call.createdAt.slice(0, 10)} · {call.status}
+                      </span>
+                    </span>
+                    <span className="whitespace-nowrap font-mono text-primary">
+                      {call.current.toFixed(2)}x / {call.peak.toFixed(2)}x
+                    </span>
+                  </button>
+
+                  {openCallId === call.id && (
+                    <div className="mt-3 rounded-md border border-border bg-background p-3 text-xs">
+                      <p className="break-all font-mono text-muted-foreground">{call.mint}</p>
+                      {call.note && <p className="mt-2">{call.note}</p>}
+                      <p className="mt-2 text-muted-foreground">
+                        Baseline liquidity ${Math.round(call.liquidityUsd).toLocaleString()}
+                        {call.peakAt ? ` · peak ${call.peakAt.slice(0, 16).replace("T", " ")} UTC` : ""}
+                      </p>
+
+                      <p className="mt-3 font-mono uppercase tracking-widest text-muted-foreground">
+                        Milestones
+                      </p>
+                      {detail && detail.milestones.length > 0 ? (
+                        <ul className="mt-1 space-y-1">
+                          {detail.milestones.map((hit) => (
+                            <li key={hit.milestone} className="flex justify-between">
+                              <span className="text-primary">{hit.milestone}x</span>
+                              <span className="text-muted-foreground">
+                                {hit.reachedAt.slice(0, 16).replace("T", " ")} UTC
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="mt-1 text-muted-foreground">None yet.</p>
+                      )}
+
+                      <p className="mt-3 font-mono uppercase tracking-widest text-muted-foreground">
+                        Recent prices
+                      </p>
+                      <ul className="mt-1 space-y-1">
+                        {(detail?.observations ?? [])
+                          .slice(0, 8)
+                          .map((point) => (
+                            <li key={point.observedAt} className="flex justify-between">
+                              <span className="text-muted-foreground">
+                                {point.observedAt.slice(5, 16).replace("T", " ")}
+                              </span>
+                              <span className="font-mono">
+                                {point.priceUsd === null ? "—" : `$${point.priceUsd}`}
+                              </span>
+                            </li>
+                          ))}
+                      </ul>
+                    </div>
+                  )}
+                </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
+      )}
+
+      {tab === "profile" && (
+        <>
+          <section className="rounded-lg border border-border bg-card p-5">
+            <h2 className="text-lg font-semibold">
+              {profile?.member.displayName ?? current?.displayName ?? "You"}
+            </h2>
+            {profile?.row ? (
+              <>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Rank {profile.rank} of {profile.total} · {profile.member.role}
+                </p>
+                <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                  <Stat label="BRUH Score" value={String(profile.row.score)} />
+                  <Stat label="Calls" value={String(profile.row.calls)} />
+                  <Stat label="Best" value={`${profile.row.bestMultiple.toFixed(2)}x`} />
+                  <Stat label="Median" value={`${profile.row.medianMultiple.toFixed(2)}x`} />
+                  <Stat label="Milestones" value={String(profile.row.milestones)} />
+                  <Stat label="Tips received" value={String(profile.row.tipsReceived)} />
+                </dl>
+                <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
+                  Score blends peak and median multiples with your 2x hit rate and peer
+                  recognition, then damps the total by sample size so one lucky call cannot top a
+                  group.
+                </p>
+              </>
+            ) : (
+              <p className="mt-2 text-sm text-muted-foreground">
+                No recorded calls in this group yet.
+              </p>
+            )}
+          </section>
+
+          <section className="mt-6 rounded-lg border border-border bg-card p-5">
+            <h2 className="text-lg font-semibold">Your data</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Everything BRUH holds about you in this group, and nothing from any other group.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button
+                onClick={handleExport}
+                className="rounded-md border border-border px-3 py-2 text-sm hover:bg-secondary"
+              >
+                Download CSV
+              </button>
+              <button
+                onClick={handleForgetMe}
+                className="rounded-md border border-destructive/50 px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
+              >
+                Forget me
+              </button>
+            </div>
+            <p className="mt-3 text-xs text-muted-foreground">
+              Forgetting revokes your wallet link, anonymises your name and turns off passive
+              detection. Calls stay in the group ledger, untied from you.
+            </p>
+          </section>
+        </>
+      )}
     </Shell>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md border border-border bg-background p-3">
+      <dt className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+        {label}
+      </dt>
+      <dd className="mt-1 font-mono text-lg text-primary">{value}</dd>
+    </div>
   );
 }
 

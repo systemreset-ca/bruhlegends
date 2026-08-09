@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      announcement_queue: {
+        Row: {
+          body: string
+          created_at: string
+          dedupe_key: string | null
+          group_id: string
+          id: string
+          kind: string
+          sent_at: string | null
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          dedupe_key?: string | null
+          group_id: string
+          id?: string
+          kind: string
+          sent_at?: string | null
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          dedupe_key?: string | null
+          group_id?: string
+          id?: string
+          kind?: string
+          sent_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "announcement_queue_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_events: {
         Row: {
           actor_id: string | null
