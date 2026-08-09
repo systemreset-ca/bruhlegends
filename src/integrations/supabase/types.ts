@@ -309,6 +309,85 @@ export type Database = {
           },
         ]
       }
+      fee_events: {
+        Row: {
+          asset_mint: string | null
+          asset_symbol: string
+          created_at: string
+          fee_base_units: number
+          fee_bps: number
+          gross_base_units: number
+          group_id: string | null
+          id: string
+          leg: Database["public"]["Enums"]["fee_leg"]
+          membership_id: string | null
+          signature: string | null
+          status: string
+          tip_intent_id: string | null
+          treasury_address: string
+          updated_at: string
+          usd_reference_at_execution: number | null
+        }
+        Insert: {
+          asset_mint?: string | null
+          asset_symbol: string
+          created_at?: string
+          fee_base_units: number
+          fee_bps: number
+          gross_base_units: number
+          group_id?: string | null
+          id?: string
+          leg: Database["public"]["Enums"]["fee_leg"]
+          membership_id?: string | null
+          signature?: string | null
+          status?: string
+          tip_intent_id?: string | null
+          treasury_address: string
+          updated_at?: string
+          usd_reference_at_execution?: number | null
+        }
+        Update: {
+          asset_mint?: string | null
+          asset_symbol?: string
+          created_at?: string
+          fee_base_units?: number
+          fee_bps?: number
+          gross_base_units?: number
+          group_id?: string | null
+          id?: string
+          leg?: Database["public"]["Enums"]["fee_leg"]
+          membership_id?: string | null
+          signature?: string | null
+          status?: string
+          tip_intent_id?: string | null
+          treasury_address?: string
+          updated_at?: string
+          usd_reference_at_execution?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_events_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_events_membership_id_fkey"
+            columns: ["membership_id"]
+            isOneToOne: false
+            referencedRelation: "group_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_events_tip_intent_id_fkey"
+            columns: ["tip_intent_id"]
+            isOneToOne: false
+            referencedRelation: "tip_intents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       group_members: {
         Row: {
           default_tip_privacy: Database["public"]["Enums"]["tip_privacy"]
@@ -1060,6 +1139,7 @@ export type Database = {
         | "archived"
         | "imported"
       detection_mode: "command_only" | "full_detection"
+      fee_leg: "buy" | "sell"
       intent_status:
         | "created"
         | "awaiting_payment"
@@ -1211,6 +1291,7 @@ export const Constants = {
         "imported",
       ],
       detection_mode: ["command_only", "full_detection"],
+      fee_leg: ["buy", "sell"],
       intent_status: [
         "created",
         "awaiting_payment",
