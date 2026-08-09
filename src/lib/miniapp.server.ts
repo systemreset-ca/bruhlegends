@@ -244,6 +244,22 @@ export async function saveSettings(input: {
   return { ok: true };
 }
 
+/** Admin-only bulk import of historical calls; stored as unscored history. */
+export async function importCalls(input: {
+  session: string;
+  membershipId: string;
+  csv: string;
+}) {
+  const { group, membership } = await requireGroupAdmin(input.session, input.membershipId);
+  const { importHistoricalCalls } = await import("./import.server");
+  return importHistoricalCalls({
+    groupId: group.id,
+    actorMembershipId: membership.id,
+    csv: input.csv,
+  });
+}
+
+
 export async function settleDispute(input: {
   session: string;
   membershipId: string;
