@@ -87,6 +87,8 @@ export async function handleUpdate(update: Update): Promise<void> {
     const { chat, new_chat_member } = update.my_chat_member;
     if (["member", "administrator"].includes(new_chat_member.status)) {
       const group = await upsertGroup(chat);
+      const db = await admin();
+      await db.from("groups").update({ removed_at: null }).eq("id", group.id);
       await sendMessage(
         chat.id,
         [
@@ -98,9 +100,22 @@ export async function handleUpdate(update: Update): Promise<void> {
         ].join("\n"),
       );
       await logAudit({ groupId: group.id, actorType: "system", eventType: "bot_added" });
+    } else if (["left", "kicked"].includes(new_chat_member.status)) {
+      // Stop every broadcast for this chat; history is kept for audit only.
+      const db = await admin();
+      const { data: group } = await db
+        .from("groups")
+        .update({ removed_at: new Date().toISOString() })
+        .eq("telegram_chat_id", chat.id)
+        .select("id")
+        .maybeSingle();
+      if (group) {
+        await logAudit({ groupId: group.id, actorType: "system", eventType: "bot_removed" });
+      }
     }
     return;
   }
+
 
   if (update.callback_query) return handleCallback(update.callback_query);
 
