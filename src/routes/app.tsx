@@ -259,6 +259,23 @@ function MiniApp() {
     URL.revokeObjectURL(url);
   }
 
+  async function handleImport() {
+    if (!session || !selected) return;
+    try {
+      const result = await importCalls({ data: { session, membershipId: selected, csv } });
+      setStatus(
+        `Imported ${result.inserted} call(s)${
+          result.skipped.length > 0 ? `, skipped ${result.skipped.length}` : ""
+        }.`,
+      );
+      if (result.inserted > 0) setCsv("");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Import failed.");
+    }
+  }
+
+
+
   async function handleForgetMe() {
     if (!session || !selected) return;
     if (!window.confirm("Revoke your wallet and anonymise your record in this group?")) return;
