@@ -43,11 +43,19 @@ function TermsRoute() {
           ],
         },
         {
+          heading: "Service fee",
+          body: [
+            "When you acquire BRUH through the Mini App, or cash BRUH back out through it, BRUH charges a service fee of 1% of the amount being converted. The fee is shown to you in the confirmation screen, in the same asset and amount, before you approve anything in your wallet.",
+            "The fee applies only to conversions performed through BRUH. Sending a tip wallet-to-wallet carries no BRUH fee, and swapping elsewhere on Solana carries none either. Network fees charged by Solana and any price impact from the swap itself are separate and are not paid to BRUH.",
+          ],
+        },
+        {
           heading: "No financial advice",
           body: [
             "Nothing produced by BRUH — calls, scores, leaderboards, milestones or announcements — is investment advice, an endorsement, or a recommendation to buy or sell anything. Scores measure recorded past outcomes on public data and say nothing about future results.",
           ],
         },
+
         {
           heading: "Acceptable use",
           body: [
