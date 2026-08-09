@@ -259,6 +259,20 @@ export async function settleDispute(input: {
   return { ok: true };
 }
 
+export type ExplorerCall = {
+  id: string;
+  symbol: string;
+  mint: string;
+  status: string;
+  note: string | null;
+  caller: string;
+  createdAt: string;
+  current: number;
+  peak: number;
+  peakAt: string | null;
+  liquidityUsd: number;
+};
+
 /** Full call list for the group, with the milestone timeline for one call. */
 export async function loadCalls(input: {
   session: string;
@@ -318,7 +332,7 @@ export async function loadCalls(input: {
 
   return {
     detail,
-    calls: (calls ?? []).map((call: any) => {
+    calls: (calls ?? []).map((call: any): ExplorerCall => {
       const base = Number(call.baseline_price_usd ?? 0);
       return {
         id: call.id as string,
