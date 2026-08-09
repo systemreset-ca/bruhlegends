@@ -108,6 +108,8 @@ function MiniApp() {
   const [status, setStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [seasonId, setSeasonId] = useState<string | null>(null);
+  const [boardWindow, setBoardWindow] = useState<"7d" | "30d" | "all">("all");
+
   const [tips, setTips] = useState<Awaited<ReturnType<typeof getTipsFn>>["tips"]>([]);
   const [mod, setMod] = useState<Awaited<ReturnType<typeof getModerationFn>> | null>(null);
   const [tab, setTab] = useState<TabId>("wallet");
