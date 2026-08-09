@@ -119,6 +119,11 @@ function MiniApp() {
         window.history.replaceState({}, "", url.toString());
       }
 
+      const requestedTab = url.searchParams.get("tab");
+      if (requestedTab && ["wallet", "board", "calls", "tips", "profile"].includes(requestedTab)) {
+        setTab(requestedTab as TabId);
+      }
+
       if (!active) {
         setLoading(false);
         return;
