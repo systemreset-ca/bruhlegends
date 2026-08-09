@@ -46,13 +46,27 @@ export function bruhScore(input: {
   );
 }
 
+export type LeaderboardWindow = "7d" | "30d" | "all";
+
+/** Pure: the ISO cutoff a window implies, or null for all-time. */
+export function windowCutoff(window: LeaderboardWindow, now = new Date()): string | null {
+  if (window === "all") return null;
+  const days = window === "7d" ? 7 : 30;
+  return new Date(now.getTime() - days * 24 * 60 * 60_000).toISOString();
+}
+
+/** Minimum calls in a window before a member is ranked rather than listed. */
+export const MIN_SAMPLE = 3;
+
 /** Group-scoped by construction: no cross-group aggregation ever happens. */
 export async function getLeaderboard(
   groupId: string,
   limit = 10,
   seasonId?: string | null,
+  window: LeaderboardWindow = "all",
 ): Promise<LeaderboardRow[]> {
   const db = await admin();
+  const cutoff = windowCutoff(window);
   const { data: members } = await db
     .from("group_members")
     .select("id, display_name")
@@ -65,6 +79,7 @@ export async function getLeaderboard(
     .eq("group_id", groupId)
     .in("status", ["active", "rugged_or_illiquid", "archived"]);
   if (seasonId) callQuery = callQuery.eq("season_id", seasonId);
+  if (cutoff) callQuery = callQuery.gte("created_at", cutoff);
   const { data: calls } = await callQuery;
 
 
@@ -73,11 +88,14 @@ export async function getLeaderboard(
     .select("call_id")
     .in("call_id", (calls ?? []).map((c: { id: string }) => c.id));
 
-  const { data: tips } = await db
+  let tipQuery = db
     .from("tip_intents")
     .select("recipient_membership_id")
     .eq("group_id", groupId)
     .eq("status", "confirmed");
+  if (cutoff) tipQuery = tipQuery.gte("created_at", cutoff);
+  const { data: tips } = await tipQuery;
+
 
   const milestoneByCall = new Map<string, number>();
   for (const row of milestones ?? []) {
