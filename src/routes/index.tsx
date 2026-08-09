@@ -100,7 +100,19 @@ function Landing() {
             BRUH never stores private keys or seed phrases. Tracking is informational only and is
             not financial advice.
           </p>
+          <nav className="mt-4 flex gap-4 font-mono text-xs uppercase tracking-widest">
+            <Link to="/privacy" className="hover:text-primary">
+              Privacy
+            </Link>
+            <Link to="/terms" className="hover:text-primary">
+              Terms
+            </Link>
+            <Link to="/risk" className="hover:text-primary">
+              Risk
+            </Link>
+          </nav>
         </footer>
+
       </div>
     </main>
   );
