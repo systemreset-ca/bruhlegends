@@ -65,6 +65,8 @@ export const getGroupBoardFn = createServerFn({ method: "POST" })
         session: z.string().min(8).max(200),
         membershipId: z.string().uuid(),
         seasonId: z.string().uuid().nullable().optional(),
+        window: z.enum(["7d", "30d", "all"]).optional(),
+
       })
       .parse(input),
   )
