@@ -13,6 +13,12 @@ import {
   getModerationFn,
   settleDisputeFn,
   saveSettingsFn,
+  getCallsFn,
+  getProfileStatsFn,
+  getTipTargetsFn,
+  composeTipFn,
+  exportMyDataFn,
+  forgetMeFn,
 } from "@/lib/miniapp.functions";
 
 export const Route = createFileRoute("/app")({
@@ -59,6 +65,12 @@ function MiniApp() {
   const getModeration = useServerFn(getModerationFn);
   const settleDispute = useServerFn(settleDisputeFn);
   const saveSettings = useServerFn(saveSettingsFn);
+  const getCalls = useServerFn(getCallsFn);
+  const getProfileStats = useServerFn(getProfileStatsFn);
+  const getTipTargets = useServerFn(getTipTargetsFn);
+  const composeTip = useServerFn(composeTipFn);
+  const exportMyData = useServerFn(exportMyDataFn);
+  const forgetMe = useServerFn(forgetMeFn);
 
   const [session, setSession] = useState<string | null>(null);
   const [groups, setGroups] = useState<GroupEntry[]>([]);
@@ -72,6 +84,14 @@ function MiniApp() {
   const [seasonId, setSeasonId] = useState<string | null>(null);
   const [tips, setTips] = useState<Awaited<ReturnType<typeof getTipsFn>>["tips"]>([]);
   const [mod, setMod] = useState<Awaited<ReturnType<typeof getModerationFn>> | null>(null);
+  const [tab, setTab] = useState<TabId>("wallet");
+  const [explorer, setExplorer] = useState<Awaited<ReturnType<typeof getCallsFn>> | null>(null);
+  const [openCallId, setOpenCallId] = useState<string | null>(null);
+  const [profile, setProfile] = useState<Awaited<ReturnType<typeof getProfileStatsFn>> | null>(
+    null,
+  );
+  const [targets, setTargets] = useState<Awaited<ReturnType<typeof getTipTargetsFn>> | null>(null);
+  const [draft, setDraft] = useState({ recipient: "", asset: "SOL", amount: "" });
 
   useEffect(() => {
     (async () => {
@@ -124,6 +144,77 @@ function MiniApp() {
       .then(setMod)
       .catch(() => setMod(null));
   }, [session, selected]);
+
+  useEffect(() => {
+    if (!session || !selected) return;
+    if (tab !== "calls") return;
+    getCalls({ data: { session, membershipId: selected, callId: openCallId } })
+      .then(setExplorer)
+      .catch(() => setExplorer(null));
+  }, [session, selected, tab, openCallId]);
+
+  useEffect(() => {
+    if (!session || !selected) return;
+    if (tab !== "profile") return;
+    getProfileStats({ data: { session, membershipId: selected } })
+      .then(setProfile)
+      .catch(() => setProfile(null));
+  }, [session, selected, tab]);
+
+  useEffect(() => {
+    if (!session || !selected) return;
+    if (tab !== "tips") return;
+    getTipTargets({ data: { session, membershipId: selected } })
+      .then(setTargets)
+      .catch(() => setTargets(null));
+  }, [session, selected, tab]);
+
+  async function handleComposeTip() {
+    if (!session || !selected) return;
+    setStatus(null);
+    const amount = Number(draft.amount);
+    if (!draft.recipient || !Number.isFinite(amount) || amount <= 0) {
+      setStatus("Pick a member and a valid amount.");
+      return;
+    }
+    try {
+      await composeTip({
+        data: {
+          session,
+          membershipId: selected,
+          recipientMembershipId: draft.recipient,
+          assetSymbol: draft.asset,
+          amount,
+        },
+      });
+      setDraft({ recipient: "", asset: draft.asset, amount: "" });
+      setStatus("Tip request created — pay it below, then verify.");
+      await refreshTips();
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Tip could not be prepared.");
+    }
+  }
+
+  async function handleExport() {
+    if (!session || !selected) return;
+    const result = await exportMyData({ data: { session, membershipId: selected } });
+    const blob = new Blob([result.csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `bruh-my-data-${selected.slice(0, 8)}.csv`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function handleForgetMe() {
+    if (!session || !selected) return;
+    if (!window.confirm("Revoke your wallet and anonymise your record in this group?")) return;
+    const result = await forgetMe({ data: { session, membershipId: selected } });
+    setStatus(`Done — you now appear as ${result.pseudonym}.`);
+    await refreshProfile(session);
+    setProfile(null);
+  }
 
   async function refreshTips() {
     if (!session || !selected) return;
