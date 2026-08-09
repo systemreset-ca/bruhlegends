@@ -211,8 +211,8 @@ export async function refreshCalls(limit = 40): Promise<{
       })
       .eq("id", call.id);
 
-    for (const milestone of MILESTONES) {
-      if (multiple < milestone) continue;
+    // The unique (call_id, milestone) index makes a repeated observation a no-op.
+    for (const milestone of milestonesFor(multiple)) {
       const { error } = await db.from("milestones").insert({
         call_id: call.id,
         milestone,
@@ -221,6 +221,7 @@ export async function refreshCalls(limit = 40): Promise<{
       });
       if (!error) hits.push({ callId: call.id, milestone, multiple });
     }
+
   }
 
   return { refreshed, quarantined, milestones: hits };
