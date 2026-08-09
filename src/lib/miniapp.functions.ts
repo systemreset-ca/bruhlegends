@@ -139,7 +139,7 @@ export const saveSettingsFn = createServerFn({ method: "POST" })
           min_token_age_minutes: z.number().int().min(0).max(10_080).optional(),
           allow_repeat_calls: z.boolean().optional(),
           announce_tips: z.boolean().optional(),
-          announcement_mode: z.enum(["immediate", "off"]).optional(),
+          announcement_mode: z.enum(["immediate", "hourly", "daily", "off"]).optional(),
           quiet_hours_start: z.number().int().min(0).max(23).nullable().optional(),
           quiet_hours_end: z.number().int().min(0).max(23).nullable().optional(),
           raw_message_retention_days: z.number().int().min(1).max(365).optional(),

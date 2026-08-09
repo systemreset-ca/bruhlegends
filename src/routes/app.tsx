@@ -497,6 +497,8 @@ function MiniApp() {
                   className="rounded-md border border-input bg-background px-2 py-1"
                 >
                   <option value="immediate">Immediate</option>
+                  <option value="hourly">Hourly digest</option>
+                  <option value="daily">Daily digest</option>
                   <option value="off">Off</option>
                 </select>
               </Field>

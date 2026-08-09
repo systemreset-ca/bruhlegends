@@ -221,7 +221,7 @@ export async function loadModeration(input: { session: string; membershipId: str
       minTokenAgeMinutes: Number(group.min_token_age_minutes ?? 0),
       allowRepeatCalls: Boolean(group.allow_repeat_calls),
       announceTips: Boolean(group.announce_tips),
-      announcementMode: (group.announcement_mode ?? "immediate") as "immediate" | "off",
+      announcementMode: (group.announcement_mode ?? "immediate") as "immediate" | "hourly" | "daily" | "off",
       quietHoursStart: group.quiet_hours_start as number | null,
       quietHoursEnd: group.quiet_hours_end as number | null,
       retentionDays: Number(group.raw_message_retention_days ?? 30),

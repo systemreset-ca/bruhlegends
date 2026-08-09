@@ -152,7 +152,7 @@ export type GroupSettingsPatch = {
   min_token_age_minutes?: number | undefined;
   allow_repeat_calls?: boolean | undefined;
   announce_tips?: boolean | undefined;
-  announcement_mode?: "immediate" | "off" | undefined;
+  announcement_mode?: "immediate" | "hourly" | "daily" | "off" | undefined;
   quiet_hours_start?: number | null | undefined;
   quiet_hours_end?: number | null | undefined;
   raw_message_retention_days?: number | undefined;
