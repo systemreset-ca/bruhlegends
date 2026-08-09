@@ -81,7 +81,7 @@ export async function createTipIntent(input: {
     return { ok: false, reason: "self_tip" };
   }
 
-  const asset = resolveAsset(input.assetSymbol);
+  const asset = await resolveAsset(input.assetSymbol);
   if (!asset) return { ok: false, reason: "asset_unavailable" };
 
   const recipientAddress = await getActiveWallet(input.recipientMembershipId);
