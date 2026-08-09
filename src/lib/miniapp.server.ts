@@ -132,13 +132,13 @@ export async function loadGroupBoard(input: { session: string; membershipId: str
   return {
     leaderboard: board,
     calls: (calls.data ?? []).map((call: any) => ({
-      symbol: call.symbol ?? call.mint.slice(0, 6),
-      caller: call.group_members?.display_name ?? "member",
+      symbol: (call.symbol ?? call.mint.slice(0, 6)) as string,
+      caller: (call.group_members?.display_name ?? "member") as string,
       current:
         Number(call.baseline_price_usd) > 0
           ? Number(call.last_price_usd ?? 0) / Number(call.baseline_price_usd)
           : 0,
       peak: Number(call.ath_multiple ?? 1),
-    })),
+    })) as { symbol: string; caller: string; current: number; peak: number }[],
   };
 }
