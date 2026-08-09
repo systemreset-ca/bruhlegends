@@ -20,6 +20,7 @@ import {
   exportMyDataFn,
   forgetMeFn,
 } from "@/lib/miniapp.functions";
+import type { ExplorerCall } from "@/lib/miniapp.server";
 
 export const Route = createFileRoute("/app")({
   ssr: false,
@@ -730,7 +731,7 @@ function MiniApp() {
             <p className="mt-2 text-sm text-muted-foreground">No calls recorded yet.</p>
           ) : (
             <ul className="mt-3 divide-y divide-border">
-              {explorer.calls.map((call) => {
+              {explorer.calls.map((call: ExplorerCall) => {
                 const detail =
                   explorer.detail && explorer.detail.id === call.id ? explorer.detail : null;
                 return (
