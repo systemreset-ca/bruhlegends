@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { refreshCalls } from "@/lib/calls.server";
 import { admin } from "@/lib/db.server";
 import { sendMessage, escapeHtml } from "@/lib/telegram.server";
+import { canAnnounce, loadGroupAnnounceSettings } from "@/lib/announce.server";
 
 /**
  * Called by the scheduler. Refreshes open calls, then announces each milestone

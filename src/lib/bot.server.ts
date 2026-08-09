@@ -643,7 +643,7 @@ async function handleDisputeList(message: TgMessage, group: any, from: TgUser) {
     return;
   }
   const lines = disputes.map(
-    (dispute) =>
+    (dispute: any) =>
       `• <code>${dispute.id.slice(0, 8)}</code> — ${escapeHtml(dispute.token ?? "no call")} · ${escapeHtml(dispute.reason)} (by ${escapeHtml(dispute.raisedBy)})`,
   );
   await sendMessage(
@@ -671,7 +671,7 @@ async function handleResolve(
   }
 
   const open = await listOpenDisputes(group.id);
-  const match = open.find((dispute) => dispute.id.startsWith(shortId));
+  const match = open.find((dispute: any) => dispute.id.startsWith(shortId));
   if (!match) {
     await sendMessage(message.chat.id, "No open dispute with that id.", {
       replyToMessageId: message.message_id,
@@ -708,7 +708,7 @@ async function handleSeason(message: TgMessage, group: any, from: TgUser, args: 
   if (action === "list") {
     const seasons = await listSeasons(group.id);
     const lines = seasons.map(
-      (season) =>
+      (season: any) =>
         `• ${escapeHtml(season.name)}${season.is_active ? " <b>(active)</b>" : ""} — from ${season.starts_at.slice(0, 10)}${season.ends_at ? ` to ${season.ends_at.slice(0, 10)}` : ""}`,
     );
     await sendMessage(
