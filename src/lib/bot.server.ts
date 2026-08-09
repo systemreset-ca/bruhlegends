@@ -406,9 +406,13 @@ async function handleCalls(message: TgMessage, group: any) {
   });
 }
 
-async function handleLeaderboard(message: TgMessage, group: any) {
-  const rows = await getLeaderboard(group.id, 10);
+async function handleLeaderboard(message: TgMessage, group: any, args: string[] = []) {
+  const requested = (args[0] ?? "").toLowerCase();
+  const window: LeaderboardWindow =
+    requested === "7d" || requested === "30d" ? requested : "all";
+  const rows = await getLeaderboard(group.id, 10, null, window);
   if (rows.length === 0) {
+
     await sendMessage(message.chat.id, "No ranked callers yet in this group.", {
       replyToMessageId: message.message_id,
     });
