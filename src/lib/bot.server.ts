@@ -1,7 +1,7 @@
 import { admin, upsertGroup, upsertMember, migrateChatId, logAudit } from "./db.server";
 import { sendMessage, answerCallbackQuery, escapeHtml, isChatAdmin } from "./telegram.server";
 import { createCall, extractCandidateMints } from "./calls.server";
-import { getLeaderboard, getMemberStats } from "./scoring.server";
+import { getLeaderboard, getMemberStats, type LeaderboardWindow } from "./scoring.server";
 import { createTipIntent, confirmTip } from "./tips.server";
 import { getActiveWallet } from "./wallets.server";
 import { createLoginToken } from "./session.server";
