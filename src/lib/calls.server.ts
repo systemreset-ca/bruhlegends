@@ -48,12 +48,17 @@ export async function createCall(input: {
     return { ok: false, reason: "already_called", detail: existing.id };
   }
 
-  const snapshot = await fetchTokenSnapshot(input.mint);
-  if (!snapshot) return { ok: false, reason: "token_unresolved" };
+  const checked = await fetchCheckedSnapshot(input.mint);
+  if (!checked) return { ok: false, reason: "token_unresolved" };
+  // A baseline is immutable, so it must come from agreeing sources with real depth.
+  if (checked.crossCheck === "disagree") return { ok: false, reason: "provider_disagreement" };
+  const snapshot = checked.snapshot;
   if (snapshot.priceUsd === null) return { ok: false, reason: "no_price_source" };
-  if ((snapshot.liquidityUsd ?? 0) < input.minLiquidityUsd) {
+  if (snapshot.liquidityUsd === null) return { ok: false, reason: "no_liquidity_data" };
+  if (snapshot.liquidityUsd < input.minLiquidityUsd) {
     return { ok: false, reason: "insufficient_liquidity" };
   }
+
 
   const { data, error } = await db
     .from("calls")
