@@ -275,7 +275,9 @@ export async function listPendingTips(membershipId: string): Promise<PendingTip[
   const { data: members } = otherIds.length
     ? await db.from("group_members").select("id, display_name").in("id", otherIds)
     : { data: [] as any[] };
-  const names = new Map((members ?? []).map((m: any) => [m.id, m.display_name as string]));
+  const names = new Map<string, string>(
+    (members ?? []).map((m: any) => [m.id as string, (m.display_name ?? "member") as string]),
+  );
 
   return rows.map((row) => {
     const direction = row.sender_membership_id === membershipId ? "sent" : "received";
