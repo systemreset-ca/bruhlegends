@@ -94,6 +94,8 @@ function MiniApp() {
   const settleDispute = useServerFn(settleDisputeFn);
   const saveSettings = useServerFn(saveSettingsFn);
   const getCalls = useServerFn(getCallsFn);
+  const importCalls = useServerFn(importCallsFn);
+
   const getProfileStats = useServerFn(getProfileStatsFn);
   const getTipTargets = useServerFn(getTipTargetsFn);
   const composeTip = useServerFn(composeTipFn);
