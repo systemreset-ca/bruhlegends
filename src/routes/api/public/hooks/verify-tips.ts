@@ -2,13 +2,19 @@ import { createFileRoute } from "@tanstack/react-router";
 import { admin } from "@/lib/db.server";
 import { sweepTipIntents } from "@/lib/tips.server";
 import { pruneRetention, purgeExpiredCredentials } from "@/lib/moderation.server";
-import { canAnnounce, loadGroupAnnounceSettings, publicName } from "@/lib/announce.server";
-import { sendMessage, escapeHtml } from "@/lib/telegram.server";
+import {
+  dispatchAnnouncement,
+  flushDigests,
+  loadGroupAnnounceSettings,
+  publicName,
+} from "@/lib/announce.server";
+import { escapeHtml } from "@/lib/telegram.server";
 
 /**
  * Scheduler entry point for money-side maintenance: verify outstanding tips
- * on-chain, announce the confirmed ones under the group's privacy rules, then
- * purge expired credentials and age out raw payloads.
+ * on-chain, announce the confirmed ones under the group's privacy rules, flush
+ * any digests that are due, then purge expired credentials and age out raw
+ * payloads.
  */
 export const Route = createFileRoute("/api/public/hooks/verify-tips")({
   server: {
@@ -24,6 +30,7 @@ export const Route = createFileRoute("/api/public/hooks/verify-tips")({
         const sweep = await sweepTipIntents();
         const db = await admin();
         let announced = 0;
+        let queued = 0;
 
         for (const confirmation of sweep.confirmed) {
           const { data: intent } = await db
@@ -34,7 +41,6 @@ export const Route = createFileRoute("/api/public/hooks/verify-tips")({
           if (!intent) continue;
 
           const group = await loadGroupAnnounceSettings(intent.group_id);
-          if (!canAnnounce(group, "tip")) continue;
 
           const { data: members } = await db
             .from("group_members")
@@ -49,16 +55,20 @@ export const Route = createFileRoute("/api/public/hooks/verify-tips")({
           const senderName = publicName(intent.privacy, sender);
           if (!senderName) continue; // private tips are never broadcast
 
-          await sendMessage(
-            group!.telegram_chat_id,
-            [
+          const decision = await dispatchAnnouncement({
+            group,
+            kind: "tip",
+            dedupeKey: `tip:${intent.id}`,
+            body: [
               `💸 <b>${escapeHtml(senderName)}</b> tipped <b>${escapeHtml(recipient.display_name ?? "a member")}</b>`,
               `${intent.amount_display} ${escapeHtml(intent.asset_symbol)} — verified on-chain.`,
             ].join("\n"),
-          );
-          announced += 1;
+          });
+          if (decision === "send") announced += 1;
+          else if (decision === "queue") queued += 1;
         }
 
+        const digests = await flushDigests();
         await purgeExpiredCredentials();
         const retention = await pruneRetention();
 
@@ -68,9 +78,12 @@ export const Route = createFileRoute("/api/public/hooks/verify-tips")({
           confirmed: sweep.confirmed.length,
           expired: sweep.expired,
           announced,
+          queued,
+          digestsSent: digests.sent,
           prunedObservations: retention.prunedObservations,
         });
       },
     },
   },
 });
+
