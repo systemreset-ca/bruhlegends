@@ -6,6 +6,13 @@ import { createTipIntent, confirmTip } from "./tips.server";
 import { getActiveWallet } from "./wallets.server";
 import { createLoginToken } from "./session.server";
 import { getBruhConfig } from "./bruh-config.server";
+import {
+  startSeason,
+  endSeason,
+  listSeasons,
+  listOpenDisputes,
+  resolveDispute,
+} from "./moderation.server";
 
 const PROJECT_URL = "https://project--e287f314-27c2-40bf-94f4-4685a95781fe.lovable.app";
 
@@ -63,6 +70,13 @@ const HELP = [
   "<b>Other</b>",
   "/privacy — what is stored and how to opt out",
   "/dispute &lt;reason&gt; — reply to a call to flag it",
+  "",
+  "<b>Admins &amp; moderators</b>",
+  "/disputes — open disputes here",
+  "/resolve &lt;id&gt; uphold|reject [note] — settle a dispute",
+  "/season start &lt;name&gt; · /season end · /season list",
+  "/settings — current group configuration",
+  "/pause · /resume",
   "",
   "<i>BRUH is non-custodial. It never holds keys or funds — every transfer is approved in your own wallet.</i>",
 ].join("\n");
@@ -608,4 +622,159 @@ async function handleCallback(query: NonNullable<Update["callback_query"]>) {
     return;
   }
   await answerCallbackQuery(query.id);
+}
+
+
+async function requireAdmin(message: TgMessage, from: TgUser): Promise<boolean> {
+  if (await isChatAdmin(message.chat.id, from.id)) return true;
+  await sendMessage(message.chat.id, "Only group admins can do that.", {
+    replyToMessageId: message.message_id,
+  });
+  return false;
+}
+
+async function handleDisputeList(message: TgMessage, group: any, from: TgUser) {
+  if (!(await requireAdmin(message, from))) return;
+  const disputes = await listOpenDisputes(group.id);
+  if (disputes.length === 0) {
+    await sendMessage(message.chat.id, "No open disputes here.", {
+      replyToMessageId: message.message_id,
+    });
+    return;
+  }
+  const lines = disputes.map(
+    (dispute) =>
+      `• <code>${dispute.id.slice(0, 8)}</code> — ${escapeHtml(dispute.token ?? "no call")} · ${escapeHtml(dispute.reason)} (by ${escapeHtml(dispute.raisedBy)})`,
+  );
+  await sendMessage(
+    message.chat.id,
+    `<b>Open disputes</b>\n\n${lines.join("\n")}\n\n<i>Settle with /resolve &lt;id&gt; uphold|reject [note]</i>`,
+    { replyToMessageId: message.message_id },
+  );
+}
+
+async function handleResolve(
+  message: TgMessage,
+  group: any,
+  member: any,
+  from: TgUser,
+  args: string[],
+) {
+  if (!(await requireAdmin(message, from))) return;
+  const shortId = args[0];
+  const outcome = (args[1] ?? "").toLowerCase();
+  if (!shortId || (outcome !== "uphold" && outcome !== "reject")) {
+    await sendMessage(message.chat.id, "Usage: /resolve &lt;id&gt; uphold|reject [note]", {
+      replyToMessageId: message.message_id,
+    });
+    return;
+  }
+
+  const open = await listOpenDisputes(group.id);
+  const match = open.find((dispute) => dispute.id.startsWith(shortId));
+  if (!match) {
+    await sendMessage(message.chat.id, "No open dispute with that id.", {
+      replyToMessageId: message.message_id,
+    });
+    return;
+  }
+
+  const result = await resolveDispute({
+    groupId: group.id,
+    disputeId: match.id,
+    moderatorMembershipId: member.id,
+    outcome,
+    note: args.slice(2).join(" ") || null,
+  });
+  if (!result.ok) {
+    await sendMessage(message.chat.id, "That dispute is already settled.", {
+      replyToMessageId: message.message_id,
+    });
+    return;
+  }
+
+  await sendMessage(
+    message.chat.id,
+    outcome === "uphold"
+      ? "Dispute upheld — the call is invalidated and drops out of scoring."
+      : "Dispute rejected — the call stands.",
+    { replyToMessageId: message.message_id },
+  );
+}
+
+async function handleSeason(message: TgMessage, group: any, from: TgUser, args: string[]) {
+  const action = (args[0] ?? "list").toLowerCase();
+
+  if (action === "list") {
+    const seasons = await listSeasons(group.id);
+    const lines = seasons.map(
+      (season) =>
+        `• ${escapeHtml(season.name)}${season.is_active ? " <b>(active)</b>" : ""} — from ${season.starts_at.slice(0, 10)}${season.ends_at ? ` to ${season.ends_at.slice(0, 10)}` : ""}`,
+    );
+    await sendMessage(
+      message.chat.id,
+      lines.length ? `<b>Seasons</b>\n\n${lines.join("\n")}` : "No seasons yet.",
+      { replyToMessageId: message.message_id },
+    );
+    return;
+  }
+
+  if (!(await requireAdmin(message, from))) return;
+
+  if (action === "start") {
+    const name = args.slice(1).join(" ").trim();
+    if (!name) {
+      await sendMessage(message.chat.id, "Usage: /season start &lt;name&gt;", {
+        replyToMessageId: message.message_id,
+      });
+      return;
+    }
+    const season = await startSeason(group.id, name);
+    await sendMessage(
+      message.chat.id,
+      `<b>${escapeHtml(season.name)}</b> is live. New calls score into this season.`,
+      { replyToMessageId: message.message_id },
+    );
+    return;
+  }
+
+  if (action === "end") {
+    const season = await endSeason(group.id);
+    await sendMessage(
+      message.chat.id,
+      season ? `<b>${escapeHtml(season.name)}</b> is closed.` : "No active season to close.",
+      { replyToMessageId: message.message_id },
+    );
+    return;
+  }
+
+  await sendMessage(message.chat.id, "Usage: /season start &lt;name&gt; · /season end · /season list", {
+    replyToMessageId: message.message_id,
+  });
+}
+
+async function handleSettings(message: TgMessage, group: any, from: TgUser) {
+  if (!(await requireAdmin(message, from))) return;
+  const quiet =
+    group.quiet_hours_start === null || group.quiet_hours_end === null
+      ? "off"
+      : `${group.quiet_hours_start}:00–${group.quiet_hours_end}:00 UTC`;
+  const token = await createLoginToken(from.id, group.id);
+  await sendMessage(
+    message.chat.id,
+    [
+      `<b>Settings — ${escapeHtml(group.title)}</b>`,
+      `Detection: ${escapeHtml(group.detection_mode)}`,
+      `Min liquidity: $${Number(group.min_liquidity_usd ?? 0).toLocaleString()}`,
+      `Min token age: ${group.min_token_age_minutes ?? 0} min`,
+      `Repeat calls: ${group.allow_repeat_calls ? "allowed" : "blocked"}`,
+      `Tip announcements: ${group.announce_tips ? "on" : "off"} (${escapeHtml(group.announcement_mode)})`,
+      `Quiet hours: ${quiet}`,
+      `Raw retention: ${group.raw_message_retention_days} days`,
+    ].join("\n"),
+    {
+      replyToMessageId: message.message_id,
+      keyboard: [[{ text: "Edit in BRUH app", url: `${appUrl()}/app?t=${token}` }]],
+    },
+  );
 }
