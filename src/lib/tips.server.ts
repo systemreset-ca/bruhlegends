@@ -201,3 +201,103 @@ export async function confirmTip(intentId: string): Promise<TipConfirmation> {
 
   return { status: "confirmed", signature: verification.signature! };
 }
+
+export type TipSweepResult = {
+  checked: number;
+  confirmed: { intentId: string; signature: string }[];
+  expired: number;
+};
+
+/**
+ * Scheduled sweep: verifies outstanding tips on-chain and expires stale ones.
+ * Nothing is credited without a confirmed transfer.
+ */
+export async function sweepTipIntents(limit = 40): Promise<TipSweepResult> {
+  const db = await admin();
+  const { data: intents } = await db
+    .from("tip_intents")
+    .select("id, expires_at, status")
+    .in("status", ["created", "awaiting_payment"])
+    .order("created_at", { ascending: true })
+    .limit(limit);
+
+  const confirmed: { intentId: string; signature: string }[] = [];
+  let expired = 0;
+
+  for (const intent of intents ?? []) {
+    const result = await confirmTip(intent.id);
+    if (result.status === "confirmed") {
+      confirmed.push({ intentId: intent.id, signature: result.signature });
+    } else if (result.status === "expired") {
+      expired += 1;
+    }
+  }
+
+  return { checked: intents?.length ?? 0, confirmed, expired };
+}
+
+export type PendingTip = {
+  id: string;
+  direction: "sent" | "received";
+  assetSymbol: string;
+  amountDisplay: number;
+  recipientAddress: string;
+  reference: string;
+  payUrl: string;
+  status: string;
+  expiresAt: string;
+  counterparty: string;
+};
+
+/** Outstanding tips for one membership, with a fresh Solana Pay link each time. */
+export async function listPendingTips(membershipId: string): Promise<PendingTip[]> {
+  const db = await admin();
+  const { data } = await db
+    .from("tip_intents")
+    .select(
+      "id, asset_symbol, asset_mint, amount_display, recipient_address, reference_key, status, expires_at, sender_membership_id, recipient_membership_id",
+    )
+    .or(`sender_membership_id.eq.${membershipId},recipient_membership_id.eq.${membershipId}`)
+    .in("status", ["created", "awaiting_payment"])
+    .order("created_at", { ascending: false })
+    .limit(10);
+
+  const rows = (data ?? []) as any[];
+  const otherIds = Array.from(
+    new Set(
+      rows.map((row) =>
+        row.sender_membership_id === membershipId
+          ? row.recipient_membership_id
+          : row.sender_membership_id,
+      ),
+    ),
+  );
+  const { data: members } = otherIds.length
+    ? await db.from("group_members").select("id, display_name").in("id", otherIds)
+    : { data: [] as any[] };
+  const names = new Map((members ?? []).map((m: any) => [m.id, m.display_name as string]));
+
+  return rows.map((row) => {
+    const direction = row.sender_membership_id === membershipId ? "sent" : "received";
+    const otherId =
+      direction === "sent" ? row.recipient_membership_id : row.sender_membership_id;
+    return {
+      id: row.id as string,
+      direction: direction as "sent" | "received",
+      assetSymbol: row.asset_symbol as string,
+      amountDisplay: Number(row.amount_display),
+      recipientAddress: row.recipient_address as string,
+      reference: row.reference_key as string,
+      payUrl: buildSolanaPayUrl({
+        recipient: row.recipient_address,
+        amountDisplay: Number(row.amount_display),
+        reference: row.reference_key,
+        splToken: row.asset_mint,
+        message: "BRUH tip",
+      }),
+      status: row.status as string,
+      expiresAt: row.expires_at as string,
+      counterparty: names.get(otherId) ?? "member",
+    };
+  });
+}
