@@ -200,10 +200,19 @@ async function handleCommand(message: TgMessage, text: string) {
     case "/pause":
     case "/resume":
       return handlePause(message, group, from, command === "/pause");
+    case "/disputes":
+      return handleDisputeList(message, group, from);
+    case "/resolve":
+      return handleResolve(message, group, member, from, args);
+    case "/season":
+      return handleSeason(message, group, from, args);
+    case "/settings":
+      return handleSettings(message, group, from);
     default:
       return;
   }
 }
+
 
 async function handleStart(message: TgMessage, args: string[]) {
   const payload = args[0];
