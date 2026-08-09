@@ -154,7 +154,23 @@ export const saveSettingsFn = createServerFn({ method: "POST" })
     return saveSettings(data);
   });
 
+export const importCallsFn = createServerFn({ method: "POST" })
+  .inputValidator((input) =>
+    z
+      .object({
+        session: z.string().min(8).max(200),
+        membershipId: z.string().uuid(),
+        csv: z.string().min(10).max(500_000),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data }) => {
+    const { importCalls } = await import("./miniapp.server");
+    return importCalls(data);
+  });
+
 export const getCallsFn = createServerFn({ method: "POST" })
+
   .inputValidator((input) =>
     z
       .object({
