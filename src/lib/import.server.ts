@@ -179,7 +179,7 @@ export async function importHistoricalCalls(input: {
     actorId: input.actorMembershipId,
     eventType: "calls_imported",
     entityType: "call",
-    afterState: { inserted: payload.length, skipped: skipped.length },
+    after: { inserted: payload.length, skipped: skipped.length },
   });
 
   return { inserted: payload.length, skipped };
