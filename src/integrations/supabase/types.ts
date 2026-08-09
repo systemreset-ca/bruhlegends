@@ -473,6 +473,79 @@ export type Database = {
           },
         ]
       }
+      miniapp_login_tokens: {
+        Row: {
+          consumed_at: string | null
+          created_at: string
+          expires_at: string
+          group_id: string | null
+          id: string
+          telegram_user_id: number
+          token_hash: string
+        }
+        Insert: {
+          consumed_at?: string | null
+          created_at?: string
+          expires_at: string
+          group_id?: string | null
+          id?: string
+          telegram_user_id: number
+          token_hash: string
+        }
+        Update: {
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          group_id?: string | null
+          id?: string
+          telegram_user_id?: number
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "miniapp_login_tokens_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      miniapp_sessions: {
+        Row: {
+          created_at: string
+          expires_at: string
+          group_id: string | null
+          id: string
+          session_hash: string
+          telegram_user_id: number
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          group_id?: string | null
+          id?: string
+          session_hash: string
+          telegram_user_id: number
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          group_id?: string | null
+          id?: string
+          session_hash?: string
+          telegram_user_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "miniapp_sessions_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       seasons: {
         Row: {
           created_at: string
