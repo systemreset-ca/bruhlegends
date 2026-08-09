@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as ApiPublicHooksRefreshCallsRouteImport } from './routes/api/public/hooks/refresh-calls'
 import { Route as ApiPublicHooksVerifyTipsRouteImport } from './routes/api/public/hooks/verify-tips'
 import { Route as ApiPublicTelegramWebhookRouteImport } from './routes/api/public/telegram/webhook'
@@ -29,6 +30,11 @@ const AppRoute = AppRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicHooksRefreshCallsRoute =
@@ -54,6 +60,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRoute
   '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
   '/api/public/hooks/refresh-calls': typeof ApiPublicHooksRefreshCallsRoute
   '/api/public/hooks/verify-tips': typeof ApiPublicHooksVerifyTipsRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
@@ -62,6 +69,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/app': typeof AppRoute
   '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
   '/api/public/hooks/refresh-calls': typeof ApiPublicHooksRefreshCallsRoute
   '/api/public/hooks/verify-tips': typeof ApiPublicHooksVerifyTipsRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
@@ -71,6 +79,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/app': typeof AppRoute
   '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
   '/api/public/hooks/refresh-calls': typeof ApiPublicHooksRefreshCallsRoute
   '/api/public/hooks/verify-tips': typeof ApiPublicHooksVerifyTipsRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
@@ -81,6 +90,7 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/privacy'
+    | '/terms'
     | '/api/public/hooks/refresh-calls'
     | '/api/public/hooks/verify-tips'
     | '/api/public/telegram/webhook'
@@ -89,6 +99,7 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/privacy'
+    | '/terms'
     | '/api/public/hooks/refresh-calls'
     | '/api/public/hooks/verify-tips'
     | '/api/public/telegram/webhook'
@@ -97,6 +108,7 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/privacy'
+    | '/terms'
     | '/api/public/hooks/refresh-calls'
     | '/api/public/hooks/verify-tips'
     | '/api/public/telegram/webhook'
@@ -106,6 +118,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRoute
   PrivacyRoute: typeof PrivacyRoute
+  TermsRoute: typeof TermsRoute
   ApiPublicHooksRefreshCallsRoute: typeof ApiPublicHooksRefreshCallsRoute
   ApiPublicHooksVerifyTipsRoute: typeof ApiPublicHooksVerifyTipsRoute
   ApiPublicTelegramWebhookRoute: typeof ApiPublicTelegramWebhookRoute
@@ -132,6 +145,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/refresh-calls': {
@@ -162,6 +182,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRoute,
   PrivacyRoute: PrivacyRoute,
+  TermsRoute: TermsRoute,
   ApiPublicHooksRefreshCallsRoute: ApiPublicHooksRefreshCallsRoute,
   ApiPublicHooksVerifyTipsRoute: ApiPublicHooksVerifyTipsRoute,
   ApiPublicTelegramWebhookRoute: ApiPublicTelegramWebhookRoute,
