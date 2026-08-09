@@ -472,23 +472,36 @@ function MiniApp() {
       {tab === "board" && board && (
         <>
           <section className="mt-6 rounded-lg border border-border bg-card p-5">
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-lg font-semibold">Leaderboard</h2>
-              {board.seasons.length > 0 && (
+              <div className="flex items-center gap-2">
                 <select
-                  value={seasonId ?? ""}
-                  onChange={(event) => setSeasonId(event.target.value || null)}
+                  value={boardWindow}
+                  onChange={(event) =>
+                    setBoardWindow(event.target.value as "7d" | "30d" | "all")
+                  }
                   className="rounded-md border border-input bg-background px-2 py-1 text-xs"
                 >
-                  <option value="">All time</option>
-                  {board.seasons.map((season) => (
-                    <option key={season.id} value={season.id}>
-                      {season.name}
-                      {season.is_active ? " (live)" : ""}
-                    </option>
-                  ))}
+                  <option value="all">All time</option>
+                  <option value="30d">Last 30d</option>
+                  <option value="7d">Last 7d</option>
                 </select>
-              )}
+                {board.seasons.length > 0 && (
+                  <select
+                    value={seasonId ?? ""}
+                    onChange={(event) => setSeasonId(event.target.value || null)}
+                    className="rounded-md border border-input bg-background px-2 py-1 text-xs"
+                  >
+                    <option value="">All seasons</option>
+                    {board.seasons.map((season) => (
+                      <option key={season.id} value={season.id}>
+                        {season.name}
+                        {season.is_active ? " (live)" : ""}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
             </div>
             {board.leaderboard.length === 0 ? (
               <p className="mt-2 text-sm text-muted-foreground">No ranked callers yet.</p>
@@ -498,9 +511,15 @@ function MiniApp() {
                   <li key={row.membershipId} className="flex justify-between py-2 text-sm">
                     <span>
                       {index + 1}. {row.displayName}
+                      {!row.ranked && (
+                        <span className="ml-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                          low sample
+                        </span>
+                      )}
                     </span>
                     <span className="font-mono text-primary">{row.score}</span>
                   </li>
+
                 ))}
               </ol>
             )}
