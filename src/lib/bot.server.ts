@@ -420,13 +420,15 @@ async function handleLeaderboard(message: TgMessage, group: any, args: string[] 
   }
   const lines = rows.map(
     (row, index) =>
-      `${index + 1}. <b>${escapeHtml(row.displayName)}</b> — ${row.score} pts · ${row.calls} calls · best ${row.bestMultiple.toFixed(2)}x`,
+      `${index + 1}. <b>${escapeHtml(row.displayName)}</b> — ${row.score} pts · ${row.calls} calls · best ${row.bestMultiple.toFixed(2)}x${row.ranked ? "" : " · low sample"}`,
   );
+  const label = window === "all" ? "all time" : `last ${window === "7d" ? "7" : "30"} days`;
   await sendMessage(
     message.chat.id,
-    `<b>BRUH Score — ${escapeHtml(group.title)}</b>\n\n${lines.join("\n")}\n\n<i>Group-scoped. Peak multiples use locked baselines.</i>`,
+    `<b>BRUH Score — ${escapeHtml(group.title)}</b>\n<i>${label}</i>\n\n${lines.join("\n")}\n\n<i>Group-scoped. Peak multiples use locked baselines. Try /leaderboard 7d or 30d.</i>`,
     { replyToMessageId: message.message_id },
   );
+
 }
 
 async function handleStats(message: TgMessage, group: any, member: any) {
