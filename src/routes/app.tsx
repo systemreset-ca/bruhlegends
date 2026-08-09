@@ -20,7 +20,6 @@ import {
   exportMyDataFn,
   forgetMeFn,
 } from "@/lib/miniapp.functions";
-import type { ExplorerCall } from "@/lib/miniapp.server";
 
 export const Route = createFileRoute("/app")({
   ssr: false,
@@ -45,6 +44,20 @@ export const Route = createFileRoute("/app")({
 });
 
 const SESSION_KEY = "bruh_session";
+
+type ExplorerCall = {
+  id: string;
+  symbol: string;
+  mint: string;
+  status: string;
+  note: string | null;
+  caller: string;
+  createdAt: string;
+  current: number;
+  peak: number;
+  peakAt: string | null;
+  liquidityUsd: number;
+};
 
 type TabId = "wallet" | "board" | "calls" | "tips" | "profile" | "admin";
 
