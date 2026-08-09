@@ -65,7 +65,16 @@ export async function listSeasons(groupId: string) {
   }[];
 }
 
-export async function listOpenDisputes(groupId: string) {
+export type OpenDispute = {
+  id: string;
+  reason: string;
+  createdAt: string;
+  callId: string | null;
+  token: string | null;
+  raisedBy: string;
+};
+
+export async function listOpenDisputes(groupId: string): Promise<OpenDispute[]> {
   const db = await admin();
   const { data } = await db
     .from("disputes")
