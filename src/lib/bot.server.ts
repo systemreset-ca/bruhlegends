@@ -13,6 +13,12 @@ import {
   listOpenDisputes,
   resolveDispute,
 } from "./moderation.server";
+import {
+  listModerators,
+  setMemberRole,
+  groupStatus,
+  forgetMember,
+} from "./datarights.server";
 
 const PROJECT_URL = "https://project--e287f314-27c2-40bf-94f4-4685a95781fe.lovable.app";
 
@@ -69,6 +75,8 @@ const HELP = [
   "",
   "<b>Other</b>",
   "/privacy — what is stored and how to opt out",
+  "/export — download everything BRUH holds about you here",
+  "/forgetme — revoke your wallet and anonymise your record",
   "/dispute &lt;reason&gt; — reply to a call to flag it",
   "",
   "<b>Admins &amp; moderators</b>",
@@ -76,6 +84,8 @@ const HELP = [
   "/resolve &lt;id&gt; uphold|reject [note] — settle a dispute",
   "/season start &lt;name&gt; · /season end · /season list",
   "/settings — current group configuration",
+  "/moderators [add|remove] — list or change moderators (reply to a member)",
+  "/status — health snapshot for this group",
   "/pause · /resume",
   "",
   "<i>BRUH is non-custodial. It never holds keys or funds — every transfer is approved in your own wallet.</i>",
@@ -222,6 +232,14 @@ async function handleCommand(message: TgMessage, text: string) {
       return handleSeason(message, group, from, args);
     case "/settings":
       return handleSettings(message, group, from);
+    case "/moderators":
+      return handleModerators(message, group, member, from, args);
+    case "/status":
+      return handleStatus(message, group, from);
+    case "/export":
+      return handleExport(message, member);
+    case "/forgetme":
+      return handleForgetMe(message, member);
     default:
       return;
   }
@@ -776,5 +794,110 @@ async function handleSettings(message: TgMessage, group: any, from: TgUser) {
       replyToMessageId: message.message_id,
       keyboard: [[{ text: "Edit in BRUH app", url: `${appUrl()}/app?t=${token}` }]],
     },
+  );
+}
+
+
+async function handleModerators(
+  message: TgMessage,
+  group: any,
+  member: any,
+  from: TgUser,
+  args: string[],
+) {
+  const action = (args[0] ?? "list").toLowerCase();
+
+  if (action === "list") {
+    const rows = await listModerators(group.id);
+    await sendMessage(
+      message.chat.id,
+      rows.length
+        ? `<b>Moderators</b>\n\n${rows.map((row) => `• ${escapeHtml(row.displayName)} — ${row.role}`).join("\n")}`
+        : "No moderators set. Telegram group admins always have full powers.",
+      { replyToMessageId: message.message_id },
+    );
+    return;
+  }
+
+  if (!(await requireAdmin(message, from))) return;
+
+  const target = message.reply_to_message?.from;
+  if (!target || target.is_bot) {
+    await sendMessage(message.chat.id, "Reply to the member you want to add or remove.", {
+      replyToMessageId: message.message_id,
+    });
+    return;
+  }
+  if (action !== "add" && action !== "remove") {
+    await sendMessage(message.chat.id, "Usage: /moderators [list|add|remove]", {
+      replyToMessageId: message.message_id,
+    });
+    return;
+  }
+
+  const targetMember = await upsertMember(group.id, target);
+  const result = await setMemberRole({
+    groupId: group.id,
+    membershipId: targetMember.id,
+    role: action === "add" ? "moderator" : "member",
+    actorMembershipId: member.id,
+  });
+  if (!result.ok) {
+    await sendMessage(message.chat.id, "That member isn't in this group.", {
+      replyToMessageId: message.message_id,
+    });
+    return;
+  }
+  await sendMessage(
+    message.chat.id,
+    action === "add"
+      ? `${escapeHtml(result.displayName)} is now a moderator here.`
+      : `${escapeHtml(result.displayName)} is no longer a moderator.`,
+    { replyToMessageId: message.message_id },
+  );
+}
+
+async function handleStatus(message: TgMessage, group: any, from: TgUser) {
+  if (!(await requireAdmin(message, from))) return;
+  const status = await groupStatus(group.id);
+  await sendMessage(
+    message.chat.id,
+    [
+      `<b>Status — ${escapeHtml(group.title)}</b>`,
+      `State: ${group.is_paused ? "paused" : "active"} · detection ${escapeHtml(group.detection_mode)}`,
+      `Season: ${status.activeSeason ? escapeHtml(status.activeSeason) : "none"}`,
+      `Members: ${status.members} · Active calls: ${status.activeCalls}`,
+      `Pending tips: ${status.pendingTips} · Open disputes: ${status.openDisputes}`,
+      `Queued announcements: ${status.queuedAnnouncements}`,
+      `Last price refresh: ${status.lastPriceRefresh ? status.lastPriceRefresh.replace("T", " ").slice(0, 16) + " UTC" : "not yet"}`,
+    ].join("\n"),
+    { replyToMessageId: message.message_id },
+  );
+}
+
+async function handleExport(message: TgMessage, member: any) {
+  const token = await createLoginToken(message.from!.id, null);
+  await sendMessage(
+    message.chat.id,
+    "Your data export is personal, so it opens in the BRUH app rather than the group.",
+    {
+      replyToMessageId: message.message_id,
+      keyboard: [[{ text: "Download my data", url: `${appUrl()}/app?t=${token}&tab=profile` }]],
+    },
+  );
+  void member;
+}
+
+async function handleForgetMe(message: TgMessage, member: any) {
+  const result = await forgetMember(member.id);
+  await sendMessage(
+    message.chat.id,
+    [
+      "Done. Your wallet link is revoked and your record here is now pseudonymous.",
+      `You appear as <b>${escapeHtml(result.pseudonym)}</b> and passive detection is off.`,
+      "",
+      "<i>Calls stay in the group ledger because other members' scores depend on them, but they are no longer tied to your identity.</i>",
+    ].join("\n"),
+    { replyToMessageId: message.message_id },
   );
 }
