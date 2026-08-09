@@ -177,10 +177,11 @@ function MiniApp() {
 
   useEffect(() => {
     if (!session || !selected) return;
-    getBoard({ data: { session, membershipId: selected, seasonId } })
+    getBoard({ data: { session, membershipId: selected, seasonId, window: boardWindow } })
       .then(setBoard)
       .catch(() => setBoard(null));
-  }, [session, selected, seasonId]);
+  }, [session, selected, seasonId, boardWindow]);
+
 
   useEffect(() => {
     if (!session || !selected) return;
