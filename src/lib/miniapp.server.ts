@@ -128,13 +128,15 @@ export async function loadGroupBoard(input: {
   session: string;
   membershipId: string;
   seasonId?: string | null | undefined;
+  window?: "7d" | "30d" | "all" | undefined;
 }) {
   const { telegramUserId } = await requireSession(input.session);
   const membership = await ownedMembership(telegramUserId, input.membershipId);
   const db = await admin();
 
   const [board, calls, seasons] = await Promise.all([
-    getLeaderboard(membership.group_id, 10, input.seasonId ?? null),
+    getLeaderboard(membership.group_id, 10, input.seasonId ?? null, input.window ?? "all"),
+
     db
       .from("calls")
       .select("symbol, mint, baseline_price_usd, last_price_usd, ath_multiple, group_members(display_name)")
