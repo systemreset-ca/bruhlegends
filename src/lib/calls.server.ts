@@ -1,6 +1,13 @@
 import { admin, activeSeason, logAudit } from "./db.server";
-import { fetchTokenSnapshot } from "./market.server";
+import { fetchCheckedSnapshot, fetchTokenSnapshot } from "./market.server";
 import { MILESTONES } from "./bruh-config.server";
+
+/** Milestones a given multiple has reached, ascending. Pure. */
+export function milestonesFor(multiple: number): number[] {
+  if (!Number.isFinite(multiple) || multiple <= 0) return [];
+  return MILESTONES.filter((milestone) => multiple >= milestone);
+}
+
 
 const BASE58_TOKEN = /\b[1-9A-HJ-NP-Za-km-z]{32,44}\b/g;
 
