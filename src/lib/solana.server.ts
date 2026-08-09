@@ -69,7 +69,7 @@ export async function getTokenBalance(owner: string, mint: string): Promise<numb
   );
 }
 
-type ParsedTransaction = {
+export type ParsedTransaction = {
   slot: number;
   meta: {
     err: unknown;
@@ -88,6 +88,32 @@ export type TransferVerification = {
   slot?: number;
   raw?: unknown;
 };
+
+/**
+ * Pure: how much the expected recipient gained in the expected asset. Returns
+ * null when the recipient never appears, so a transaction that paid someone
+ * else — or moved a different mint — can never be read as a match.
+ */
+export function recipientDelta(
+  tx: ParsedTransaction,
+  recipient: string,
+  mint: string | null,
+): bigint | null {
+  if (!tx.meta) return null;
+
+  if (mint) {
+    const matches = (balance: { owner?: string; mint: string }) =>
+      balance.owner === recipient && balance.mint === mint;
+    const before = tx.meta.preTokenBalances?.find(matches);
+    const after = tx.meta.postTokenBalances?.find(matches);
+    if (!before && !after) return null;
+    return BigInt(after?.uiTokenAmount.amount ?? "0") - BigInt(before?.uiTokenAmount.amount ?? "0");
+  }
+
+  const index = tx.transaction.message.accountKeys.findIndex((key) => key.pubkey === recipient);
+  if (index < 0) return null;
+  return BigInt(tx.meta.postBalances[index] ?? 0) - BigInt(tx.meta.preBalances[index] ?? 0);
+}
 
 /**
  * Server-side verification: a tip counts only when a confirmed transaction
@@ -118,24 +144,9 @@ export async function verifyTransferByReference(input: {
     ]);
     if (!tx?.meta || tx.meta.err) continue;
 
-    let delta = 0n;
-    if (input.mint) {
-      const before =
-        tx.meta.preTokenBalances?.find(
-          (balance) => balance.owner === input.recipient && balance.mint === input.mint,
-        )?.uiTokenAmount.amount ?? "0";
-      const after =
-        tx.meta.postTokenBalances?.find(
-          (balance) => balance.owner === input.recipient && balance.mint === input.mint,
-        )?.uiTokenAmount.amount ?? "0";
-      delta = BigInt(after) - BigInt(before);
-    } else {
-      const index = tx.transaction.message.accountKeys.findIndex(
-        (key) => key.pubkey === input.recipient,
-      );
-      if (index < 0) continue;
-      delta =
-        BigInt(tx.meta.postBalances[index] ?? 0) - BigInt(tx.meta.preBalances[index] ?? 0);
+    const delta = recipientDelta(tx, input.recipient, input.mint);
+    if (delta === null) {
+      return { verified: false, reason: "recipient_not_credited", signature: entry.signature };
     }
 
     if (delta + tolerance >= input.amountBaseUnits) {
@@ -146,3 +157,4 @@ export async function verifyTransferByReference(input: {
 
   return { verified: false, reason: "no_confirmed_matching_transaction" };
 }
+
