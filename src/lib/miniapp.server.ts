@@ -126,7 +126,7 @@ export async function unlinkWallet(input: { session: string; membershipId: strin
 export async function loadGroupBoard(input: {
   session: string;
   membershipId: string;
-  seasonId?: string | null;
+  seasonId?: string | null | undefined;
 }) {
   const { telegramUserId } = await requireSession(input.session);
   const membership = await ownedMembership(telegramUserId, input.membershipId);
@@ -244,7 +244,7 @@ export async function settleDispute(input: {
   membershipId: string;
   disputeId: string;
   outcome: DisputeResolution;
-  note?: string | null;
+  note?: string | null | undefined;
 }) {
   const { group, membership } = await requireGroupAdmin(input.session, input.membershipId);
   const result = await resolveDispute({
