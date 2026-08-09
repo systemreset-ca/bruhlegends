@@ -346,6 +346,10 @@ async function handleCall(message: TgMessage, group: any, member: any, args: str
       already_called: "That token is already an open call in this group.",
       token_unresolved: "I couldn't find a Solana market for that mint.",
       no_price_source: "No reliable price source for that token right now — call not recorded.",
+      provider_disagreement:
+        "Price sources disagree on that token right now — call not recorded. Try again shortly.",
+      no_liquidity_data: "No pool depth data for that token right now — call not recorded.",
+
       insufficient_liquidity: `Liquidity is below this group's floor ($${Number(group.min_liquidity_usd ?? 0).toLocaleString()}).`,
     };
     await sendMessage(message.chat.id, messages[result.reason] ?? "Call could not be recorded.", {
