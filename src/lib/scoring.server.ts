@@ -131,6 +131,9 @@ export async function getLeaderboard(
         medianMultiple: median(multiples),
         milestones: memberMilestones,
         tipsReceived,
+        // Below the minimum sample a member is shown but not ranked above
+        // people with a real track record in the window.
+        ranked: own.length >= MIN_SAMPLE,
         score: bruhScore({
           calls: own.length,
           multiples,
@@ -143,9 +146,10 @@ export async function getLeaderboard(
 
   return rows
     .filter((row) => row.calls > 0 || row.tipsReceived > 0)
-    .sort((a, b) => b.score - a.score)
+    .sort((a, b) => (a.ranked === b.ranked ? b.score - a.score : a.ranked ? -1 : 1))
     .slice(0, limit);
 }
+
 
 export async function getMemberStats(groupId: string, membershipId: string) {
   const board = await getLeaderboard(groupId, 1000);
