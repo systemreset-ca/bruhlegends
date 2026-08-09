@@ -138,15 +138,15 @@ export async function resolveDispute(input: {
 }
 
 export type GroupSettingsPatch = {
-  detection_mode?: "command_only" | "full_detection";
-  min_liquidity_usd?: number;
-  min_token_age_minutes?: number;
-  allow_repeat_calls?: boolean;
-  announce_tips?: boolean;
-  announcement_mode?: "immediate" | "off";
-  quiet_hours_start?: number | null;
-  quiet_hours_end?: number | null;
-  raw_message_retention_days?: number;
+  detection_mode?: "command_only" | "full_detection" | undefined;
+  min_liquidity_usd?: number | undefined;
+  min_token_age_minutes?: number | undefined;
+  allow_repeat_calls?: boolean | undefined;
+  announce_tips?: boolean | undefined;
+  announcement_mode?: "immediate" | "off" | undefined;
+  quiet_hours_start?: number | null | undefined;
+  quiet_hours_end?: number | null | undefined;
+  raw_message_retention_days?: number | undefined;
 };
 
 export async function updateGroupSettings(
