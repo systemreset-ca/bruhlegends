@@ -150,6 +150,8 @@ export async function loadGroupBoard(input: {
   return {
     seasons,
     seasonId: input.seasonId ?? null,
+    window: input.window ?? "all",
+
     leaderboard: board,
     calls: (calls.data ?? []).map((call: any) => ({
       symbol: (call.symbol ?? call.mint.slice(0, 6)) as string,
