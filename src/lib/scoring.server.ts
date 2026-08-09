@@ -8,7 +8,9 @@ export type LeaderboardRow = {
   medianMultiple: number;
   milestones: number;
   tipsReceived: number;
+  ranked: boolean;
   score: number;
+
 };
 
 function median(values: number[]): number {
