@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import {
+  exchangeInitDataFn,
   exchangeLoginTokenFn,
   getMeFn,
   startWalletLinkFn,
@@ -79,6 +80,7 @@ type GroupEntry = {
 
 function MiniApp() {
   const exchange = useServerFn(exchangeLoginTokenFn);
+  const exchangeInitData = useServerFn(exchangeInitDataFn);
   const getMe = useServerFn(getMeFn);
   const startLink = useServerFn(startWalletLinkFn);
   const finishLink = useServerFn(finishWalletLinkFn);
