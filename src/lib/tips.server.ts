@@ -10,24 +10,48 @@ import { getBruhConfig, USDC_MAINNET_MINT } from "./bruh-config.server";
 
 export type TipAsset = { symbol: string; mint: string | null; decimals: number };
 
-const SOL: TipAsset = { symbol: "SOL", mint: null, decimals: 9 };
-const USDC: TipAsset = { symbol: "USDC", mint: USDC_MAINNET_MINT, decimals: 6 };
+const FALLBACK_ASSETS: Record<string, TipAsset> = {
+  SOL: { symbol: "SOL", mint: null, decimals: 9 },
+  USDC: { symbol: "USDC", mint: USDC_MAINNET_MINT, decimals: 6 },
+};
 
-export function resolveAsset(symbol: string): TipAsset | null {
+/**
+ * Asset availability is driven by the `supported_assets` registry, so enabling
+ * BRUH is a data change plus the mint env var — never a code change.
+ */
+export async function resolveAsset(symbol: string): Promise<TipAsset | null> {
   const upper = symbol.toUpperCase();
-  if (upper === "SOL") return SOL;
-  if (upper === "USDC") return USDC;
+  const { network, bruhMint, bruhTippingEnabled } = getBruhConfig();
+  const db = await admin();
+  const { data } = await db
+    .from("supported_assets")
+    .select("symbol, mint, decimals, enabled, is_tip_asset")
+    .eq("symbol", upper)
+    .eq("network", network)
+    .maybeSingle();
+
   if (upper === "BRUH") {
-    const { bruhMint, bruhTippingEnabled } = getBruhConfig();
     if (!bruhTippingEnabled) return null;
-    return { symbol: "BRUH", mint: bruhMint, decimals: 9 };
+    const mint = (data?.mint as string | null) ?? bruhMint;
+    if (!mint) return null;
+    return { symbol: "BRUH", mint, decimals: Number(data?.decimals ?? 9) };
   }
-  return null;
+
+  if (data) {
+    if (!data.enabled || !data.is_tip_asset) return null;
+    return {
+      symbol: data.symbol as string,
+      mint: (data.mint as string | null) ?? null,
+      decimals: Number(data.decimals),
+    };
+  }
+  return FALLBACK_ASSETS[upper] ?? null;
 }
 
 export function toBaseUnits(amount: number, decimals: number): bigint {
   return BigInt(Math.round(amount * 10 ** decimals));
 }
+
 
 export type TipIntent = {
   id: string;
