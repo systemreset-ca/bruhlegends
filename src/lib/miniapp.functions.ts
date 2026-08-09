@@ -227,3 +227,10 @@ export const forgetMeFn = createServerFn({ method: "POST" })
     const { forgetMe } = await import("./miniapp.server");
     return forgetMe(data);
   });
+
+export const exchangeInitDataFn = createServerFn({ method: "POST" })
+  .inputValidator((input) => z.object({ initData: z.string().min(10).max(4096) }).parse(input))
+  .handler(async ({ data }) => {
+    const { sessionFromInitData } = await import("./session.server");
+    return { session: await sessionFromInitData(data.initData) };
+  });

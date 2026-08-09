@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import {
+  exchangeInitDataFn,
   exchangeLoginTokenFn,
   getMeFn,
   startWalletLinkFn,
@@ -79,6 +80,7 @@ type GroupEntry = {
 
 function MiniApp() {
   const exchange = useServerFn(exchangeLoginTokenFn);
+  const exchangeInitData = useServerFn(exchangeInitDataFn);
   const getMe = useServerFn(getMeFn);
   const startLink = useServerFn(startWalletLinkFn);
   const finishLink = useServerFn(finishWalletLinkFn);
@@ -132,6 +134,24 @@ function MiniApp() {
         url.searchParams.delete("t");
         window.history.replaceState({}, "", url.toString());
       }
+
+      // Inside Telegram the signed initData payload is authoritative, so it can
+      // mint a session without the one-time link.
+      const initData = (
+        window as unknown as { Telegram?: { WebApp?: { initData?: string } } }
+      ).Telegram?.WebApp?.initData;
+      if (!active && initData) {
+        try {
+          const result = await exchangeInitData({ data: { initData } });
+          if (result.session) {
+            active = result.session;
+            window.localStorage.setItem(SESSION_KEY, result.session);
+          }
+        } catch {
+          /* falls back to the login-link flow */
+        }
+      }
+
 
       const requestedTab = url.searchParams.get("tab");
       if (requestedTab && ["wallet", "board", "calls", "tips", "profile"].includes(requestedTab)) {
