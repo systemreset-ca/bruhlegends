@@ -8,6 +8,11 @@ import {
   finishWalletLinkFn,
   unlinkWalletFn,
   getGroupBoardFn,
+  getTipsFn,
+  verifyTipFn,
+  getModerationFn,
+  settleDisputeFn,
+  saveSettingsFn,
 } from "@/lib/miniapp.functions";
 
 export const Route = createFileRoute("/app")({
@@ -49,6 +54,11 @@ function MiniApp() {
   const finishLink = useServerFn(finishWalletLinkFn);
   const unlink = useServerFn(unlinkWalletFn);
   const getBoard = useServerFn(getGroupBoardFn);
+  const getTips = useServerFn(getTipsFn);
+  const verifyTip = useServerFn(verifyTipFn);
+  const getModeration = useServerFn(getModerationFn);
+  const settleDispute = useServerFn(settleDisputeFn);
+  const saveSettings = useServerFn(saveSettingsFn);
 
   const [session, setSession] = useState<string | null>(null);
   const [groups, setGroups] = useState<GroupEntry[]>([]);
@@ -59,6 +69,9 @@ function MiniApp() {
   const [signature, setSignature] = useState("");
   const [status, setStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [seasonId, setSeasonId] = useState<string | null>(null);
+  const [tips, setTips] = useState<Awaited<ReturnType<typeof getTipsFn>>["tips"]>([]);
+  const [mod, setMod] = useState<Awaited<ReturnType<typeof getModerationFn>> | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -95,10 +108,59 @@ function MiniApp() {
 
   useEffect(() => {
     if (!session || !selected) return;
-    getBoard({ data: { session, membershipId: selected } })
+    getBoard({ data: { session, membershipId: selected, seasonId } })
       .then(setBoard)
       .catch(() => setBoard(null));
+  }, [session, selected, seasonId]);
+
+  useEffect(() => {
+    if (!session || !selected) return;
+    setSeasonId(null);
+    getTips({ data: { session, membershipId: selected } })
+      .then((result) => setTips(result.tips))
+      .catch(() => setTips([]));
+    // Moderation tools only resolve for Telegram group admins; silence otherwise.
+    getModeration({ data: { session, membershipId: selected } })
+      .then(setMod)
+      .catch(() => setMod(null));
   }, [session, selected]);
+
+  async function refreshTips() {
+    if (!session || !selected) return;
+    const result = await getTips({ data: { session, membershipId: selected } });
+    setTips(result.tips);
+  }
+
+  async function handleVerifyTip(tipId: string) {
+    if (!session || !selected) return;
+    setStatus(null);
+    try {
+      const result = await verifyTip({ data: { session, membershipId: selected, tipId } });
+      setStatus(
+        result.status === "confirmed"
+          ? "Tip confirmed on-chain."
+          : "No matching transfer found yet — try again once your wallet confirms.",
+      );
+      await refreshTips();
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Could not verify that tip.");
+    }
+  }
+
+  async function handleDispute(disputeId: string, outcome: "uphold" | "reject") {
+    if (!session || !selected) return;
+    await settleDispute({ data: { session, membershipId: selected, disputeId, outcome } });
+    const refreshed = await getModeration({ data: { session, membershipId: selected } });
+    setMod(refreshed);
+    setStatus(outcome === "uphold" ? "Call invalidated." : "Dispute rejected.");
+  }
+
+  async function patchSettings(patch: Record<string, unknown>) {
+    if (!session || !selected || !mod) return;
+    setMod({ ...mod, settings: { ...mod.settings, ...(patch as any) } });
+    await saveSettings({ data: { session, membershipId: selected, patch: patch as any } });
+    setStatus("Settings saved.");
+  }
 
   const current = groups.find((group) => group.membershipId === selected) ?? null;
 
@@ -249,7 +311,24 @@ function MiniApp() {
       {board && (
         <>
           <section className="mt-6 rounded-lg border border-border bg-card p-5">
-            <h2 className="text-lg font-semibold">Leaderboard</h2>
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-lg font-semibold">Leaderboard</h2>
+              {board.seasons.length > 0 && (
+                <select
+                  value={seasonId ?? ""}
+                  onChange={(event) => setSeasonId(event.target.value || null)}
+                  className="rounded-md border border-input bg-background px-2 py-1 text-xs"
+                >
+                  <option value="">All time</option>
+                  {board.seasons.map((season) => (
+                    <option key={season.id} value={season.id}>
+                      {season.name}
+                      {season.is_active ? " (live)" : ""}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
             {board.leaderboard.length === 0 ? (
               <p className="mt-2 text-sm text-muted-foreground">No ranked callers yet.</p>
             ) : (
@@ -288,7 +367,196 @@ function MiniApp() {
           </section>
         </>
       )}
+
+      {tips.length > 0 && (
+        <section className="mt-6 rounded-lg border border-border bg-card p-5">
+          <h2 className="text-lg font-semibold">Pending tips</h2>
+          <ul className="mt-3 space-y-4">
+            {tips.map((tip) => (
+              <li key={tip.id} className="rounded-md border border-border p-3">
+                <div className="flex justify-between text-sm">
+                  <span>
+                    {tip.direction === "sent" ? "To" : "From"}{" "}
+                    <span className="text-muted-foreground">{tip.counterparty}</span>
+                  </span>
+                  <span className="font-mono text-primary">
+                    {tip.amountDisplay} {tip.assetSymbol}
+                  </span>
+                </div>
+                {tip.direction === "sent" && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <a
+                      href={tip.payUrl}
+                      className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                    >
+                      Pay in wallet
+                    </a>
+                    <button
+                      onClick={() => handleVerifyTip(tip.id)}
+                      className="rounded-md border border-border px-3 py-2 text-sm hover:bg-secondary"
+                    >
+                      I&apos;ve paid — verify
+                    </button>
+                  </div>
+                )}
+                <p className="mt-2 break-all font-mono text-xs text-muted-foreground">
+                  ref {tip.reference}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {mod && (
+        <>
+          <section className="mt-6 rounded-lg border border-border bg-card p-5">
+            <h2 className="text-lg font-semibold">Disputes</h2>
+            {mod.disputes.length === 0 ? (
+              <p className="mt-2 text-sm text-muted-foreground">Nothing open.</p>
+            ) : (
+              <ul className="mt-3 space-y-3">
+                {mod.disputes.map((dispute) => (
+                  <li key={dispute.id} className="rounded-md border border-border p-3 text-sm">
+                    <p>
+                      <span className="font-mono text-primary">{dispute.token ?? "call"}</span> —{" "}
+                      {dispute.reason}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">by {dispute.raisedBy}</p>
+                    <div className="mt-3 flex gap-2">
+                      <button
+                        onClick={() => handleDispute(dispute.id, "uphold")}
+                        className="rounded-md border border-border px-3 py-1.5 text-xs hover:bg-secondary"
+                      >
+                        Uphold (invalidate)
+                      </button>
+                      <button
+                        onClick={() => handleDispute(dispute.id, "reject")}
+                        className="rounded-md border border-border px-3 py-1.5 text-xs hover:bg-secondary"
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <section className="mt-6 rounded-lg border border-border bg-card p-5">
+            <h2 className="text-lg font-semibold">Group settings</h2>
+            <div className="mt-4 space-y-4 text-sm">
+              <Field label="Detection mode">
+                <select
+                  value={mod.settings.detectionMode}
+                  onChange={(event) => patchSettings({ detection_mode: event.target.value })}
+                  className="rounded-md border border-input bg-background px-2 py-1"
+                >
+                  <option value="command_only">Command only</option>
+                  <option value="full_detection">Full detection</option>
+                </select>
+              </Field>
+              <Field label="Min liquidity (USD)">
+                <input
+                  type="number"
+                  defaultValue={mod.settings.minLiquidityUsd}
+                  onBlur={(event) =>
+                    patchSettings({ min_liquidity_usd: Number(event.target.value) })
+                  }
+                  className="w-28 rounded-md border border-input bg-background px-2 py-1 font-mono"
+                />
+              </Field>
+              <Field label="Min token age (min)">
+                <input
+                  type="number"
+                  defaultValue={mod.settings.minTokenAgeMinutes}
+                  onBlur={(event) =>
+                    patchSettings({ min_token_age_minutes: Number(event.target.value) })
+                  }
+                  className="w-28 rounded-md border border-input bg-background px-2 py-1 font-mono"
+                />
+              </Field>
+              <Field label="Repeat calls">
+                <input
+                  type="checkbox"
+                  checked={mod.settings.allowRepeatCalls}
+                  onChange={(event) => patchSettings({ allow_repeat_calls: event.target.checked })}
+                />
+              </Field>
+              <Field label="Announce tips">
+                <input
+                  type="checkbox"
+                  checked={mod.settings.announceTips}
+                  onChange={(event) => patchSettings({ announce_tips: event.target.checked })}
+                />
+              </Field>
+              <Field label="Announcements">
+                <select
+                  value={mod.settings.announcementMode}
+                  onChange={(event) => patchSettings({ announcement_mode: event.target.value })}
+                  className="rounded-md border border-input bg-background px-2 py-1"
+                >
+                  <option value="immediate">Immediate</option>
+                  <option value="off">Off</option>
+                </select>
+              </Field>
+              <Field label="Quiet hours (UTC)">
+                <span className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min={0}
+                    max={23}
+                    defaultValue={mod.settings.quietHoursStart ?? ""}
+                    onBlur={(event) =>
+                      patchSettings({
+                        quiet_hours_start:
+                          event.target.value === "" ? null : Number(event.target.value),
+                      })
+                    }
+                    className="w-16 rounded-md border border-input bg-background px-2 py-1 font-mono"
+                  />
+                  <span className="text-muted-foreground">to</span>
+                  <input
+                    type="number"
+                    min={0}
+                    max={23}
+                    defaultValue={mod.settings.quietHoursEnd ?? ""}
+                    onBlur={(event) =>
+                      patchSettings({
+                        quiet_hours_end:
+                          event.target.value === "" ? null : Number(event.target.value),
+                      })
+                    }
+                    className="w-16 rounded-md border border-input bg-background px-2 py-1 font-mono"
+                  />
+                </span>
+              </Field>
+              <Field label="Raw retention (days)">
+                <input
+                  type="number"
+                  min={1}
+                  max={365}
+                  defaultValue={mod.settings.retentionDays}
+                  onBlur={(event) =>
+                    patchSettings({ raw_message_retention_days: Number(event.target.value) })
+                  }
+                  className="w-24 rounded-md border border-input bg-background px-2 py-1 font-mono"
+                />
+              </Field>
+            </div>
+          </section>
+        </>
+      )}
     </Shell>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-between gap-4">
+      <span className="text-muted-foreground">{label}</span>
+      {children}
+    </div>
   );
 }
 

@@ -10,6 +10,16 @@ import {
   revokeWallets,
 } from "./wallets.server";
 import { getLeaderboard } from "./scoring.server";
+import {
+  listSeasons,
+  listOpenDisputes,
+  resolveDispute,
+  updateGroupSettings,
+  type GroupSettingsPatch,
+  type DisputeResolution,
+} from "./moderation.server";
+import { listPendingTips, confirmTip } from "./tips.server";
+import { isChatAdmin } from "./telegram.server";
 
 async function requireSession(session: string) {
   const resolved = await resolveSession(session);
@@ -113,13 +123,17 @@ export async function unlinkWallet(input: { session: string; membershipId: strin
   return { ok: true };
 }
 
-export async function loadGroupBoard(input: { session: string; membershipId: string }) {
+export async function loadGroupBoard(input: {
+  session: string;
+  membershipId: string;
+  seasonId?: string | null | undefined;
+}) {
   const { telegramUserId } = await requireSession(input.session);
   const membership = await ownedMembership(telegramUserId, input.membershipId);
   const db = await admin();
 
-  const [board, calls] = await Promise.all([
-    getLeaderboard(membership.group_id, 10),
+  const [board, calls, seasons] = await Promise.all([
+    getLeaderboard(membership.group_id, 10, input.seasonId ?? null),
     db
       .from("calls")
       .select("symbol, mint, baseline_price_usd, last_price_usd, ath_multiple, group_members(display_name)")
@@ -127,9 +141,12 @@ export async function loadGroupBoard(input: { session: string; membershipId: str
       .eq("status", "active")
       .order("created_at", { ascending: false })
       .limit(10),
+    listSeasons(membership.group_id),
   ]);
 
   return {
+    seasons,
+    seasonId: input.seasonId ?? null,
     leaderboard: board,
     calls: (calls.data ?? []).map((call: any) => ({
       symbol: (call.symbol ?? call.mint.slice(0, 6)) as string,
@@ -141,4 +158,102 @@ export async function loadGroupBoard(input: { session: string; membershipId: str
       peak: Number(call.ath_multiple ?? 1),
     })) as { symbol: string; caller: string; current: number; peak: number }[],
   };
+}
+
+
+/** Tips the caller is party to, with a payment link they can act on now. */
+export async function loadTips(input: { session: string; membershipId: string }) {
+  const { telegramUserId } = await requireSession(input.session);
+  await ownedMembership(telegramUserId, input.membershipId);
+  return { tips: await listPendingTips(input.membershipId) };
+}
+
+export async function verifyTip(input: {
+  session: string;
+  membershipId: string;
+  tipId: string;
+}) {
+  const { telegramUserId } = await requireSession(input.session);
+  await ownedMembership(telegramUserId, input.membershipId);
+
+  const db = await admin();
+  const { data: intent } = await db
+    .from("tip_intents")
+    .select("id, sender_membership_id, recipient_membership_id")
+    .eq("id", input.tipId)
+    .maybeSingle();
+  if (
+    !intent ||
+    (intent.sender_membership_id !== input.membershipId &&
+      intent.recipient_membership_id !== input.membershipId)
+  ) {
+    throw new Error("That tip isn't yours.");
+  }
+
+  const result = await confirmTip(input.tipId);
+  return { status: result.status };
+}
+
+/** Telegram group admin status is the source of truth for moderator powers. */
+async function requireGroupAdmin(session: string, membershipId: string) {
+  const { telegramUserId } = await requireSession(session);
+  const membership = await ownedMembership(telegramUserId, membershipId);
+  const db = await admin();
+  const { data: group } = await db
+    .from("groups")
+    .select("*")
+    .eq("id", membership.group_id)
+    .maybeSingle();
+  if (!group) throw new Error("Group not found.");
+  if (!(await isChatAdmin(Number(group.telegram_chat_id), telegramUserId))) {
+    throw new Error("Only group admins can do that.");
+  }
+  return { membership, group };
+}
+
+export async function loadModeration(input: { session: string; membershipId: string }) {
+  const { group } = await requireGroupAdmin(input.session, input.membershipId);
+  return {
+    disputes: await listOpenDisputes(group.id),
+    settings: {
+      detectionMode: group.detection_mode as "command_only" | "full_detection",
+      minLiquidityUsd: Number(group.min_liquidity_usd ?? 0),
+      minTokenAgeMinutes: Number(group.min_token_age_minutes ?? 0),
+      allowRepeatCalls: Boolean(group.allow_repeat_calls),
+      announceTips: Boolean(group.announce_tips),
+      announcementMode: (group.announcement_mode ?? "immediate") as "immediate" | "off",
+      quietHoursStart: group.quiet_hours_start as number | null,
+      quietHoursEnd: group.quiet_hours_end as number | null,
+      retentionDays: Number(group.raw_message_retention_days ?? 30),
+    },
+  };
+}
+
+export async function saveSettings(input: {
+  session: string;
+  membershipId: string;
+  patch: GroupSettingsPatch;
+}) {
+  const { group, membership } = await requireGroupAdmin(input.session, input.membershipId);
+  await updateGroupSettings(group.id, membership.id, input.patch);
+  return { ok: true };
+}
+
+export async function settleDispute(input: {
+  session: string;
+  membershipId: string;
+  disputeId: string;
+  outcome: DisputeResolution;
+  note?: string | null | undefined;
+}) {
+  const { group, membership } = await requireGroupAdmin(input.session, input.membershipId);
+  const result = await resolveDispute({
+    groupId: group.id,
+    disputeId: input.disputeId,
+    moderatorMembershipId: membership.id,
+    outcome: input.outcome,
+    note: input.note ?? null,
+  });
+  if (!result.ok) throw new Error("That dispute is already settled.");
+  return { ok: true };
 }
