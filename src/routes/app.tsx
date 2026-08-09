@@ -640,6 +640,30 @@ function MiniApp() {
       {tab === "admin" && mod && (
         <>
           <section className="mt-6 rounded-lg border border-border bg-card p-5">
+            <h2 className="text-lg font-semibold">Import historical calls</h2>
+            <p className="mt-2 text-xs text-muted-foreground">
+              CSV columns: mint, caller_telegram_id, baseline_price_usd, and optionally symbol,
+              peak_price_usd, called_at, note. Imported calls are shown as history and never counted
+              toward BRUH Score.
+            </p>
+            <textarea
+              value={csv}
+              onChange={(event) => setCsv(event.target.value)}
+              rows={4}
+              placeholder="mint,caller_telegram_id,baseline_price_usd,symbol"
+              className="mt-3 w-full rounded-md border border-input bg-background px-3 py-2 font-mono text-xs"
+            />
+            <button
+              onClick={handleImport}
+              disabled={csv.trim().length < 10}
+              className="mt-3 rounded-md bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground disabled:opacity-50"
+            >
+              Import calls
+            </button>
+          </section>
+
+          <section className="mt-6 rounded-lg border border-border bg-card p-5">
+
             <h2 className="text-lg font-semibold">Disputes</h2>
             {mod.disputes.length === 0 ? (
               <p className="mt-2 text-sm text-muted-foreground">Nothing open.</p>
