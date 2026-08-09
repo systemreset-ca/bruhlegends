@@ -505,7 +505,7 @@ function MiniApp() {
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
             >
               <option value="">Choose a member…</option>
-              {(targets?.members ?? []).map((member) => (
+              {(targets?.members ?? []).map((member: { membershipId: string; displayName: string }) => (
                 <option key={member.membershipId} value={member.membershipId}>
                   {member.displayName}
                 </option>
@@ -524,7 +524,7 @@ function MiniApp() {
                 onChange={(event) => setDraft({ ...draft, asset: event.target.value })}
                 className="rounded-md border border-input bg-background px-3 py-2 text-sm"
               >
-                {(targets?.assets ?? ["SOL"]).map((asset) => (
+                {(targets?.assets ?? ["SOL"]).map((asset: string) => (
                   <option key={asset} value={asset}>
                     {asset}
                   </option>
@@ -730,7 +730,10 @@ function MiniApp() {
             <p className="mt-2 text-sm text-muted-foreground">No calls recorded yet.</p>
           ) : (
             <ul className="mt-3 divide-y divide-border">
-              {explorer.calls.map((call) => (
+              {explorer.calls.map((call) => {
+                const detail =
+                  explorer.detail && explorer.detail.id === call.id ? explorer.detail : null;
+                return (
                 <li key={call.id} className="py-3">
                   <button
                     onClick={() => setOpenCallId(openCallId === call.id ? null : call.id)}
@@ -760,10 +763,9 @@ function MiniApp() {
                       <p className="mt-3 font-mono uppercase tracking-widest text-muted-foreground">
                         Milestones
                       </p>
-                      {explorer.detail?.id === call.id &&
-                      explorer.detail.milestones.length > 0 ? (
+                      {detail && detail.milestones.length > 0 ? (
                         <ul className="mt-1 space-y-1">
-                          {explorer.detail.milestones.map((hit) => (
+                          {detail.milestones.map((hit) => (
                             <li key={hit.milestone} className="flex justify-between">
                               <span className="text-primary">{hit.milestone}x</span>
                               <span className="text-muted-foreground">
@@ -780,7 +782,7 @@ function MiniApp() {
                         Recent prices
                       </p>
                       <ul className="mt-1 space-y-1">
-                        {(explorer.detail?.id === call.id ? explorer.detail.observations : [])
+                        {(detail?.observations ?? [])
                           .slice(0, 8)
                           .map((point) => (
                             <li key={point.observedAt} className="flex justify-between">
@@ -796,7 +798,8 @@ function MiniApp() {
                     </div>
                   )}
                 </li>
-              ))}
+                );
+              })}
             </ul>
           )}
         </section>
