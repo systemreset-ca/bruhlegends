@@ -115,7 +115,7 @@ export async function createTipIntent(input: {
 
 export type TipConfirmation =
   | { status: "confirmed"; signature: string }
-  | { status: "pending" | "expired" | "not_found"; reason?: string };
+  | { status: "pending" | "expired" | "not_found"; reason?: string | undefined };
 
 /** Idempotent: re-checking a confirmed tip returns the stored signature. */
 export async function confirmTip(intentId: string): Promise<TipConfirmation> {
