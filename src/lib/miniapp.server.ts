@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import bs58 from "bs58";
-import { ed25519 } from "@noble/curves/ed25519";
+import { ed25519 } from "@noble/curves/ed25519.js";
 import { resolveSession } from "./session.server";
 import { admin } from "./db.server";
 import {
