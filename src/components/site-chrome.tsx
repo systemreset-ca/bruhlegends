@@ -71,6 +71,9 @@ export function SiteFooter() {
           <Link to="/token" className="hover:text-primary">
             $BRUH
           </Link>
+          <Link to="/tiptek" className="hover:text-primary">
+            TipTek
+          </Link>
           <Link to="/app" className="hover:text-primary">
             Mini App
           </Link>
