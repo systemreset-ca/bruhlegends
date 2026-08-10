@@ -7,6 +7,7 @@ export const TELEGRAM_BOT_URL = "https://t.me/BRUHLegendsBot";
 const nav = [
   { to: "/", label: "The Bot" },
   { to: "/groups", label: "For Admins" },
+  { to: "/tiptek", label: "TipTek" },
   { to: "/token", label: "$BRUH" },
 ] as const;
 

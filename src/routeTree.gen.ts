@@ -15,6 +15,7 @@ import { Route as GroupsRouteImport } from './routes/groups'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RiskRouteImport } from './routes/risk'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as TiptekRouteImport } from './routes/tiptek'
 import { Route as TokenRouteImport } from './routes/token'
 import { Route as ApiPublicHooksRefreshCallsRouteImport } from './routes/api/public/hooks/refresh-calls'
 import { Route as ApiPublicHooksVerifyTipsRouteImport } from './routes/api/public/hooks/verify-tips'
@@ -50,6 +51,11 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TiptekRoute = TiptekRouteImport.update({
+  id: '/tiptek',
+  path: '/tiptek',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TokenRoute = TokenRouteImport.update({
   id: '/token',
   path: '/token',
@@ -81,6 +87,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/risk': typeof RiskRoute
   '/terms': typeof TermsRoute
+  '/tiptek': typeof TiptekRoute
   '/token': typeof TokenRoute
   '/api/public/hooks/refresh-calls': typeof ApiPublicHooksRefreshCallsRoute
   '/api/public/hooks/verify-tips': typeof ApiPublicHooksVerifyTipsRoute
@@ -93,6 +100,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/risk': typeof RiskRoute
   '/terms': typeof TermsRoute
+  '/tiptek': typeof TiptekRoute
   '/token': typeof TokenRoute
   '/api/public/hooks/refresh-calls': typeof ApiPublicHooksRefreshCallsRoute
   '/api/public/hooks/verify-tips': typeof ApiPublicHooksVerifyTipsRoute
@@ -106,6 +114,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/risk': typeof RiskRoute
   '/terms': typeof TermsRoute
+  '/tiptek': typeof TiptekRoute
   '/token': typeof TokenRoute
   '/api/public/hooks/refresh-calls': typeof ApiPublicHooksRefreshCallsRoute
   '/api/public/hooks/verify-tips': typeof ApiPublicHooksVerifyTipsRoute
@@ -120,6 +129,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/risk'
     | '/terms'
+    | '/tiptek'
     | '/token'
     | '/api/public/hooks/refresh-calls'
     | '/api/public/hooks/verify-tips'
@@ -132,6 +142,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/risk'
     | '/terms'
+    | '/tiptek'
     | '/token'
     | '/api/public/hooks/refresh-calls'
     | '/api/public/hooks/verify-tips'
@@ -144,6 +155,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/risk'
     | '/terms'
+    | '/tiptek'
     | '/token'
     | '/api/public/hooks/refresh-calls'
     | '/api/public/hooks/verify-tips'
@@ -157,6 +169,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   RiskRoute: typeof RiskRoute
   TermsRoute: typeof TermsRoute
+  TiptekRoute: typeof TiptekRoute
   TokenRoute: typeof TokenRoute
   ApiPublicHooksRefreshCallsRoute: typeof ApiPublicHooksRefreshCallsRoute
   ApiPublicHooksVerifyTipsRoute: typeof ApiPublicHooksVerifyTipsRoute
@@ -207,6 +220,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tiptek': {
+      id: '/tiptek'
+      path: '/tiptek'
+      fullPath: '/tiptek'
+      preLoaderRoute: typeof TiptekRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/token': {
       id: '/token'
       path: '/token'
@@ -245,6 +265,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   RiskRoute: RiskRoute,
   TermsRoute: TermsRoute,
+  TiptekRoute: TiptekRoute,
   TokenRoute: TokenRoute,
   ApiPublicHooksRefreshCallsRoute: ApiPublicHooksRefreshCallsRoute,
   ApiPublicHooksVerifyTipsRoute: ApiPublicHooksVerifyTipsRoute,
@@ -253,13 +274,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
