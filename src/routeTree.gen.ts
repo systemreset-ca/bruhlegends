@@ -14,6 +14,7 @@ import { Route as AppRouteImport } from './routes/app'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RiskRouteImport } from './routes/risk'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as TokenRouteImport } from './routes/token'
 import { Route as ApiPublicHooksRefreshCallsRouteImport } from './routes/api/public/hooks/refresh-calls'
 import { Route as ApiPublicHooksVerifyTipsRouteImport } from './routes/api/public/hooks/verify-tips'
 import { Route as ApiPublicTelegramWebhookRouteImport } from './routes/api/public/telegram/webhook'
@@ -43,6 +44,11 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TokenRoute = TokenRouteImport.update({
+  id: '/token',
+  path: '/token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksRefreshCallsRoute =
   ApiPublicHooksRefreshCallsRouteImport.update({
     id: '/api/public/hooks/refresh-calls',
@@ -68,6 +74,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/risk': typeof RiskRoute
   '/terms': typeof TermsRoute
+  '/token': typeof TokenRoute
   '/api/public/hooks/refresh-calls': typeof ApiPublicHooksRefreshCallsRoute
   '/api/public/hooks/verify-tips': typeof ApiPublicHooksVerifyTipsRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/risk': typeof RiskRoute
   '/terms': typeof TermsRoute
+  '/token': typeof TokenRoute
   '/api/public/hooks/refresh-calls': typeof ApiPublicHooksRefreshCallsRoute
   '/api/public/hooks/verify-tips': typeof ApiPublicHooksVerifyTipsRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
@@ -89,6 +97,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/risk': typeof RiskRoute
   '/terms': typeof TermsRoute
+  '/token': typeof TokenRoute
   '/api/public/hooks/refresh-calls': typeof ApiPublicHooksRefreshCallsRoute
   '/api/public/hooks/verify-tips': typeof ApiPublicHooksVerifyTipsRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
@@ -101,6 +110,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/risk'
     | '/terms'
+    | '/token'
     | '/api/public/hooks/refresh-calls'
     | '/api/public/hooks/verify-tips'
     | '/api/public/telegram/webhook'
@@ -111,6 +121,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/risk'
     | '/terms'
+    | '/token'
     | '/api/public/hooks/refresh-calls'
     | '/api/public/hooks/verify-tips'
     | '/api/public/telegram/webhook'
@@ -121,6 +132,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/risk'
     | '/terms'
+    | '/token'
     | '/api/public/hooks/refresh-calls'
     | '/api/public/hooks/verify-tips'
     | '/api/public/telegram/webhook'
@@ -132,6 +144,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   RiskRoute: typeof RiskRoute
   TermsRoute: typeof TermsRoute
+  TokenRoute: typeof TokenRoute
   ApiPublicHooksRefreshCallsRoute: typeof ApiPublicHooksRefreshCallsRoute
   ApiPublicHooksVerifyTipsRoute: typeof ApiPublicHooksVerifyTipsRoute
   ApiPublicTelegramWebhookRoute: typeof ApiPublicTelegramWebhookRoute
@@ -174,6 +187,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/token': {
+      id: '/token'
+      path: '/token'
+      fullPath: '/token'
+      preLoaderRoute: typeof TokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/refresh-calls': {
       id: '/api/public/hooks/refresh-calls'
       path: '/api/public/hooks/refresh-calls'
@@ -204,6 +224,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   RiskRoute: RiskRoute,
   TermsRoute: TermsRoute,
+  TokenRoute: TokenRoute,
   ApiPublicHooksRefreshCallsRoute: ApiPublicHooksRefreshCallsRoute,
   ApiPublicHooksVerifyTipsRoute: ApiPublicHooksVerifyTipsRoute,
   ApiPublicTelegramWebhookRoute: ApiPublicTelegramWebhookRoute,
