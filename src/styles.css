@@ -26,6 +26,9 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+  --font-display: "Anton", "Arial Narrow", sans-serif;
+  --font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -42,6 +45,10 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-gold: var(--gold);
+  --color-gold-foreground: var(--gold-foreground);
+  --color-imperial: var(--imperial);
+  --color-imperial-foreground: var(--imperial-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -63,39 +70,76 @@
 
 :root {
   --radius: 0.5rem;
-  --background: oklch(0.16 0.015 265);
-  --foreground: oklch(0.96 0.01 120);
-  --card: oklch(0.21 0.018 265);
-  --card-foreground: oklch(0.96 0.01 120);
-  --popover: oklch(0.21 0.018 265);
-  --popover-foreground: oklch(0.96 0.01 120);
-  --primary: oklch(0.86 0.21 128);
-  --primary-foreground: oklch(0.18 0.03 130);
-  --secondary: oklch(0.28 0.02 265);
-  --secondary-foreground: oklch(0.96 0.01 120);
-  --muted: oklch(0.26 0.018 265);
-  --muted-foreground: oklch(0.72 0.02 250);
-  --accent: oklch(0.7 0.17 42);
-  --accent-foreground: oklch(0.18 0.03 130);
-  --destructive: oklch(0.62 0.22 25);
-  --destructive-foreground: oklch(0.97 0.01 120);
-  --border: oklch(0.32 0.02 265);
-  --input: oklch(0.32 0.02 265);
-  --ring: oklch(0.86 0.21 128);
-  --chart-1: oklch(0.86 0.21 128);
-  --chart-2: oklch(0.7 0.17 42);
-  --chart-3: oklch(0.66 0.15 250);
-  --chart-4: oklch(0.75 0.16 320);
-  --chart-5: oklch(0.8 0.15 200);
-  --sidebar: oklch(0.19 0.018 265);
-  --sidebar-foreground: oklch(0.96 0.01 120);
-  --sidebar-primary: oklch(0.86 0.21 128);
-  --sidebar-primary-foreground: oklch(0.18 0.03 130);
-  --sidebar-accent: oklch(0.26 0.018 265);
-  --sidebar-accent-foreground: oklch(0.96 0.01 120);
-  --sidebar-border: oklch(0.32 0.02 265);
-  --sidebar-ring: oklch(0.86 0.21 128);
+
+  /* Colosseum Degen — obsidian arena, molten gold, imperial purple, acid lime */
+  --background: oklch(0.13 0.012 285);
+  --foreground: oklch(0.96 0.012 100);
+  --card: oklch(0.18 0.018 288);
+  --card-foreground: oklch(0.96 0.012 100);
+  --popover: oklch(0.16 0.018 288);
+  --popover-foreground: oklch(0.96 0.012 100);
+
+  --primary: oklch(0.88 0.23 124);
+  --primary-foreground: oklch(0.17 0.04 130);
+
+  --secondary: oklch(0.35 0.14 300);
+  --secondary-foreground: oklch(0.97 0.01 100);
+
+  --muted: oklch(0.24 0.02 288);
+  --muted-foreground: oklch(0.74 0.02 285);
+
+  --accent: oklch(0.81 0.15 86);
+  --accent-foreground: oklch(0.18 0.05 90);
+
+  --gold: oklch(0.81 0.15 86);
+  --gold-foreground: oklch(0.18 0.05 90);
+  --imperial: oklch(0.5 0.22 300);
+  --imperial-foreground: oklch(0.97 0.01 100);
+
+  --destructive: oklch(0.6 0.22 27);
+  --destructive-foreground: oklch(0.97 0.01 100);
+
+  --border: oklch(0.3 0.035 292);
+  --input: oklch(0.3 0.035 292);
+  --ring: oklch(0.88 0.23 124);
+
+  --chart-1: oklch(0.88 0.23 124);
+  --chart-2: oklch(0.81 0.15 86);
+  --chart-3: oklch(0.5 0.22 300);
+  --chart-4: oklch(0.7 0.18 330);
+  --chart-5: oklch(0.72 0.14 210);
+
+  --sidebar: oklch(0.16 0.018 288);
+  --sidebar-foreground: oklch(0.96 0.012 100);
+  --sidebar-primary: oklch(0.88 0.23 124);
+  --sidebar-primary-foreground: oklch(0.17 0.04 130);
+  --sidebar-accent: oklch(0.24 0.02 288);
+  --sidebar-accent-foreground: oklch(0.96 0.012 100);
+  --sidebar-border: oklch(0.3 0.035 292);
+  --sidebar-ring: oklch(0.88 0.23 124);
+
+  --gradient-gold: linear-gradient(
+    180deg,
+    oklch(0.93 0.11 95) 0%,
+    oklch(0.83 0.16 84) 45%,
+    oklch(0.65 0.14 70) 100%
+  );
+  --gradient-lime: linear-gradient(135deg, oklch(0.93 0.21 128), oklch(0.78 0.2 140));
+  --gradient-arena: radial-gradient(
+      120% 90% at 50% 0%,
+      color-mix(in oklab, var(--imperial) 30%, transparent) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      90% 70% at 80% 20%,
+      color-mix(in oklab, var(--primary) 14%, transparent) 0%,
+      transparent 65%
+    );
+  --glow-lime: 0 0 40px color-mix(in oklab, var(--primary) 35%, transparent);
+  --glow-gold: 0 0 40px color-mix(in oklab, var(--gold) 35%, transparent);
+  --shadow-plinth: 0 30px 80px -30px color-mix(in oklab, var(--imperial) 60%, transparent);
 }
+
 
 .dark {
   --background: oklch(0.129 0.042 264.695);
