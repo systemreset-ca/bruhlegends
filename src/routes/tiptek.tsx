@@ -51,14 +51,10 @@ function TipTekPage() {
 
       <section className="mx-auto max-w-6xl px-6 py-10">
         <div className="overflow-hidden rounded-xl border border-border/70 bg-card/40">
-          <iframe
-            src="/tiptek-flow.html"
-            title="BRUH TipTek on-chain tip flow diagram"
-            className="h-[1600px] w-full border-0"
-            loading="lazy"
-          />
+          <FlowFrame />
         </div>
       </section>
+
     </SiteShell>
   );
 }
