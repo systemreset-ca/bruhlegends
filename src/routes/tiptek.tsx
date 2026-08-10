@@ -1,5 +1,41 @@
+import { useEffect, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteShell, SectionLabel } from "@/components/site-chrome";
+
+function FlowFrame() {
+  const ref = useRef<HTMLIFrameElement>(null);
+  const [height, setHeight] = useState(1600);
+
+  useEffect(() => {
+    const measure = () => {
+      const doc = ref.current?.contentDocument;
+      if (!doc) return;
+      const h = Math.max(
+        doc.body?.scrollHeight ?? 0,
+        doc.documentElement?.scrollHeight ?? 0,
+      );
+      if (h > 0) setHeight(h);
+    };
+    const id = window.setInterval(measure, 500);
+    window.addEventListener("resize", measure);
+    return () => {
+      window.clearInterval(id);
+      window.removeEventListener("resize", measure);
+    };
+  }, []);
+
+  return (
+    <iframe
+      ref={ref}
+      src="/tiptek-flow.html"
+      title="BRUH TipTek on-chain tip flow diagram"
+      scrolling="no"
+      style={{ height }}
+      className="w-full border-0 overflow-hidden"
+    />
+  );
+}
+
 
 export const Route = createFileRoute("/tiptek")({
   head: () => ({
@@ -51,14 +87,10 @@ function TipTekPage() {
 
       <section className="mx-auto max-w-6xl px-6 py-10">
         <div className="overflow-hidden rounded-xl border border-border/70 bg-card/40">
-          <iframe
-            src="/tiptek-flow.html"
-            title="BRUH TipTek on-chain tip flow diagram"
-            className="h-[1600px] w-full border-0"
-            loading="lazy"
-          />
+          <FlowFrame />
         </div>
       </section>
+
     </SiteShell>
   );
 }
