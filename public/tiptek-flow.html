@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>BRUH — Wallet-to-Wallet Tip Flow (On-Chain)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --obsidian:#07080b; --panel:#111319; --panel-2:#161a22;
+    --gold:#f2c14e; --gold-2:#e0a020;
+    --lime:#b6ff2e; --purple:#8b5cf6; --purple-2:#6d3df0;
+    --ink:#e9ecf3; --muted:#8e97a9; --line:#242a36; --danger:#ff5c7a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(1200px 700px at 50% -10%,#161327 0%,var(--obsidian) 60%);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;padding:44px 40px 56px}
+  .wrap{max-width:1520px;margin:0 auto}
+  header{display:flex;justify-content:space-between;align-items:flex-end;gap:32px;border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:30px}
+  h1{font-family:Anton,sans-serif;font-size:52px;letter-spacing:.02em;margin:0;line-height:1;
+     background:linear-gradient(180deg,#fff3cd,var(--gold) 45%,var(--gold-2));-webkit-background-clip:text;background-clip:text;color:transparent;text-transform:uppercase}
+  .sub{color:var(--muted);font-size:14px;max-width:640px;margin-top:10px;line-height:1.55}
+  .badges{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+  .badge{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--line);border-radius:999px;padding:6px 12px;color:var(--muted);background:var(--panel)}
+  .badge.lime{color:var(--lime);border-color:#31441a;background:#12190a}
+  .badge.gold{color:var(--gold);border-color:#463719;background:#1a1508}
+  .badge.purple{color:#c4b5fd;border-color:#3a2a63;background:#150f26}
+
+  .lanes{display:grid;grid-template-columns:repeat(5,1fr);gap:18px}
+  .lane{background:linear-gradient(180deg,var(--panel),#0c0e13);border:1px solid var(--line);border-radius:16px;padding:16px 14px 18px;position:relative;overflow:hidden}
+  .lane::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:var(--accent,var(--purple))}
+  .lane h2{font-family:Anton,sans-serif;font-weight:400;text-transform:uppercase;letter-spacing:.06em;font-size:15px;margin:6px 0 2px;color:var(--accent,var(--purple))}
+  .lane .who{font-family:"JetBrains Mono",monospace;font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px}
+
+  .step{background:var(--panel-2);border:1px solid var(--line);border-left:3px solid var(--accent,var(--purple));border-radius:10px;padding:11px 12px;margin-bottom:10px}
+  .step .n{font-family:"JetBrains Mono",monospace;font-size:10px;color:#0a0a0a;background:var(--accent,var(--purple));border-radius:4px;padding:1px 6px;font-weight:700;letter-spacing:.06em}
+  .step .t{font-weight:700;font-size:13.5px;margin:7px 0 5px;line-height:1.25}
+  .step .d{font-size:11.8px;color:var(--muted);line-height:1.5}
+  .step code{font-family:"JetBrains Mono",monospace;font-size:10.8px;color:var(--lime);background:#0d1207;border:1px solid #263317;border-radius:4px;padding:1px 4px}
+  .step .d b{color:#cfd6e4;font-weight:700}
+
+  .note{margin-top:6px;font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.04em;color:var(--gold)}
+  .no{color:var(--danger)}
+
+  .flowbar{display:grid;grid-template-columns:repeat(5,1fr);gap:18px;margin:14px 0 26px}
+  .arrow{height:26px;border-radius:999px;background:linear-gradient(90deg,var(--purple),var(--lime));position:relative;opacity:.85}
+  .arrow span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:"JetBrains Mono",monospace;font-size:10px;color:#08090c;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+
+  .money{display:grid;grid-template-columns:1.15fr 1fr;gap:18px;margin-top:26px}
+  .card{background:linear-gradient(180deg,var(--panel),#0c0e13);border:1px solid var(--line);border-radius:16px;padding:18px 20px}
+  .card h3{font-family:Anton,sans-serif;font-weight:400;text-transform:uppercase;letter-spacing:.06em;font-size:17px;margin:0 0 12px;color:var(--gold)}
+  table{width:100%;border-collapse:collapse;font-family:"JetBrains Mono",monospace;font-size:12px}
+  th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:400}
+  td.val{color:var(--lime);text-align:right}
+  td.fee{color:var(--gold);text-align:right}
+  ul{margin:0;padding-left:16px}
+  li{font-size:12.4px;color:var(--muted);line-height:1.65;margin-bottom:6px}
+  li b{color:#cfd6e4}
+  footer{margin-top:28px;border-top:1px solid var(--line);padding-top:14px;display:flex;justify-content:space-between;font-family:"JetBrains Mono",monospace;font-size:10.5px;color:#5f6779;letter-spacing:.08em;text-transform:uppercase}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Wallet → Wallet, Verified On-Chain</h1>
+      <div class="sub">How a BRUH tip travels from one member's wallet to another's. The bot never holds keys, never holds funds, and never marks a tip paid until Solana confirms it.</div>
+    </div>
+    <div class="badges">
+      <span class="badge lime">Non-custodial</span>
+      <span class="badge gold">Solana Pay</span>
+      <span class="badge purple">Mainnet-beta</span>
+      <span class="badge">SOL · USDC · $BRUH</span>
+    </div>
+  </header>
+
+  <div class="lanes">
+    <div class="lane" style="--accent:#8b5cf6">
+      <h2>1 · Request</h2>
+      <div class="who">Telegram client</div>
+      <div class="step"><span class="n">01</span><div class="t">Sender fires the tip</div><div class="d"><code>/tip @chad 10 USDC</code> in-group, or the Tip composer in the Mini App. Mini App calls are authenticated by HMAC-SHA256 over Telegram <code>initData</code>.</div></div>
+      <div class="step"><span class="n">02</span><div class="t">Membership resolved</div><div class="d">Sender and recipient are matched to <b>group-scoped memberships</b>. Data never crosses group boundaries.</div></div>
+      <div class="step"><span class="n">03</span><div class="t">Recipient payout address</div><div class="d">The recipient's <b>self-registered active wallet</b> is looked up. No wallet, no tip — the bot refuses rather than guessing.</div><div class="note">GUARD: self-tip &amp; amount ≤ 0 rejected</div></div>
+    </div>
+
+    <div class="lane" style="--accent:#f2c14e">
+      <h2>2 · Intent</h2>
+      <div class="who">BRUH server · unsigned</div>
+      <div class="step"><span class="n">04</span><div class="t">Asset resolved</div><div class="d">Symbol → mint + decimals from the <b>supported-assets registry</b>. SOL is native (9dp); USDC and $BRUH are SPL (6dp). Only one $BRUH mint is ever accepted — from server config.</div></div>
+      <div class="step"><span class="n">05</span><div class="t">Amount to base units</div><div class="d">Integer math only: <code>amount × 10^decimals</code>. Floats never touch the settlement path.</div></div>
+      <div class="step"><span class="n">06</span><div class="t">Reference key minted</div><div class="d">A random <b>32-byte pubkey</b> is generated as a Solana Pay <code>reference</code>. It is never a signer — it is a read-only tag that makes the payment findable on-chain.</div></div>
+      <div class="step"><span class="n">07</span><div class="t">Intent row + TTL</div><div class="d">Stored as <code>status: created</code> with an expiry and a USD price snapshot for the receipt.</div></div>
+    </div>
+
+    <div class="lane" style="--accent:#b6ff2e">
+      <h2>3 · Sign</h2>
+      <div class="who">User's wallet · keys stay local</div>
+      <div class="step"><span class="n">08</span><div class="t">Solana Pay URL / QR</div><div class="d"><code>solana:&lt;recipient&gt;?amount&amp;reference&amp;spl-token</code> — rendered as a deep link and a QR code.</div></div>
+      <div class="step"><span class="n">09</span><div class="t">Wallet builds the transfer</div><div class="d">Phantom / Solflare / Backpack constructs a <b>System transfer</b> (SOL) or <b>SPL token transfer</b> to the recipient's associated token account, with the reference key attached as a read-only account.</div></div>
+      <div class="step"><span class="n">10</span><div class="t">Sender signs</div><div class="d">The private key never leaves the device. The bot cannot initiate, co-sign, sweep, or reverse anything.</div><div class="note no">BRUH HOLDS NO KEYS · NO CUSTODY</div></div>
+      <div class="step"><span class="n">11</span><div class="t">Broadcast</div><div class="d">The wallet submits directly to an RPC node. Funds move <b>wallet → wallet</b>, never through a BRUH account.</div></div>
+    </div>
+
+    <div class="lane" style="--accent:#38bdf8">
+      <h2>4 · Settle</h2>
+      <div class="who">Solana mainnet-beta</div>
+      <div class="step"><span class="n">12</span><div class="t">Validators confirm</div><div class="d">The transaction lands in a slot and reaches <code>confirmed</code> commitment. Fees are ~0.000005 SOL plus any ATA rent if the recipient's token account must be created.</div></div>
+      <div class="step"><span class="n">13</span><div class="t">Server finds it by reference</div><div class="d"><code>getSignaturesForAddress(reference)</code> then <code>getTransaction</code> with <code>jsonParsed</code>. Polled on demand and by a <b>2-minute sweep</b> job.</div></div>
+      <div class="step"><span class="n">14</span><div class="t">Balance-delta proof</div><div class="d">The recipient's <b>pre/post balance delta</b> for the exact mint must meet the expected base units. Wrong recipient, wrong mint, or short amount → <code>not verified</code>.</div><div class="note">FAILED TX &amp; err ≠ null ARE SKIPPED</div></div>
+    </div>
+
+    <div class="lane" style="--accent:#fb7185">
+      <h2>5 · Receipt</h2>
+      <div class="who">Ledger · leaderboard · treasury</div>
+      <div class="step"><span class="n">15</span><div class="t">Verified transfer recorded</div><div class="d">Signature, slot, mint, base units and USD-at-execution are written to <code>verified_transfers</code>; the intent flips to <code>confirmed</code>. Re-checking is <b>idempotent</b>.</div></div>
+      <div class="step"><span class="n">16</span><div class="t">Fee leg logged</div><div class="d">A 1% app-level service fee (<code>100 bps</code>) applies on the <b>buy</b> and <b>cash-out</b> legs, paid to the treasury address and written to <code>fee_events</code>. It is <b>floored</b>, so rounding never favours the treasury. $BRUH itself has no transfer tax.</div></div>
+      <div class="step"><span class="n">17</span><div class="t">Announce &amp; score</div><div class="d">Subject to quiet hours and the sender's privacy mode (public / pseudonymous / anonymous / private). Tips feed reputation, not price calls.</div></div>
+      <div class="step"><span class="n">18</span><div class="t">Expiry path</div><div class="d">Unpaid past TTL → <code>expired</code>. Nothing is ever credited without a confirmed on-chain transfer.</div></div>
+    </div>
+  </div>
+
+  <div class="flowbar">
+    <div class="arrow"><span>Ask</span></div>
+    <div class="arrow"><span>Quote</span></div>
+    <div class="arrow"><span>Sign</span></div>
+    <div class="arrow"><span>Confirm</span></div>
+    <div class="arrow"><span>Prove</span></div>
+  </div>
+
+  <div class="money">
+    <div class="card">
+      <h3>Where the money actually goes — $10.00 USDC tip</h3>
+      <table>
+        <tr><th>Leg</th><th>Movement</th><th style="text-align:right">Amount</th><th style="text-align:right">Fee (1%)</th></tr>
+        <tr><td>Buy</td><td>Sender wallet → swap</td><td class="val">10.000000</td><td class="fee">0.100000</td></tr>
+        <tr><td>Tip</td><td>Sender wallet → recipient wallet</td><td class="val">9.900000</td><td class="fee">0.000000</td></tr>
+        <tr><td>Cash-out</td><td>Recipient wallet → swap</td><td class="val">9.900000</td><td class="fee">0.099000</td></tr>
+        <tr><td><b>Net</b></td><td>Recipient keeps</td><td class="val">9.801000</td><td class="fee">0.199000</td></tr>
+      </table>
+      <div class="note" style="margin-top:12px">BASE-UNIT INTEGER MATH · NET + FEE ≡ GROSS · FEE FLOORED</div>
+    </div>
+    <div class="card">
+      <h3>Trust boundaries</h3>
+      <ul>
+        <li><b>Keys:</b> stay in the user's wallet. BRUH stores none, ever.</li>
+        <li><b>Funds:</b> move wallet → wallet. No BRUH escrow, no pooled account.</li>
+        <li><b>Truth:</b> the chain is the source. The database is history and audit only.</li>
+        <li><b>Reference keys:</b> random, single-use, read-only — they tag a payment, they cannot spend one.</li>
+        <li><b>Failure is loud:</b> if the RPC read fails, the tip stays pending. Nothing is assumed paid.</li>
+        <li><b>Group isolation:</b> wallets, calls and scores are scoped per Telegram group.</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer><span>BRUH · Bruh Legends — on-chain tip settlement</span><span>Non-custodial · Solana mainnet-beta · v1</span></footer>
+</div>
+</body>
+</html>
