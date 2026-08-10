@@ -77,24 +77,33 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "BRUH Legends — Telegram call tracking & Solana tipping" },
+      {
+        name: "description",
+        content:
+          "BRUH Legends is a Telegram bot for crypto groups: locked call baselines, honest leaderboards and non-custodial Solana tipping.",
+      },
+      { name: "author", content: "BRUH Legends" },
+      { property: "og:site_name", content: "BRUH Legends" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", type: "image/png", href: "/favicon.png" },
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap",
+      },
     ],
     scripts: [{ src: "https://telegram.org/js/telegram-web-app.js" }],
   }),
+
 
   shellComponent: RootShell,
   component: RootComponent,
