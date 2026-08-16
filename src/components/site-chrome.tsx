@@ -9,6 +9,7 @@ const nav = [
   { to: "/groups", label: "For Admins" },
   { to: "/tiptek", label: "TipTek" },
   { to: "/token", label: "$BRUH" },
+  { to: "/brand", label: "Brand" },
 ] as const;
 
 export function SiteHeader() {
@@ -76,6 +77,9 @@ export function SiteFooter() {
           </Link>
           <Link to="/app" className="hover:text-primary">
             Mini App
+          </Link>
+          <Link to="/brand" className="hover:text-primary">
+            Brand
           </Link>
           <Link to="/privacy" className="hover:text-primary">
             Privacy
