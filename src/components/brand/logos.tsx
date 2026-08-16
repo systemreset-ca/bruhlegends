@@ -1,3 +1,5 @@
+import type { ReactElement } from "react";
+
 import { BRAND_COLORS as C } from "@/lib/brand";
 
 export type LogoProps = {
@@ -99,7 +101,7 @@ export type LogoVariant = {
   story: string;
   bestFor: string;
   stacked: boolean;
-  Mark: (props: LogoProps) => JSX.Element;
+  Mark: (props: LogoProps) => ReactElement;
 };
 
 export const LOGO_VARIANTS: LogoVariant[] = [
