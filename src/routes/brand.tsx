@@ -118,7 +118,7 @@ function LogoCard({ variant, light }: { variant: LogoVariant; light: boolean }) 
 function ChosenIdentity() {
   const ref = useRef<HTMLDivElement>(null);
   const [style, setStyle] = useState<BannerStyle>("arena");
-  const [tagline, setTagline] = useState(TAGLINES[0]);
+  const [tagline, setTagline] = useState<string>(TAGLINES[0] ?? "");
   const getSvg = () => ref.current?.querySelector("svg") as SVGSVGElement | null;
 
   const background =
