@@ -17,19 +17,22 @@ const ink = (inverse?: boolean) => (inverse ? C.bone : C.obsidian);
 /*    default identity: reputation, minted.                            */
 /* ------------------------------------------------------------------ */
 export function MarkLaurelCoin({ size = 64, inverse, className }: LogoProps) {
-  const leaf = "M32 12 C26 16 24 21 25 26 C30 25 33 21 32 12 Z";
+  const leaves = [-46, -24, -2, 20, 42];
   return (
     <svg viewBox="0 0 64 64" width={size} height={size} className={className} role="img" aria-label="Laurel Coin mark">
       <circle cx="32" cy="32" r="30" fill={inverse ? C.obsidian : C.bone} />
       <circle cx="32" cy="32" r="30" fill="none" stroke={C.gold} strokeWidth="3" />
-      {[0, 1].map((side) =>
-        [0, 26, 52, 78].map((deg) => (
-          <path
+      {[-1, 1].map((side) =>
+        leaves.map((deg) => (
+          <ellipse
             key={`${side}-${deg}`}
-            d={leaf}
-            transform={`rotate(${side ? -1 : 1} 32 32) rotate(${(side ? -1 : 1) * (150 + deg)} 32 32)`}
+            cx={32 + side * 25.5}
+            cy={32}
+            rx="4.6"
+            ry="2.4"
             fill={C.gold}
             opacity={0.9}
+            transform={`rotate(${deg} 32 32) rotate(${side * 32} ${32 + side * 25.5} 32)`}
           />
         )),
       )}
