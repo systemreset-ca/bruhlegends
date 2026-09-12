@@ -4,7 +4,7 @@ Operation date: 2026-09-12 (America/Toronto).
 Cloud project: Lovable project `e287f314-27c2-40bf-94f4-4685a95781fe` and its connected Supabase database.
 Feature merge: PR #18, merge commit `d7921e016292f4050ccc1f332e75fd8c198c99af`.
 Cloud reconciliation baseline: `main` at `e50b99837030618913b040baca76bac023bbaf9b`.
-Scope: apply and verify the durable Telegram reply outbox, then widen the existing conditional Telegram worker schedule to cover both inbound updates and pending outbound actions. No production site publication occurred.
+Scope: apply and verify the durable Telegram reply outbox, then widen the existing conditional Telegram worker schedule to cover both inbound updates and pending outbound actions.
 
 ## Result
 
@@ -61,3 +61,9 @@ The Lovable scan reported no finding for `telegram_outbox` or its functions. It 
 Telegram's Bot API does not provide a general idempotency key for these methods. A process crash after Telegram accepts an action but before BRUH records `sent_at` can therefore still cause a duplicate message on retry. The outbox closes the larger failure mode in which a Telegram error reran command-side database work, but it cannot eliminate this narrow acknowledgement window.
 
 A second resilience slice is still recommended for multi-write command handlers: record source-update effects idempotently so a database failure partway through a handler cannot repeat an already-committed internal effect on retry.
+
+## Production publication
+
+After the Cloud checks and operation record were reviewed and merged, the owner explicitly authorized publication of exact GitHub `main` commit `240570b00fe9af06001476ffc3e9547a9c517c12`. Lovable reported “Your website was updated.” A direct post-publish request to `https://bruh.tips/` loaded the BRUH Legends production page and its Telegram link successfully.
+
+This verifies that the public deployment is reachable. The next live boundary is a harmless private-chat `/help` update through the real Telegram webhook, inbound queue, command handler, outbound queue and Bot API delivery. No wallet operation or transaction is needed for that smoke test.
