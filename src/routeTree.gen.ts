@@ -18,7 +18,9 @@ import { Route as RiskRouteImport } from './routes/risk'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TiptekRouteImport } from './routes/tiptek'
 import { Route as TokenRouteImport } from './routes/token'
+import { Route as ApiPublicHooksMaintenanceHourlyRouteImport } from './routes/api/public/hooks/maintenance-hourly'
 import { Route as ApiPublicHooksProcessTelegramUpdatesRouteImport } from './routes/api/public/hooks/process-telegram-updates'
+import { Route as ApiPublicHooksPruneRetentionRouteImport } from './routes/api/public/hooks/prune-retention'
 import { Route as ApiPublicHooksRefreshCallsRouteImport } from './routes/api/public/hooks/refresh-calls'
 import { Route as ApiPublicHooksVerifyTipsRouteImport } from './routes/api/public/hooks/verify-tips'
 import { Route as ApiPublicTelegramWebhookRouteImport } from './routes/api/public/telegram/webhook'
@@ -68,10 +70,22 @@ const TokenRoute = TokenRouteImport.update({
   path: '/token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksMaintenanceHourlyRoute =
+  ApiPublicHooksMaintenanceHourlyRouteImport.update({
+    id: '/api/public/hooks/maintenance-hourly',
+    path: '/api/public/hooks/maintenance-hourly',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksProcessTelegramUpdatesRoute =
   ApiPublicHooksProcessTelegramUpdatesRouteImport.update({
     id: '/api/public/hooks/process-telegram-updates',
     path: '/api/public/hooks/process-telegram-updates',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksPruneRetentionRoute =
+  ApiPublicHooksPruneRetentionRouteImport.update({
+    id: '/api/public/hooks/prune-retention',
+    path: '/api/public/hooks/prune-retention',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicHooksRefreshCallsRoute =
@@ -103,7 +117,9 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/tiptek': typeof TiptekRoute
   '/token': typeof TokenRoute
+  '/api/public/hooks/maintenance-hourly': typeof ApiPublicHooksMaintenanceHourlyRoute
   '/api/public/hooks/process-telegram-updates': typeof ApiPublicHooksProcessTelegramUpdatesRoute
+  '/api/public/hooks/prune-retention': typeof ApiPublicHooksPruneRetentionRoute
   '/api/public/hooks/refresh-calls': typeof ApiPublicHooksRefreshCallsRoute
   '/api/public/hooks/verify-tips': typeof ApiPublicHooksVerifyTipsRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
@@ -118,7 +134,9 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/tiptek': typeof TiptekRoute
   '/token': typeof TokenRoute
+  '/api/public/hooks/maintenance-hourly': typeof ApiPublicHooksMaintenanceHourlyRoute
   '/api/public/hooks/process-telegram-updates': typeof ApiPublicHooksProcessTelegramUpdatesRoute
+  '/api/public/hooks/prune-retention': typeof ApiPublicHooksPruneRetentionRoute
   '/api/public/hooks/refresh-calls': typeof ApiPublicHooksRefreshCallsRoute
   '/api/public/hooks/verify-tips': typeof ApiPublicHooksVerifyTipsRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
@@ -134,7 +152,9 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/tiptek': typeof TiptekRoute
   '/token': typeof TokenRoute
+  '/api/public/hooks/maintenance-hourly': typeof ApiPublicHooksMaintenanceHourlyRoute
   '/api/public/hooks/process-telegram-updates': typeof ApiPublicHooksProcessTelegramUpdatesRoute
+  '/api/public/hooks/prune-retention': typeof ApiPublicHooksPruneRetentionRoute
   '/api/public/hooks/refresh-calls': typeof ApiPublicHooksRefreshCallsRoute
   '/api/public/hooks/verify-tips': typeof ApiPublicHooksVerifyTipsRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
@@ -151,7 +171,9 @@ export interface FileRouteTypes {
     | '/terms'
     | '/tiptek'
     | '/token'
+    | '/api/public/hooks/maintenance-hourly'
     | '/api/public/hooks/process-telegram-updates'
+    | '/api/public/hooks/prune-retention'
     | '/api/public/hooks/refresh-calls'
     | '/api/public/hooks/verify-tips'
     | '/api/public/telegram/webhook'
@@ -166,7 +188,9 @@ export interface FileRouteTypes {
     | '/terms'
     | '/tiptek'
     | '/token'
+    | '/api/public/hooks/maintenance-hourly'
     | '/api/public/hooks/process-telegram-updates'
+    | '/api/public/hooks/prune-retention'
     | '/api/public/hooks/refresh-calls'
     | '/api/public/hooks/verify-tips'
     | '/api/public/telegram/webhook'
@@ -181,7 +205,9 @@ export interface FileRouteTypes {
     | '/terms'
     | '/tiptek'
     | '/token'
+    | '/api/public/hooks/maintenance-hourly'
     | '/api/public/hooks/process-telegram-updates'
+    | '/api/public/hooks/prune-retention'
     | '/api/public/hooks/refresh-calls'
     | '/api/public/hooks/verify-tips'
     | '/api/public/telegram/webhook'
@@ -197,7 +223,9 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   TiptekRoute: typeof TiptekRoute
   TokenRoute: typeof TokenRoute
+  ApiPublicHooksMaintenanceHourlyRoute: typeof ApiPublicHooksMaintenanceHourlyRoute
   ApiPublicHooksProcessTelegramUpdatesRoute: typeof ApiPublicHooksProcessTelegramUpdatesRoute
+  ApiPublicHooksPruneRetentionRoute: typeof ApiPublicHooksPruneRetentionRoute
   ApiPublicHooksRefreshCallsRoute: typeof ApiPublicHooksRefreshCallsRoute
   ApiPublicHooksVerifyTipsRoute: typeof ApiPublicHooksVerifyTipsRoute
   ApiPublicTelegramWebhookRoute: typeof ApiPublicTelegramWebhookRoute
@@ -268,11 +296,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/maintenance-hourly': {
+      id: '/api/public/hooks/maintenance-hourly'
+      path: '/api/public/hooks/maintenance-hourly'
+      fullPath: '/api/public/hooks/maintenance-hourly'
+      preLoaderRoute: typeof ApiPublicHooksMaintenanceHourlyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/process-telegram-updates': {
       id: '/api/public/hooks/process-telegram-updates'
       path: '/api/public/hooks/process-telegram-updates'
       fullPath: '/api/public/hooks/process-telegram-updates'
       preLoaderRoute: typeof ApiPublicHooksProcessTelegramUpdatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/prune-retention': {
+      id: '/api/public/hooks/prune-retention'
+      path: '/api/public/hooks/prune-retention'
+      fullPath: '/api/public/hooks/prune-retention'
+      preLoaderRoute: typeof ApiPublicHooksPruneRetentionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/refresh-calls': {
@@ -309,8 +351,10 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   TiptekRoute: TiptekRoute,
   TokenRoute: TokenRoute,
+  ApiPublicHooksMaintenanceHourlyRoute: ApiPublicHooksMaintenanceHourlyRoute,
   ApiPublicHooksProcessTelegramUpdatesRoute:
     ApiPublicHooksProcessTelegramUpdatesRoute,
+  ApiPublicHooksPruneRetentionRoute: ApiPublicHooksPruneRetentionRoute,
   ApiPublicHooksRefreshCallsRoute: ApiPublicHooksRefreshCallsRoute,
   ApiPublicHooksVerifyTipsRoute: ApiPublicHooksVerifyTipsRoute,
   ApiPublicTelegramWebhookRoute: ApiPublicTelegramWebhookRoute,

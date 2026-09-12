@@ -1,13 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { admin } from "@/lib/db.server";
 import { sweepTipIntents } from "@/lib/tips.server";
-import { pruneRetention, purgeExpiredCredentials } from "@/lib/moderation.server";
-import {
-  dispatchAnnouncement,
-  flushDigests,
-  loadGroupAnnounceSettings,
-  publicName,
-} from "@/lib/announce.server";
+import { dispatchAnnouncement, loadGroupAnnounceSettings, publicName } from "@/lib/announce.server";
 import { escapeHtml } from "@/lib/telegram.server";
 import { isAuthorizedSchedulerRequest } from "@/lib/scheduler-auth.server";
 
@@ -19,9 +13,8 @@ type AnnouncementMember = {
 
 /**
  * Scheduler entry point for money-side maintenance: verify outstanding tips
- * on-chain, announce the confirmed ones under the group's privacy rules, flush
- * any digests that are due, then purge expired credentials and age out raw
- * payloads.
+ * on-chain and announce the confirmed ones under the group's privacy rules.
+ * Digest and retention maintenance use lower-frequency dedicated routes.
  */
 export const Route = createFileRoute("/api/public/hooks/verify-tips")({
   server: {
@@ -39,7 +32,9 @@ export const Route = createFileRoute("/api/public/hooks/verify-tips")({
         for (const confirmation of sweep.confirmed) {
           const { data: intent } = await db
             .from("tip_intents")
-            .select("id, group_id, privacy, amount_display, asset_symbol, sender_membership_id, recipient_membership_id")
+            .select(
+              "id, group_id, privacy, amount_display, asset_symbol, sender_membership_id, recipient_membership_id",
+            )
             .eq("id", confirmation.intentId)
             .maybeSingle();
           if (!intent) continue;
@@ -51,7 +46,9 @@ export const Route = createFileRoute("/api/public/hooks/verify-tips")({
             .select("id, display_name, pseudonym")
             .in("id", [intent.sender_membership_id, intent.recipient_membership_id]);
           const announcementMembers = (members ?? []) as AnnouncementMember[];
-          const sender = announcementMembers.find((member) => member.id === intent.sender_membership_id);
+          const sender = announcementMembers.find(
+            (member) => member.id === intent.sender_membership_id,
+          );
           const recipient = announcementMembers.find(
             (member) => member.id === intent.recipient_membership_id,
           );
@@ -73,10 +70,6 @@ export const Route = createFileRoute("/api/public/hooks/verify-tips")({
           else if (decision === "queue") queued += 1;
         }
 
-        const digests = await flushDigests();
-        await purgeExpiredCredentials();
-        const retention = await pruneRetention();
-
         return Response.json({
           ok: true,
           checked: sweep.checked,
@@ -84,12 +77,8 @@ export const Route = createFileRoute("/api/public/hooks/verify-tips")({
           expired: sweep.expired,
           announced,
           queued,
-          digestsSent: digests.sent,
-          prunedObservations: retention.prunedObservations,
-          prunedWebhookUpdates: retention.prunedWebhookUpdates,
         });
       },
     },
   },
 });
-
