@@ -448,6 +448,8 @@ export async function composeTip(input: {
       invalid_amount: "That amount isn't valid.",
       asset_unavailable: "That asset isn't available for tipping yet.",
       recipient_wallet_missing: "That member hasn't linked a wallet in this group yet.",
+      membership_group_mismatch: "That recipient isn't available in this group.",
+      membership_unavailable: "That member isn't available for tipping.",
     };
     throw new Error(messages[result.reason] ?? "Tip could not be prepared.");
   }

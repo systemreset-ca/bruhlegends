@@ -3,6 +3,7 @@ import {
   buildSolanaPayUrl,
   isValidSolanaAddress,
   recipientDelta,
+  transferAmountMatches,
   type ParsedTransaction,
 } from "../src/lib/solana.server";
 
@@ -53,6 +54,18 @@ describe("transfer verification", () => {
   it("reports a shortfall rather than rounding it away", () => {
     const tx = splTx(RECIPIENT, USDC, "0", "249999");
     expect(recipientDelta(tx, RECIPIENT, USDC)).toBeLessThan(250_000n);
+  });
+
+  it("requires the expected amount and rejects both shortfalls and overpayments", () => {
+    expect(transferAmountMatches(250_000n, 250_000n)).toBe(true);
+    expect(transferAmountMatches(249_999n, 250_000n)).toBe(false);
+    expect(transferAmountMatches(250_001n, 250_000n)).toBe(false);
+  });
+
+  it("allows only an explicitly configured symmetric tolerance", () => {
+    expect(transferAmountMatches(249_999n, 250_000n, 1n)).toBe(true);
+    expect(transferAmountMatches(250_001n, 250_000n, 1n)).toBe(true);
+    expect(transferAmountMatches(250_002n, 250_000n, 1n)).toBe(false);
   });
 });
 

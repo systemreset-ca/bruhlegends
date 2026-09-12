@@ -1,9 +1,9 @@
 # BRUH current handoff
 
 Inspection date: 2026-09-11 (America/Toronto).
-Code baseline: `main` at `b491c99839f4986c735eb702e5e28643bc67a46b`.
-Implementation branch: `codex/security-foundation`.
-Scope: first security slice for private scheduler authentication and a reproducible validation baseline. No schema, secret value or scheduler configuration is included.
+Code baseline: `main` at `1038d0db698a58997d1a42df6b371ad38e6ba77b`.
+Implementation branch: `codex/tip-isolation`.
+Scope: enforce same-group tip membership, reject expired intents before chain lookup, and require exact transfer amounts. No schema, secret value or scheduler configuration is included.
 
 ## Access and context
 
@@ -23,18 +23,19 @@ Scope: first security slice for private scheduler authentication and a reproduci
 | Database | Five migrations under `supabase/migrations/`; generated types; RLS statements present | Applied migrations and effective authorization not tested |
 | Market | `market.server.ts` includes DexScreener and Jupiter, cross-check and fallback | Historical Phase 7 missing-provider statement is stale; live API support unverified |
 | Fees | `fees.server.ts` has split/quote/record/confirm/report helpers, plus migration/tests | Search found fee record/confirmation definitions without an integrated application swap caller; do not describe complete buy/sell as shipped |
-| Tests | Seven files: announce, fees, import, initdata, market, scoring, transfers | Presence does not establish passing tests or full acceptance coverage |
+| Tests | Nine files including scheduler authentication and tip-scope adversarial cases | 57 tests pass locally; database and live-provider integration coverage remains incomplete |
 
-Scripts: `dev`, `build`, `build:dev`, `preview`, `lint`, `format`, `test`. No explicit `typecheck` script or `.github` workflow directory was found in this checkout. Establish a reproducible lockfile-based environment before running the code baseline.
+Scripts: `dev`, `build`, `build:dev`, `preview`, `lint`, `typecheck`, `format`, `test`. No `.github` workflow directory exists yet. CI still needs a reproducible Bun lockfile-based environment.
 
 ## Priority findings for follow-up
 
-1. **Scheduler authentication:** implementation branch `codex/security-foundation` replaces public Supabase-key authorization with a dedicated `BRUH_SCHEDULER_SECRET`, sent in `X-BRUH-Scheduler-Secret`. The helper fails closed when missing or shorter than 32 characters and uses constant-time comparison. Deployment and scheduler configuration remain required before merge/publish.
-2. **Webhook durability:** `src/routes/api/public/telegram/webhook.ts` awaits `handleUpdate`, catches errors and returns success. This does not demonstrate the spec's fast durable receipt plus asynchronous retry behavior. Audit deduplication and crash recovery together so retries neither lose nor duplicate effects.
-3. **Session consumption:** `exchangeLoginToken` in `src/lib/session.server.ts` reads then updates a login token in separate operations. Review concurrent redemption and implement atomic consumption with expiry enforcement. Test forged, stale and future-dated `initData`, not just normal signatures.
-4. **Credential documentation mismatch:** outgoing Telegram calls use the Lovable connector gateway with `LOVABLE_API_KEY` and `TELEGRAM_API_KEY`; `verifyInitData` separately needs `TELEGRAM_BOT_TOKEN`. The plan's gateway statement does not cover that actual requirement.
-5. **Launch defaults:** `bruh-config.server.ts` defaults to mainnet, leaves direct asset tips enabled and enables its BRUH flag based on nonempty mint text. Audit all actual enforcement paths and align network, RPC, allowlist and explicit release gates before claiming launch readiness.
-6. **Claims vs evidence:** later plans say Phases 0–6 are shipped while listing unfinished safety tests; current code has features those plans call missing. The mint guide calls fees built, but helpers are not a verified swap product. Build a requirements-to-code-to-test matrix before declaring completion.
+1. **Scheduler authentication:** merged `main` replaces public Supabase-key authorization with a dedicated `BRUH_SCHEDULER_SECRET`, sent in `X-BRUH-Scheduler-Secret`. The helper fails closed when missing or shorter than 32 characters and uses constant-time comparison. Production publication and synchronized scheduler configuration remain required.
+2. **Tip isolation and verification:** implementation branch `codex/tip-isolation` validates both memberships against the requested group before wallet resolution, rejects banned memberships, expires intents before RPC lookup, and requires the transferred amount to match exactly. Database-level relationship constraints and live devnet verification still remain.
+3. **Webhook durability:** `src/routes/api/public/telegram/webhook.ts` awaits `handleUpdate`, catches errors and returns success. This does not demonstrate the spec's fast durable receipt plus asynchronous retry behavior. Audit deduplication and crash recovery together so retries neither lose nor duplicate effects.
+4. **Session consumption:** `exchangeLoginToken` in `src/lib/session.server.ts` reads then updates a login token in separate operations. Review concurrent redemption and implement atomic consumption with expiry enforcement. Test forged, stale and future-dated `initData`, not just normal signatures.
+5. **Credential documentation mismatch:** outgoing Telegram calls use the Lovable connector gateway with `LOVABLE_API_KEY` and `TELEGRAM_API_KEY`; `verifyInitData` separately needs `TELEGRAM_BOT_TOKEN`. The plan's gateway statement does not cover that actual requirement.
+6. **Launch defaults:** `bruh-config.server.ts` defaults to mainnet, leaves direct asset tips enabled and enables its BRUH flag based on nonempty mint text. Audit all actual enforcement paths and align network, RPC, allowlist and explicit release gates before claiming launch readiness.
+7. **Claims vs evidence:** later plans say Phases 0–6 are shipped while listing unfinished safety tests; current code has features those plans call missing. The mint guide calls fees built, but helpers are not a verified swap product. Build a requirements-to-code-to-test matrix before declaring completion.
 
 These are source-based findings and audit priorities, not proof of an exploited production service.
 
@@ -44,6 +45,6 @@ Observed server references include `LOVABLE_API_KEY`, `TELEGRAM_API_KEY`, `TELEG
 
 ## Validation and next action
 
-The implementation branch passes 49 tests across eight files, strict TypeScript checking, focused lint for the new scheduler helper/test, and the production build. Repository-wide lint remains blocked by pre-existing CRLF/Prettier failures throughout untouched files. Live database checks, scheduler invocation and devnet transfers have not been run. No release readiness is claimed.
+The implementation branch passes 57 tests across nine files, strict TypeScript checking, focused lint and the production build. The build still reports existing TanStack `inputValidator` deprecations and an oversized client chunk. Repository-wide lint remains blocked by pre-existing CRLF/Prettier failures throughout untouched files. Live database checks, scheduler invocation and devnet transfers have not been run. No release readiness is claimed.
 
-Next: configure `BRUH_SCHEDULER_SECRET` in the deployment and scheduler, verify both maintenance routes reject the retired public-key credential in production, then implement durable webhook receipt and replay controls.
+Next: merge the tip-isolation slice, configure `BRUH_SCHEDULER_SECRET` in both deployment and scheduler, then implement durable webhook receipt, replay controls and database-level group constraints.

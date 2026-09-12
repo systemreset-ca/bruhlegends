@@ -490,6 +490,8 @@ async function handleTip(message: TgMessage, group: any, member: any, args: stri
           ? "BRUH tipping turns on once the token mint is live. Use SOL or USDC for now."
           : "That asset isn't supported.",
       recipient_wallet_missing: `${escapeHtml(recipient.display_name)} hasn't linked a wallet in this group yet.`,
+      membership_group_mismatch: "That recipient isn't available in this group.",
+      membership_unavailable: "That member isn't available for tipping.",
     };
     await sendMessage(message.chat.id, messages[result.reason] ?? "Tip could not be prepared.", {
       replyToMessageId: message.message_id,
