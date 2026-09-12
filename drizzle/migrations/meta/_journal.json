@@ -50,6 +50,13 @@
       "when": 1789211734376,
       "tag": "0006_harden_remaining_table_privileges",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1789216200000,
+      "tag": "0007_durable_telegram_outbox",
+      "breakpoints": true
     }
   ]
 }

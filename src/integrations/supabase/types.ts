@@ -1092,6 +1092,65 @@ export type Database = {
           },
         ]
       }
+      telegram_outbox: {
+        Row: {
+          action_key: string
+          attempt_count: number
+          created_at: string
+          id: string
+          last_error: string | null
+          lock_token: string | null
+          locked_at: string | null
+          method: string
+          next_attempt_at: string
+          payload: Json
+          response_message_id: number | null
+          sent_at: string | null
+          status: string
+          telegram_update_id: number
+        }
+        Insert: {
+          action_key: string
+          attempt_count?: number
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          lock_token?: string | null
+          locked_at?: string | null
+          method: string
+          next_attempt_at?: string
+          payload: Json
+          response_message_id?: number | null
+          sent_at?: string | null
+          status?: string
+          telegram_update_id: number
+        }
+        Update: {
+          action_key?: string
+          attempt_count?: number
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          lock_token?: string | null
+          locked_at?: string | null
+          method?: string
+          next_attempt_at?: string
+          payload?: Json
+          response_message_id?: number | null
+          sent_at?: string | null
+          status?: string
+          telegram_update_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "telegram_outbox_telegram_update_id_fkey"
+            columns: ["telegram_update_id"]
+            isOneToOne: false
+            referencedRelation: "webhook_updates"
+            referencedColumns: ["telegram_update_id"]
+          },
+        ]
+      }
       webhook_updates: {
         Row: {
           attempt_count: number
@@ -1142,6 +1201,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_telegram_outbox: {
+        Args: { p_lease_seconds?: number; p_limit?: number }
+        Returns: {
+          attempt_count: number
+          id: string
+          lock_token: string
+          method: string
+          payload: Json
+        }[]
+      }
       claim_telegram_updates: {
         Args: { p_lease_seconds?: number; p_limit?: number }
         Returns: {
@@ -1170,6 +1239,15 @@ export type Database = {
           group_id: string
           telegram_user_id: number
         }[]
+      }
+      enqueue_telegram_action: {
+        Args: {
+          p_action_key: string
+          p_method: string
+          p_payload: Json
+          p_telegram_update_id: number
+        }
+        Returns: undefined
       }
     }
     Enums: {

@@ -1,6 +1,7 @@
 import { admin } from "./db.server";
 import { handleUpdate, type TelegramUpdate } from "./bot.server";
-import { TelegramRateLimitError } from "./telegram.server";
+import { deliverTelegramAction, TelegramRateLimitError } from "./telegram.server";
+import { withTelegramDeliveryContext } from "./telegram-delivery-context.server";
 
 const MAX_ATTEMPTS = 10;
 
@@ -90,7 +91,8 @@ export async function processTelegramUpdateBatch(limit = 10): Promise<{
         throw new Error("Stored Telegram payload does not match its update id");
       }
 
-      await handleUpdate(row.payload);
+      const update = row.payload;
+      await withTelegramDeliveryContext(row.telegram_update_id, () => handleUpdate(update));
       const { error: completionError } = await db
         .from("webhook_updates")
         .update({
@@ -127,4 +129,78 @@ export async function processTelegramUpdateBatch(limit = 10): Promise<{
   }
 
   return { claimed: claimed.length, processed, failed, deadLettered };
+}
+
+type ClaimedAction = {
+  id: string;
+  method: string;
+  payload: Record<string, unknown>;
+  attempt_count: number;
+  lock_token: string;
+};
+
+export async function processTelegramOutboxBatch(limit = 20): Promise<{
+  claimed: number;
+  sent: number;
+  failed: number;
+  deadLettered: number;
+}> {
+  const db = await admin();
+  const { data, error } = await db.rpc("claim_telegram_outbox", {
+    p_limit: limit,
+    p_lease_seconds: 300,
+  });
+  if (error) throw error;
+
+  const claimed = (data ?? []) as ClaimedAction[];
+  let sent = 0;
+  let failed = 0;
+  let deadLettered = 0;
+
+  for (const action of claimed) {
+    try {
+      const result = await deliverTelegramAction<{ message_id?: number }>(
+        action.method,
+        action.payload,
+      );
+      const { data: completed, error: completionError } = await db
+        .from("telegram_outbox")
+        .update({
+          status: "sent",
+          sent_at: new Date().toISOString(),
+          response_message_id: result?.message_id ?? null,
+          locked_at: null,
+          lock_token: null,
+          last_error: null,
+        })
+        .eq("id", action.id)
+        .eq("lock_token", action.lock_token)
+        .select("id")
+        .maybeSingle();
+      if (completionError) throw completionError;
+      if (!completed) throw new Error("Telegram outbox lease was lost after delivery");
+      sent += 1;
+    } catch (deliveryError) {
+      const exhausted = action.attempt_count >= MAX_ATTEMPTS;
+      const retryAt = new Date(
+        Date.now() + retryDelayForErrorSeconds(action.attempt_count, deliveryError) * 1000,
+      ).toISOString();
+      const { error: failureError } = await db
+        .from("telegram_outbox")
+        .update({
+          status: exhausted ? "dead_letter" : "failed",
+          next_attempt_at: retryAt,
+          locked_at: null,
+          lock_token: null,
+          last_error: errorMessage(deliveryError),
+        })
+        .eq("id", action.id)
+        .eq("lock_token", action.lock_token);
+      if (failureError) throw failureError;
+      if (exhausted) deadLettered += 1;
+      else failed += 1;
+    }
+  }
+
+  return { claimed: claimed.length, sent, failed, deadLettered };
 }
