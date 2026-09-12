@@ -90,7 +90,12 @@ export function verifyInitData(initData: string, maxAgeSeconds = 86_400): number
 
   const authDate = Number(params.get("auth_date") ?? 0);
   const ageSeconds = Math.floor(Date.now() / 1000) - authDate;
-  if (!Number.isInteger(authDate) || authDate <= 0 || ageSeconds < -30 || ageSeconds > maxAgeSeconds) {
+  if (
+    !Number.isInteger(authDate) ||
+    authDate <= 0 ||
+    ageSeconds < -30 ||
+    ageSeconds > maxAgeSeconds
+  ) {
     return null;
   }
 

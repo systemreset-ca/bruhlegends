@@ -13,7 +13,12 @@ import {
   TAGLINES,
   VOICE_RULES,
 } from "@/lib/brand";
-import { LOGO_VARIANTS, MarkLaurelCoin, Wordmark, type LogoVariant } from "@/components/brand/logos";
+import {
+  LOGO_VARIANTS,
+  MarkLaurelCoin,
+  Wordmark,
+  type LogoVariant,
+} from "@/components/brand/logos";
 import {
   BANNER_PRESETS,
   bannerToPng,
@@ -35,7 +40,8 @@ export const Route = createFileRoute("/brand")({
       { property: "og:title", content: "BRUH Legends — brand kit & content studio" },
       {
         property: "og:description",
-        content: "Marks, palette, typography, voice rules and ready-to-paste copy for BRUH Legends.",
+        content:
+          "Marks, palette, typography, voice rules and ready-to-paste copy for BRUH Legends.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -94,7 +100,9 @@ function LogoCard({ variant, light }: { variant: LogoVariant; light: boolean }) 
       <div className="space-y-3 border-t border-border p-6">
         <h3 className="font-display text-lg tracking-wide">{variant.name}</h3>
         <p className="text-sm leading-relaxed text-muted-foreground">{variant.story}</p>
-        <p className="font-mono text-[11px] uppercase tracking-widest text-gold">{variant.bestFor}</p>
+        <p className="font-mono text-[11px] uppercase tracking-widest text-gold">
+          {variant.bestFor}
+        </p>
         <div className="flex flex-wrap gap-2 pt-2">
           <Button variant="outline" size="sm" onClick={handleSvg}>
             <Download className="mr-2 h-4 w-4" />
@@ -402,8 +410,9 @@ function BrandPage() {
           <h2 className="font-display text-3xl tracking-wide">Colour — Colosseum Degen</h2>
           <p className="mt-2 max-w-2xl text-muted-foreground">
             Obsidian is the floor, gold is the crown, lime is the win, purple is the arena. Click a
-            swatch to copy the hex. Tokens in <code className="font-mono text-primary">styles.css</code>{" "}
-            stay authoritative for app UI.
+            swatch to copy the hex. Tokens in{" "}
+            <code className="font-mono text-primary">styles.css</code> stay authoritative for app
+            UI.
           </p>
           <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {BRAND_PALETTE.map((c) => (

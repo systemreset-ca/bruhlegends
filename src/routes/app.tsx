@@ -16,7 +16,6 @@ import {
   saveSettingsFn,
   getCallsFn,
   importCallsFn,
-
   getProfileStatsFn,
   getTipTargetsFn,
   composeTipFn,
@@ -115,7 +114,6 @@ function MiniApp() {
   const [boardWindow, setBoardWindow] = useState<"7d" | "30d" | "all">("all");
   const [csv, setCsv] = useState("");
 
-
   const [tips, setTips] = useState<Awaited<ReturnType<typeof getTipsFn>>["tips"]>([]);
   const [mod, setMod] = useState<Awaited<ReturnType<typeof getModerationFn>> | null>(null);
   const [tab, setTab] = useState<TabId>("wallet");
@@ -145,9 +143,8 @@ function MiniApp() {
 
       // Inside Telegram the signed initData payload is authoritative, so it can
       // mint a session without the one-time link.
-      const initData = (
-        window as unknown as { Telegram?: { WebApp?: { initData?: string } } }
-      ).Telegram?.WebApp?.initData;
+      const initData = (window as unknown as { Telegram?: { WebApp?: { initData?: string } } })
+        .Telegram?.WebApp?.initData;
       if (!active && initData) {
         try {
           const result = await exchangeInitData({ data: { initData } });
@@ -159,7 +156,6 @@ function MiniApp() {
           /* falls back to the login-link flow */
         }
       }
-
 
       const requestedTab = url.searchParams.get("tab");
       if (requestedTab && ["wallet", "board", "calls", "tips", "profile"].includes(requestedTab)) {
@@ -189,7 +185,6 @@ function MiniApp() {
       .then(setBoard)
       .catch(() => setBoard(null));
   }, [session, selected, seasonId, boardWindow]);
-
 
   useEffect(() => {
     if (!session || !selected) return;
@@ -279,8 +274,6 @@ function MiniApp() {
       setStatus(error instanceof Error ? error.message : "Import failed.");
     }
   }
-
-
 
   async function handleForgetMe() {
     if (!session || !selected) return;
@@ -378,7 +371,11 @@ function MiniApp() {
   }
 
   if (loading) {
-    return <Shell><p className="text-muted-foreground">Loading…</p></Shell>;
+    return (
+      <Shell>
+        <p className="text-muted-foreground">Loading…</p>
+      </Shell>
+    );
   }
 
   if (!session) {
@@ -500,9 +497,7 @@ function MiniApp() {
               <div className="flex items-center gap-2">
                 <select
                   value={boardWindow}
-                  onChange={(event) =>
-                    setBoardWindow(event.target.value as "7d" | "30d" | "all")
-                  }
+                  onChange={(event) => setBoardWindow(event.target.value as "7d" | "30d" | "all")}
                   className="rounded-md border border-input bg-background px-2 py-1 text-xs"
                 >
                   <option value="all">All time</option>
@@ -542,7 +537,6 @@ function MiniApp() {
                     </span>
                     <span className="font-mono text-primary">{row.score}</span>
                   </li>
-
                 ))}
               </ol>
             )}
@@ -557,8 +551,7 @@ function MiniApp() {
                 {board.calls.map((call) => (
                   <li key={call.symbol + call.caller} className="flex justify-between py-2 text-sm">
                     <span>
-                      {call.symbol}{" "}
-                      <span className="text-muted-foreground">· {call.caller}</span>
+                      {call.symbol} <span className="text-muted-foreground">· {call.caller}</span>
                     </span>
                     <span className="font-mono text-primary">
                       {call.current.toFixed(2)}x / {call.peak.toFixed(2)}x
@@ -584,11 +577,13 @@ function MiniApp() {
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
             >
               <option value="">Choose a member…</option>
-              {(targets?.members ?? []).map((member: { membershipId: string; displayName: string }) => (
-                <option key={member.membershipId} value={member.membershipId}>
-                  {member.displayName}
-                </option>
-              ))}
+              {(targets?.members ?? []).map(
+                (member: { membershipId: string; displayName: string }) => (
+                  <option key={member.membershipId} value={member.membershipId}>
+                    {member.displayName}
+                  </option>
+                ),
+              )}
             </select>
             <div className="flex gap-2">
               <input
@@ -686,7 +681,6 @@ function MiniApp() {
           </section>
 
           <section className="mt-6 rounded-lg border border-border bg-card p-5">
-
             <h2 className="text-lg font-semibold">Disputes</h2>
             {mod.disputes.length === 0 ? (
               <p className="mt-2 text-sm text-muted-foreground">Nothing open.</p>
@@ -837,57 +831,57 @@ function MiniApp() {
                 const detail =
                   explorer.detail && explorer.detail.id === call.id ? explorer.detail : null;
                 return (
-                <li key={call.id} className="py-3">
-                  <button
-                    onClick={() => setOpenCallId(openCallId === call.id ? null : call.id)}
-                    className="flex w-full items-start justify-between gap-3 text-left text-sm"
-                  >
-                    <span>
-                      <span className="font-medium">{call.symbol}</span>{" "}
-                      <span className="text-muted-foreground">· {call.caller}</span>
-                      <span className="block text-xs text-muted-foreground">
-                        {call.createdAt.slice(0, 10)} · {call.status}
+                  <li key={call.id} className="py-3">
+                    <button
+                      onClick={() => setOpenCallId(openCallId === call.id ? null : call.id)}
+                      className="flex w-full items-start justify-between gap-3 text-left text-sm"
+                    >
+                      <span>
+                        <span className="font-medium">{call.symbol}</span>{" "}
+                        <span className="text-muted-foreground">· {call.caller}</span>
+                        <span className="block text-xs text-muted-foreground">
+                          {call.createdAt.slice(0, 10)} · {call.status}
+                        </span>
                       </span>
-                    </span>
-                    <span className="whitespace-nowrap font-mono text-primary">
-                      {call.current.toFixed(2)}x / {call.peak.toFixed(2)}x
-                    </span>
-                  </button>
+                      <span className="whitespace-nowrap font-mono text-primary">
+                        {call.current.toFixed(2)}x / {call.peak.toFixed(2)}x
+                      </span>
+                    </button>
 
-                  {openCallId === call.id && (
-                    <div className="mt-3 rounded-md border border-border bg-background p-3 text-xs">
-                      <p className="break-all font-mono text-muted-foreground">{call.mint}</p>
-                      {call.note && <p className="mt-2">{call.note}</p>}
-                      <p className="mt-2 text-muted-foreground">
-                        Baseline liquidity ${Math.round(call.liquidityUsd).toLocaleString()}
-                        {call.peakAt ? ` · peak ${call.peakAt.slice(0, 16).replace("T", " ")} UTC` : ""}
-                      </p>
+                    {openCallId === call.id && (
+                      <div className="mt-3 rounded-md border border-border bg-background p-3 text-xs">
+                        <p className="break-all font-mono text-muted-foreground">{call.mint}</p>
+                        {call.note && <p className="mt-2">{call.note}</p>}
+                        <p className="mt-2 text-muted-foreground">
+                          Baseline liquidity ${Math.round(call.liquidityUsd).toLocaleString()}
+                          {call.peakAt
+                            ? ` · peak ${call.peakAt.slice(0, 16).replace("T", " ")} UTC`
+                            : ""}
+                        </p>
 
-                      <p className="mt-3 font-mono uppercase tracking-widest text-muted-foreground">
-                        Milestones
-                      </p>
-                      {detail && detail.milestones.length > 0 ? (
+                        <p className="mt-3 font-mono uppercase tracking-widest text-muted-foreground">
+                          Milestones
+                        </p>
+                        {detail && detail.milestones.length > 0 ? (
+                          <ul className="mt-1 space-y-1">
+                            {detail.milestones.map((hit) => (
+                              <li key={hit.milestone} className="flex justify-between">
+                                <span className="text-primary">{hit.milestone}x</span>
+                                <span className="text-muted-foreground">
+                                  {hit.reachedAt.slice(0, 16).replace("T", " ")} UTC
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="mt-1 text-muted-foreground">None yet.</p>
+                        )}
+
+                        <p className="mt-3 font-mono uppercase tracking-widest text-muted-foreground">
+                          Recent prices
+                        </p>
                         <ul className="mt-1 space-y-1">
-                          {detail.milestones.map((hit) => (
-                            <li key={hit.milestone} className="flex justify-between">
-                              <span className="text-primary">{hit.milestone}x</span>
-                              <span className="text-muted-foreground">
-                                {hit.reachedAt.slice(0, 16).replace("T", " ")} UTC
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p className="mt-1 text-muted-foreground">None yet.</p>
-                      )}
-
-                      <p className="mt-3 font-mono uppercase tracking-widest text-muted-foreground">
-                        Recent prices
-                      </p>
-                      <ul className="mt-1 space-y-1">
-                        {(detail?.observations ?? [])
-                          .slice(0, 8)
-                          .map((point) => (
+                          {(detail?.observations ?? []).slice(0, 8).map((point) => (
                             <li key={point.observedAt} className="flex justify-between">
                               <span className="text-muted-foreground">
                                 {point.observedAt.slice(5, 16).replace("T", " ")}
@@ -897,10 +891,10 @@ function MiniApp() {
                               </span>
                             </li>
                           ))}
-                      </ul>
-                    </div>
-                  )}
-                </li>
+                        </ul>
+                      </div>
+                    )}
+                  </li>
                 );
               })}
             </ul>
@@ -928,9 +922,8 @@ function MiniApp() {
                   <Stat label="Tips received" value={String(profile.row.tipsReceived)} />
                 </dl>
                 <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
-                  Score blends peak and median multiples with your 2x hit rate and peer
-                  recognition, then damps the total by sample size so one lucky call cannot top a
-                  group.
+                  Score blends peak and median multiples with your 2x hit rate and peer recognition,
+                  then damps the total by sample size so one lucky call cannot top a group.
                 </p>
               </>
             ) : (

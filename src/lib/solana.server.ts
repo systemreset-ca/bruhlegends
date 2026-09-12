@@ -61,7 +61,9 @@ export async function getSolBalance(address: string): Promise<number> {
 
 export async function getTokenBalance(owner: string, mint: string): Promise<number> {
   const result = await rpc<{
-    value: { account: { data: { parsed: { info: { tokenAmount: { uiAmount: number | null } } } } } }[];
+    value: {
+      account: { data: { parsed: { info: { tokenAmount: { uiAmount: number | null } } } } };
+    }[];
   }>("getTokenAccountsByOwner", [owner, { mint }, { encoding: "jsonParsed" }]);
   return result.value.reduce(
     (total, entry) => total + (entry.account.data.parsed.info.tokenAmount.uiAmount ?? 0),
@@ -138,10 +140,10 @@ export async function verifyTransferByReference(input: {
   /** Allowed shortfall in base units (0 = exact). */
   toleranceBaseUnits?: bigint;
 }): Promise<TransferVerification> {
-  const signatures = await rpc<{ signature: string; err: unknown }[]>(
-    "getSignaturesForAddress",
-    [input.reference, { limit: 10 }],
-  );
+  const signatures = await rpc<{ signature: string; err: unknown }[]>("getSignaturesForAddress", [
+    input.reference,
+    { limit: 10 },
+  ]);
   if (signatures.length === 0) return { verified: false, reason: "no_transaction_found" };
 
   const tolerance = input.toleranceBaseUnits ?? 0n;
@@ -173,4 +175,3 @@ export async function verifyTransferByReference(input: {
 
   return mismatch ?? { verified: false, reason: "no_confirmed_matching_transaction" };
 }
-

@@ -1,16 +1,8 @@
 import { admin, logAudit } from "./db.server";
 import { getActiveWallet } from "./wallets.server";
-import {
-  buildSolanaPayUrl,
-  createReferenceKey,
-  verifyTransferByReference,
-} from "./solana.server";
+import { buildSolanaPayUrl, createReferenceKey, verifyTransferByReference } from "./solana.server";
 import { fetchUsdPrice } from "./market.server";
-import {
-  getBruhConfig,
-  USDC_MAINNET_MINT,
-  type BruhConfig,
-} from "./bruh-config.server";
+import { getBruhConfig, USDC_MAINNET_MINT, type BruhConfig } from "./bruh-config.server";
 
 export type TipAsset = { symbol: string; mint: string | null; decimals: number };
 
@@ -27,7 +19,12 @@ export function tipMembershipScopeError(
   const sender = memberships.find((membership) => membership.id === input.senderMembershipId);
   const recipient = memberships.find((membership) => membership.id === input.recipientMembershipId);
 
-  if (!sender || !recipient || sender.group_id !== input.groupId || recipient.group_id !== input.groupId) {
+  if (
+    !sender ||
+    !recipient ||
+    sender.group_id !== input.groupId ||
+    recipient.group_id !== input.groupId
+  ) {
     return "membership_group_mismatch";
   }
   if (sender.is_banned || recipient.is_banned) return "membership_unavailable";
@@ -63,9 +60,7 @@ export function isAllowedRegisteredTipAsset(
   }
   if (asset.symbol === "BRUH") {
     return (
-      config.bruhTippingEnabled &&
-      config.bruhMint.length > 0 &&
-      asset.mint === config.bruhMint
+      config.bruhTippingEnabled && config.bruhMint.length > 0 && asset.mint === config.bruhMint
     );
   }
   return false;
@@ -113,7 +108,6 @@ export async function resolveAsset(symbol: string): Promise<TipAsset | null> {
 export function toBaseUnits(amount: number, decimals: number): bigint {
   return BigInt(Math.round(amount * 10 ** decimals));
 }
-
 
 export type TipIntent = {
   id: string;
@@ -364,8 +358,7 @@ export async function listPendingTips(membershipId: string): Promise<PendingTip[
 
   return rows.map((row) => {
     const direction = row.sender_membership_id === membershipId ? "sent" : "received";
-    const otherId =
-      direction === "sent" ? row.recipient_membership_id : row.sender_membership_id;
+    const otherId = direction === "sent" ? row.recipient_membership_id : row.sender_membership_id;
     return {
       id: row.id as string,
       direction: direction as "sent" | "received",

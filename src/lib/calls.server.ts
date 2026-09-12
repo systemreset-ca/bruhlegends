@@ -8,7 +8,6 @@ export function milestonesFor(multiple: number): number[] {
   return MILESTONES.filter((milestone) => multiple >= milestone);
 }
 
-
 const BASE58_TOKEN = /\b[1-9A-HJ-NP-Za-km-z]{32,44}\b/g;
 
 export function extractCandidateMints(text: string): string[] {
@@ -16,7 +15,11 @@ export function extractCandidateMints(text: string): string[] {
 }
 
 export type CallCreation =
-  | { ok: true; callId: string; snapshot: NonNullable<Awaited<ReturnType<typeof fetchTokenSnapshot>>> }
+  | {
+      ok: true;
+      callId: string;
+      snapshot: NonNullable<Awaited<ReturnType<typeof fetchTokenSnapshot>>>;
+    }
   | { ok: false; reason: string; detail?: string };
 
 /**
@@ -58,7 +61,6 @@ export async function createCall(input: {
   if (snapshot.liquidityUsd < input.minLiquidityUsd) {
     return { ok: false, reason: "insufficient_liquidity" };
   }
-
 
   const { data, error } = await db
     .from("calls")
@@ -194,7 +196,6 @@ export async function refreshCalls(limit = 40): Promise<{
       continue;
     }
 
-
     const baseline = Number(call.baseline_price_usd ?? 0);
     const multiple = baseline > 0 ? snapshot.priceUsd / baseline : 0;
     const isNewAth = snapshot.priceUsd > Number(call.ath_price_usd ?? 0);
@@ -221,7 +222,6 @@ export async function refreshCalls(limit = 40): Promise<{
       });
       if (!error) hits.push({ callId: call.id, milestone, multiple });
     }
-
   }
 
   return { refreshed, quarantined, milestones: hits };

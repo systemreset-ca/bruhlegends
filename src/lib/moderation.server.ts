@@ -78,7 +78,9 @@ export async function listOpenDisputes(groupId: string): Promise<OpenDispute[]> 
   const db = await admin();
   const { data } = await db
     .from("disputes")
-    .select("id, reason, status, created_at, call_id, calls(symbol, mint), group_members!disputes_raised_by_membership_id_fkey(display_name)")
+    .select(
+      "id, reason, status, created_at, call_id, calls(symbol, mint), group_members!disputes_raised_by_membership_id_fkey(display_name)",
+    )
     .eq("group_id", groupId)
     .eq("status", "open")
     .order("created_at", { ascending: true })

@@ -76,10 +76,28 @@ export type BannerPreset = {
 };
 
 export const BANNER_PRESETS: BannerPreset[] = [
-  { id: "og", label: "Social / OG card", width: 1200, height: 630, note: "Telegram, X and link previews" },
+  {
+    id: "og",
+    label: "Social / OG card",
+    width: 1200,
+    height: 630,
+    note: "Telegram, X and link previews",
+  },
   { id: "x", label: "X / Twitter header", width: 1500, height: 500, note: "Profile cover" },
-  { id: "square", label: "Square post", width: 1080, height: 1080, note: "Announcements, TG stickers" },
-  { id: "tg", label: "Telegram group banner", width: 1280, height: 320, note: "Group / channel header" },
+  {
+    id: "square",
+    label: "Square post",
+    width: 1080,
+    height: 1080,
+    note: "Announcements, TG stickers",
+  },
+  {
+    id: "tg",
+    label: "Telegram group banner",
+    width: 1280,
+    height: 320,
+    note: "Group / channel header",
+  },
 ];
 
 export type BannerStyle = "arena" | "obsidian" | "bone";
@@ -129,7 +147,7 @@ export async function bannerToPng(
   const markSize = stacked ? short * 0.32 : short * 0.5;
   const titleSize = stacked ? short * 0.13 : short * 0.22;
   const tagSize = titleSize * 0.26;
-  const display = '400 ' + titleSize + 'px Anton, "Arial Narrow", sans-serif';
+  const display = "400 " + titleSize + 'px Anton, "Arial Narrow", sans-serif';
 
   ctx.textBaseline = "middle";
   ctx.font = display;
@@ -148,7 +166,7 @@ export async function bannerToPng(
     ctx.fillText(partB, x + wA, y);
   };
 
-  const tagFont = '500 ' + tagSize + 'px "Space Grotesk", system-ui, sans-serif';
+  const tagFont = "500 " + tagSize + 'px "Space Grotesk", system-ui, sans-serif';
 
   if (stacked) {
     const cx = w / 2;

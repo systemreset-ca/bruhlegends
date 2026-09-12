@@ -78,6 +78,5 @@ export function getBruhConfig(): BruhConfig {
   };
 }
 
-
 export const USDC_MAINNET_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 export const MILESTONES = [2, 5, 10, 25, 50, 100] as const;

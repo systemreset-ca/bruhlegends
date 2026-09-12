@@ -19,7 +19,14 @@ const ink = (inverse?: boolean) => (inverse ? C.bone : C.obsidian);
 export function MarkLaurelCoin({ size = 64, inverse, className }: LogoProps) {
   const leaves = [-46, -24, -2, 20, 42];
   return (
-    <svg viewBox="0 0 64 64" width={size} height={size} className={className} role="img" aria-label="Laurel Coin mark">
+    <svg
+      viewBox="0 0 64 64"
+      width={size}
+      height={size}
+      className={className}
+      role="img"
+      aria-label="Laurel Coin mark"
+    >
       <circle cx="32" cy="32" r="30" fill={inverse ? C.obsidian : C.bone} />
       <circle cx="32" cy="32" r="30" fill="none" stroke={C.gold} strokeWidth="3" />
       {[-1, 1].map((side) =>
@@ -36,8 +43,22 @@ export function MarkLaurelCoin({ size = 64, inverse, className }: LogoProps) {
           />
         )),
       )}
-      <path d="M18 42 L28 32 L35 38 L47 22" fill="none" stroke={C.lime} strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M39 22 L47 22 L47 30" fill="none" stroke={C.lime} strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M18 42 L28 32 L35 38 L47 22"
+        fill="none"
+        stroke={C.lime}
+        strokeWidth="4.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M39 22 L47 22 L47 30"
+        fill="none"
+        stroke={C.lime}
+        strokeWidth="4.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -47,12 +68,25 @@ export function MarkLaurelCoin({ size = 64, inverse, className }: LogoProps) {
 /* ------------------------------------------------------------------ */
 export function MarkUpOnly({ size = 64, inverse, className }: LogoProps) {
   return (
-    <svg viewBox="0 0 64 64" width={size} height={size} className={className} role="img" aria-label="Up Only mark">
+    <svg
+      viewBox="0 0 64 64"
+      width={size}
+      height={size}
+      className={className}
+      role="img"
+      aria-label="Up Only mark"
+    >
       <rect x="8" y="42" width="10" height="14" rx="2" fill={C.imperial} />
       <rect x="22" y="32" width="10" height="24" rx="2" fill={C.imperial} opacity="0.8" />
       <rect x="36" y="22" width="10" height="34" rx="2" fill={C.gold} />
       <path d="M50 10 L60 26 L40 26 Z" fill={C.lime} />
-      <path d="M6 60 L58 60" stroke={ink(inverse)} strokeWidth="3" strokeLinecap="round" opacity="0.7" />
+      <path
+        d="M6 60 L58 60"
+        stroke={ink(inverse)}
+        strokeWidth="3"
+        strokeLinecap="round"
+        opacity="0.7"
+      />
     </svg>
   );
 }
@@ -69,14 +103,27 @@ export function MarkWingedSigil({ size = 64, inverse, className }: LogoProps) {
     </g>
   );
   return (
-    <svg viewBox="0 0 64 64" width={size} height={size} className={className} role="img" aria-label="Winged Sigil mark">
+    <svg
+      viewBox="0 0 64 64"
+      width={size}
+      height={size}
+      className={className}
+      role="img"
+      aria-label="Winged Sigil mark"
+    >
       {wing(false)}
       {wing(true)}
       <rect x="24" y="16" width="16" height="34" rx="4" fill={C.lime} />
       <path d="M28 24 h6 a4 4 0 0 1 0 8 h-6 Z" fill={C.obsidian} />
       <path d="M28 34 h7 a4 4 0 0 1 0 8 h-7 Z" fill={C.obsidian} />
       <path d="M22 54 L42 54" stroke={C.gold} strokeWidth="4" strokeLinecap="round" />
-      <path d="M18 60 L46 60" stroke={ink(inverse)} strokeWidth="3" strokeLinecap="round" opacity="0.7" />
+      <path
+        d="M18 60 L46 60"
+        stroke={ink(inverse)}
+        strokeWidth="3"
+        strokeLinecap="round"
+        opacity="0.7"
+      />
     </svg>
   );
 }
@@ -86,13 +133,27 @@ export function MarkWingedSigil({ size = 64, inverse, className }: LogoProps) {
 /* ------------------------------------------------------------------ */
 export function MarkArenaShield({ size = 64, inverse, className }: LogoProps) {
   return (
-    <svg viewBox="0 0 64 64" width={size} height={size} className={className} role="img" aria-label="Arena Shield mark">
+    <svg
+      viewBox="0 0 64 64"
+      width={size}
+      height={size}
+      className={className}
+      role="img"
+      aria-label="Arena Shield mark"
+    >
       <path d="M32 4 L56 12 V32 C56 46 45 56 32 60 C19 56 8 46 8 32 V12 Z" fill={C.imperial} />
       <path
         d="M32 9 L51 15.5 V32 C51 43.5 42 51.8 32 55.2 C22 51.8 13 43.5 13 32 V15.5 Z"
         fill={inverse ? C.obsidian : C.bone}
       />
-      <path d="M19 40 L27 31 L33 36 L45 21" fill="none" stroke={C.lime} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M19 40 L27 31 L33 36 L45 21"
+        fill="none"
+        stroke={C.lime}
+        strokeWidth="4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
       <circle cx="45" cy="21" r="4" fill={C.gold} />
     </svg>
   );
@@ -111,7 +172,8 @@ export const LOGO_VARIANTS: LogoVariant[] = [
   {
     id: "laurel-coin",
     name: "01 Laurel Coin",
-    story: "A gold laurel wreath struck into a coin with an acid-lime breakout inside. Reputation, minted.",
+    story:
+      "A gold laurel wreath struck into a coin with an acid-lime breakout inside. Reputation, minted.",
     bestFor: "Primary mark · avatar · favicon",
     stacked: false,
     Mark: MarkLaurelCoin,
@@ -127,7 +189,8 @@ export const LOGO_VARIANTS: LogoVariant[] = [
   {
     id: "winged-sigil",
     name: "03 Winged Sigil",
-    story: "Imperial wings flanking a lime plinth carrying the BRUH B. Straight from the banner artwork.",
+    story:
+      "Imperial wings flanking a lime plinth carrying the BRUH B. Straight from the banner artwork.",
     bestFor: "Merch, hero lockups, sticker packs",
     stacked: true,
     Mark: MarkWingedSigil,
