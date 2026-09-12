@@ -220,10 +220,10 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "calls_caller_membership_id_fkey"
-            columns: ["caller_membership_id"]
+            columns: ["caller_membership_id", "group_id"]
             isOneToOne: false
             referencedRelation: "group_members"
-            referencedColumns: ["id"]
+            referencedColumns: ["id", "group_id"]
           },
           {
             foreignKeyName: "calls_group_id_fkey"
@@ -234,10 +234,10 @@ export type Database = {
           },
           {
             foreignKeyName: "calls_season_id_fkey"
-            columns: ["season_id"]
+            columns: ["season_id", "group_id"]
             isOneToOne: false
             referencedRelation: "seasons"
-            referencedColumns: ["id"]
+            referencedColumns: ["id", "group_id"]
           },
         ]
       }
@@ -281,10 +281,10 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "disputes_call_id_fkey"
-            columns: ["call_id"]
+            columns: ["call_id", "group_id"]
             isOneToOne: false
             referencedRelation: "calls"
-            referencedColumns: ["id"]
+            referencedColumns: ["id", "group_id"]
           },
           {
             foreignKeyName: "disputes_group_id_fkey"
@@ -295,17 +295,17 @@ export type Database = {
           },
           {
             foreignKeyName: "disputes_raised_by_membership_id_fkey"
-            columns: ["raised_by_membership_id"]
+            columns: ["raised_by_membership_id", "group_id"]
             isOneToOne: false
             referencedRelation: "group_members"
-            referencedColumns: ["id"]
+            referencedColumns: ["id", "group_id"]
           },
           {
             foreignKeyName: "disputes_resolved_by_membership_id_fkey"
-            columns: ["resolved_by_membership_id"]
+            columns: ["resolved_by_membership_id", "group_id"]
             isOneToOne: false
             referencedRelation: "group_members"
-            referencedColumns: ["id"]
+            referencedColumns: ["id", "group_id"]
           },
         ]
       }
@@ -884,10 +884,10 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "tip_intents_call_id_fkey"
-            columns: ["call_id"]
+            columns: ["call_id", "group_id"]
             isOneToOne: false
             referencedRelation: "calls"
-            referencedColumns: ["id"]
+            referencedColumns: ["id", "group_id"]
           },
           {
             foreignKeyName: "tip_intents_group_id_fkey"
@@ -905,17 +905,17 @@ export type Database = {
           },
           {
             foreignKeyName: "tip_intents_recipient_membership_id_fkey"
-            columns: ["recipient_membership_id"]
+            columns: ["recipient_membership_id", "group_id"]
             isOneToOne: false
             referencedRelation: "group_members"
-            referencedColumns: ["id"]
+            referencedColumns: ["id", "group_id"]
           },
           {
             foreignKeyName: "tip_intents_sender_membership_id_fkey"
-            columns: ["sender_membership_id"]
+            columns: ["sender_membership_id", "group_id"]
             isOneToOne: false
             referencedRelation: "group_members"
-            referencedColumns: ["id"]
+            referencedColumns: ["id", "group_id"]
           },
         ]
       }
@@ -1096,27 +1096,42 @@ export type Database = {
         Row: {
           attempt_count: number
           last_error: string | null
+          lock_token: string | null
+          locked_at: string | null
+          next_attempt_at: string
+          payload: Json | null
           processed_at: string | null
           received_at: string
           status: string
+          telegram_chat_id: number | null
           telegram_update_id: number
           update_type: string | null
         }
         Insert: {
           attempt_count?: number
           last_error?: string | null
+          lock_token?: string | null
+          locked_at?: string | null
+          next_attempt_at?: string
+          payload?: Json | null
           processed_at?: string | null
           received_at?: string
           status?: string
+          telegram_chat_id?: number | null
           telegram_update_id: number
           update_type?: string | null
         }
         Update: {
           attempt_count?: number
           last_error?: string | null
+          lock_token?: string | null
+          locked_at?: string | null
+          next_attempt_at?: string
+          payload?: Json | null
           processed_at?: string | null
           received_at?: string
           status?: string
+          telegram_chat_id?: number | null
           telegram_update_id?: number
           update_type?: string | null
         }
@@ -1127,7 +1142,35 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      claim_telegram_updates: {
+        Args: { p_lease_seconds?: number; p_limit?: number }
+        Returns: {
+          attempt_count: number
+          lock_token: string
+          payload: Json
+          telegram_update_id: number
+        }[]
+      }
+      complete_wallet_challenge: {
+        Args: {
+          p_challenge_id: string
+          p_membership_id: string
+          p_replacement_delay_minutes: number
+          p_signature_hash: string
+          p_verification_method: string
+        }
+        Returns: {
+          replaced_existing: boolean
+          wallet_address: string
+        }[]
+      }
+      exchange_miniapp_login_token: {
+        Args: { p_session_hash: string; p_token_hash: string }
+        Returns: {
+          group_id: string
+          telegram_user_id: number
+        }[]
+      }
     }
     Enums: {
       call_status:

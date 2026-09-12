@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1789191161272,
+      "tag": "0000_atomic_auth_credentials",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789191187746,
+      "tag": "0001_durable_telegram_updates",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789191212541,
+      "tag": "0002_enforce_group_relationships",
+      "breakpoints": true
+    }
+  ]
+}
