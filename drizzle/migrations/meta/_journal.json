@@ -43,6 +43,13 @@
       "when": 1789212600000,
       "tag": "0005_harden_remaining_table_privileges",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1789211734376,
+      "tag": "0006_harden_remaining_table_privileges",
+      "breakpoints": true
     }
   ]
 }
