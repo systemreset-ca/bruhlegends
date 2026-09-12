@@ -42,51 +42,61 @@ ALTER TABLE public.wallets ENABLE ROW LEVEL SECURITY;
 -- Restrictive false policies are a second boundary for the client roles. Even
 -- if a table grant or permissive policy is added later, access remains denied
 -- until this explicit server-only posture is deliberately changed.
+DROP POLICY IF EXISTS "group_members deny client access" ON public.group_members;
 CREATE POLICY "group_members deny client access"
   ON public.group_members AS RESTRICTIVE
   FOR ALL TO anon, authenticated
   USING (false) WITH CHECK (false);
 
+DROP POLICY IF EXISTS "miniapp_sessions deny client access" ON public.miniapp_sessions;
 CREATE POLICY "miniapp_sessions deny client access"
   ON public.miniapp_sessions AS RESTRICTIVE
   FOR ALL TO anon, authenticated
   USING (false) WITH CHECK (false);
 
+DROP POLICY IF EXISTS "miniapp_login_tokens deny client access" ON public.miniapp_login_tokens;
 CREATE POLICY "miniapp_login_tokens deny client access"
   ON public.miniapp_login_tokens AS RESTRICTIVE
   FOR ALL TO anon, authenticated
   USING (false) WITH CHECK (false);
 
+DROP POLICY IF EXISTS "swap_intents deny client access" ON public.swap_intents;
 CREATE POLICY "swap_intents deny client access"
   ON public.swap_intents AS RESTRICTIVE
   FOR ALL TO anon, authenticated
   USING (false) WITH CHECK (false);
 
+DROP POLICY IF EXISTS "verified_swaps deny client access" ON public.verified_swaps;
 CREATE POLICY "verified_swaps deny client access"
   ON public.verified_swaps AS RESTRICTIVE
   FOR ALL TO anon, authenticated
   USING (false) WITH CHECK (false);
 
+DROP POLICY IF EXISTS "telegram_users deny client access" ON public.telegram_users;
 CREATE POLICY "telegram_users deny client access"
   ON public.telegram_users AS RESTRICTIVE
   FOR ALL TO anon, authenticated
   USING (false) WITH CHECK (false);
 
+DROP POLICY IF EXISTS "tip_intents deny client access" ON public.tip_intents;
 CREATE POLICY "tip_intents deny client access"
   ON public.tip_intents AS RESTRICTIVE
   FOR ALL TO anon, authenticated
   USING (false) WITH CHECK (false);
 
+DROP POLICY IF EXISTS "verified_transfers deny client access" ON public.verified_transfers;
 CREATE POLICY "verified_transfers deny client access"
   ON public.verified_transfers AS RESTRICTIVE
   FOR ALL TO anon, authenticated
   USING (false) WITH CHECK (false);
 
+DROP POLICY IF EXISTS "wallet_challenges deny client access" ON public.wallet_challenges;
 CREATE POLICY "wallet_challenges deny client access"
   ON public.wallet_challenges AS RESTRICTIVE
   FOR ALL TO anon, authenticated
   USING (false) WITH CHECK (false);
 
+DROP POLICY IF EXISTS "wallets deny client access" ON public.wallets;
 CREATE POLICY "wallets deny client access"
   ON public.wallets AS RESTRICTIVE
   FOR ALL TO anon, authenticated
