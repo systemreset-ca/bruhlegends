@@ -1127,7 +1127,29 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      complete_wallet_challenge: {
+        Args: {
+          p_challenge_id: string
+          p_membership_id: string
+          p_replacement_delay_minutes: number
+          p_signature_hash: string
+          p_verification_method: string
+        }
+        Returns: {
+          replaced_existing: boolean
+          wallet_address: string
+        }[]
+      }
+      exchange_miniapp_login_token: {
+        Args: {
+          p_session_hash: string
+          p_token_hash: string
+        }
+        Returns: {
+          group_id: string | null
+          telegram_user_id: number
+        }[]
+      }
     }
     Enums: {
       call_status:

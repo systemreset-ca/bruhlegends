@@ -46,73 +46,33 @@ export async function completeWalletChallenge(input: {
   method: string;
 }): Promise<{ ok: true; address: string } | { ok: false; reason: string }> {
   const db = await admin();
-  const { data: challenge } = await db
-    .from("wallet_challenges")
-    .select("*")
-    .eq("id", input.challengeId)
-    .eq("membership_id", input.membershipId)
-    .maybeSingle();
-
-  if (!challenge) return { ok: false, reason: "challenge_not_found" };
-  if (challenge.consumed_at) return { ok: false, reason: "challenge_used" };
-  if (new Date(challenge.expires_at) < new Date()) return { ok: false, reason: "challenge_expired" };
-
   const { walletReplacementDelayMinutes } = getBruhConfig();
-  const now = new Date();
-
-  const { data: current } = await db
-    .from("wallets")
-    .select("id, address")
-    .eq("membership_id", input.membershipId)
-    .eq("status", "verified")
-    .maybeSingle();
-
-  // Replacing an active wallet is delayed: an attacker who briefly controls an
-  // account cannot redirect tips instantly.
-  const activeFrom = current
-    ? new Date(now.getTime() + walletReplacementDelayMinutes * 60_000)
-    : now;
-
-  if (current) {
-    await db.from("wallets").update({ status: "pending_replacement" }).eq("id", current.id);
-  }
-
-  await db.from("wallets").insert({
-    membership_id: input.membershipId,
-    address: challenge.address,
-    status: "verified",
-    verification_method: input.method,
-    signature_hash: input.signatureHash,
-    nonce: challenge.nonce,
-    verified_at: now.toISOString(),
-    active_from: activeFrom.toISOString(),
+  const { data, error } = await db.rpc("complete_wallet_challenge", {
+    p_challenge_id: input.challengeId,
+    p_membership_id: input.membershipId,
+    p_signature_hash: input.signatureHash,
+    p_verification_method: input.method,
+    p_replacement_delay_minutes: walletReplacementDelayMinutes,
   });
+  if (error) throw error;
 
-  await db
-    .from("wallet_challenges")
-    .update({ consumed_at: now.toISOString() })
-    .eq("id", challenge.id);
-
-  await logAudit({
-    actorType: "member",
-    actorId: input.membershipId,
-    eventType: "wallet_verified",
-    entityType: "wallet",
-    entityId: challenge.address,
-  });
-
-  return { ok: true, address: challenge.address };
+  const result = Array.isArray(data) ? data[0] : data;
+  return result?.wallet_address
+    ? { ok: true, address: result.wallet_address }
+    : { ok: false, reason: "challenge_invalid" };
 }
 
 /** Returns the payout address only when it is verified and past its delay. */
 export async function getActiveWallet(membershipId: string): Promise<string | null> {
   const db = await admin();
+  const now = new Date().toISOString();
   const { data } = await db
     .from("wallets")
     .select("address, active_from")
     .eq("membership_id", membershipId)
-    .eq("status", "verified")
-    .lte("active_from", new Date().toISOString())
+    .in("status", ["verified", "pending_replacement"])
+    .lte("active_from", now)
+    .or(`replaced_at.is.null,replaced_at.gt.${now}`)
     .order("verified_at", { ascending: false })
     .limit(1)
     .maybeSingle();

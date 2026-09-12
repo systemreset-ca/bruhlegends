@@ -55,4 +55,12 @@ describe("telegram initData verification", () => {
     };
     expect(verifyInitData(signInitData(stale))).toBeNull();
   });
+
+  it("rejects an authentic payload dated too far in the future", () => {
+    const future = {
+      auth_date: String(Math.floor(Date.now() / 1000) + 60),
+      user: JSON.stringify({ id: 4242 }),
+    };
+    expect(verifyInitData(signInitData(future))).toBeNull();
+  });
 });
