@@ -115,6 +115,16 @@ export function recipientDelta(
   return BigInt(tx.meta.postBalances[index] ?? 0) - BigInt(tx.meta.preBalances[index] ?? 0);
 }
 
+export function transferAmountMatches(
+  actual: bigint,
+  expected: bigint,
+  tolerance: bigint = 0n,
+): boolean {
+  if (actual < 0n || expected < 0n || tolerance < 0n) return false;
+  const difference = actual >= expected ? actual - expected : expected - actual;
+  return difference <= tolerance;
+}
+
 /**
  * Server-side verification: a tip counts only when a confirmed transaction
  * carrying the intent's reference key moved the expected mint and amount to the
@@ -135,6 +145,7 @@ export async function verifyTransferByReference(input: {
   if (signatures.length === 0) return { verified: false, reason: "no_transaction_found" };
 
   const tolerance = input.toleranceBaseUnits ?? 0n;
+  let mismatch: TransferVerification | null = null;
 
   for (const entry of signatures) {
     if (entry.err) continue;
@@ -146,15 +157,20 @@ export async function verifyTransferByReference(input: {
 
     const delta = recipientDelta(tx, input.recipient, input.mint);
     if (delta === null) {
-      return { verified: false, reason: "recipient_not_credited", signature: entry.signature };
+      mismatch ??= {
+        verified: false,
+        reason: "recipient_not_credited",
+        signature: entry.signature,
+      };
+      continue;
     }
 
-    if (delta + tolerance >= input.amountBaseUnits) {
+    if (transferAmountMatches(delta, input.amountBaseUnits, tolerance)) {
       return { verified: true, signature: entry.signature, slot: tx.slot, raw: tx.meta };
     }
-    return { verified: false, reason: "amount_mismatch", signature: entry.signature };
+    mismatch = { verified: false, reason: "amount_mismatch", signature: entry.signature };
   }
 
-  return { verified: false, reason: "no_confirmed_matching_transaction" };
+  return mismatch ?? { verified: false, reason: "no_confirmed_matching_transaction" };
 }
 

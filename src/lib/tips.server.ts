@@ -10,6 +10,31 @@ import { getBruhConfig, USDC_MAINNET_MINT } from "./bruh-config.server";
 
 export type TipAsset = { symbol: string; mint: string | null; decimals: number };
 
+export type TipMembership = {
+  id: string;
+  group_id: string;
+  is_banned: boolean;
+};
+
+export function tipMembershipScopeError(
+  input: { groupId: string; senderMembershipId: string; recipientMembershipId: string },
+  memberships: TipMembership[],
+): "membership_group_mismatch" | "membership_unavailable" | null {
+  const sender = memberships.find((membership) => membership.id === input.senderMembershipId);
+  const recipient = memberships.find((membership) => membership.id === input.recipientMembershipId);
+
+  if (!sender || !recipient || sender.group_id !== input.groupId || recipient.group_id !== input.groupId) {
+    return "membership_group_mismatch";
+  }
+  if (sender.is_banned || recipient.is_banned) return "membership_unavailable";
+  return null;
+}
+
+export function isTipIntentExpired(expiresAt: string, nowMs: number = Date.now()): boolean {
+  const expiresAtMs = Date.parse(expiresAt);
+  return !Number.isFinite(expiresAtMs) || expiresAtMs <= nowMs;
+}
+
 const FALLBACK_ASSETS: Record<string, TipAsset> = {
   SOL: { symbol: "SOL", mint: null, decimals: 9 },
   USDC: { symbol: "USDC", mint: USDC_MAINNET_MINT, decimals: 6 },
@@ -81,13 +106,22 @@ export async function createTipIntent(input: {
     return { ok: false, reason: "self_tip" };
   }
 
+  const db = await admin();
+  const { data: membershipRows, error: membershipError } = await db
+    .from("group_members")
+    .select("id, group_id, is_banned")
+    .in("id", [input.senderMembershipId, input.recipientMembershipId]);
+  if (membershipError) throw membershipError;
+
+  const scopeError = tipMembershipScopeError(input, (membershipRows ?? []) as TipMembership[]);
+  if (scopeError) return { ok: false, reason: scopeError };
+
   const asset = await resolveAsset(input.assetSymbol);
   if (!asset) return { ok: false, reason: "asset_unavailable" };
 
   const recipientAddress = await getActiveWallet(input.recipientMembershipId);
   if (!recipientAddress) return { ok: false, reason: "recipient_wallet_missing" };
 
-  const db = await admin();
   const { tipIntentTtlMinutes } = getBruhConfig();
   const reference = createReferenceKey();
   const expiresAt = new Date(Date.now() + tipIntentTtlMinutes * 60_000).toISOString();
@@ -160,6 +194,22 @@ export async function confirmTip(intentId: string): Promise<TipConfirmation> {
     return { status: "confirmed", signature: transfer?.signature ?? "" };
   }
 
+  if (intent.status === "expired") return { status: "expired", reason: "intent_expired" };
+
+  if (isTipIntentExpired(intent.expires_at)) {
+    await db.from("tip_intents").update({ status: "expired" }).eq("id", intentId);
+    await logAudit({
+      groupId: intent.group_id,
+      actorType: "system",
+      eventType: "tip_expired",
+      entityType: "tip_intent",
+      entityId: intentId,
+      before: { status: intent.status },
+      after: { status: "expired" },
+    });
+    return { status: "expired", reason: "intent_expired" };
+  }
+
   const verification = await verifyTransferByReference({
     reference: intent.reference_key,
     recipient: intent.recipient_address,
@@ -168,10 +218,6 @@ export async function confirmTip(intentId: string): Promise<TipConfirmation> {
   });
 
   if (!verification.verified) {
-    if (new Date(intent.expires_at) < new Date()) {
-      await db.from("tip_intents").update({ status: "expired" }).eq("id", intentId);
-      return { status: "expired", reason: verification.reason };
-    }
     await db.from("tip_intents").update({ status: "awaiting_payment" }).eq("id", intentId);
     return { status: "pending", reason: verification.reason };
   }
