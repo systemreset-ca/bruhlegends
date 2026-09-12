@@ -2,10 +2,10 @@
 
 Audit date: 2026-09-12 (America/Toronto).
 Cloud project: Lovable project `e287f314-27c2-40bf-94f4-4685a95781fe` and its connected Supabase database.
-Repository baseline: `main` at `378885cf5ff15a603bf613acdedb662fb8be452e`.
-Scope: read-only verification of the seven Lovable basic security warnings. No database object, grant, policy, role, row, secret, setting, job, application file or deployment was changed during the Cloud audit.
+Repository baseline: `main` at `123510e9239b7ff2e872a75c1f04f504e6ca9825`.
+Scope: effective-access verification of all 21 tables flagged by the Lovable basic security scanner, followed by scoped privilege hardening. No row, secret, setting, scheduler job or deployment was changed.
 
-## Result
+## Initial result
 
 No current browser or REST data exposure was confirmed. All ten sensitive tables have RLS enabled and no policies, so `anon` and `authenticated` cannot select, insert, update or delete rows. Both roles are non-owner roles without `BYPASSRLS`. `service_role` has `BYPASSRLS`, as expected for the server-only credential.
 
@@ -77,7 +77,7 @@ Revoking `anon` and `authenticated` table privileges from these ten tables shoul
 
 `SET LOCAL ROLE anon` and `SET LOCAL ROLE authenticated` could not be used from the Lovable SQL sandbox because its execution role lacks membership in those roles. Public REST probes returned empty successful responses, but all ten tables were empty, so those probes were not conclusive. The effective-access conclusion rests on PostgreSQL catalog evidence: RLS is enabled, no policy grants row access, and neither client role owns the tables or bypasses RLS.
 
-## Implemented remediation
+## First remediation result
 
 Migration `20260912110000_harden_sensitive_table_privileges.sql` removes every client table privilege while preserving explicit server access:
 
@@ -111,4 +111,28 @@ TO service_role;
 
 The migration also adds a restrictive `FOR ALL` policy with `USING (false)` and `WITH CHECK (false)` for `anon` and `authenticated` on each table. Each policy is dropped by its exact name before creation so the Lovable migration runner can safely execute its validation pass more than once. These policies create a second boundary: an accidental restored grant or permissive client policy does not provide row access until the restrictive deny policy is deliberately removed. A `service_role` policy was not added because that role bypasses RLS and such a policy would have no enforcement effect.
 
-After applying the migration, verify `relacl`, `has_table_privilege` for all seven table privileges, policy inventory, public REST behavior, service-role server routes and the Lovable scanner. The desired result is no table privilege for `anon` or `authenticated`, unchanged full access for `service_role`, and no change to rows or application behavior.
+Lovable applied the migration through its owner-capable path on 2026-09-12. All ten tables now have no table privileges for `PUBLIC`, `anon` or `authenticated`; `service_role` retains all seven table privileges; RLS remains enabled; and each table has exactly one restrictive false client policy. Row counts remained unchanged. Public REST probes now return permission errors, while safe empty-work service-role probes remained successful. The original seven scanner warnings cleared.
+
+The Lovable migration runner recorded a second Drizzle migration (`0004_harden_sensitive_table_privileges`) with the same DDL as the committed `0003` migration. Re-entrant DDL left only one policy per table. Both journal entries are preserved because they are applied migration history; removing or rewriting either entry would make repository history disagree with the connected database.
+
+## Remaining-table audit
+
+After the first ten warnings cleared, the scanner identified the same condition on 11 more tables:
+
+- `announcement_queue`
+- `audit_events`
+- `calls`
+- `disputes`
+- `groups`
+- `market_observations`
+- `milestones`
+- `seasons`
+- `supported_assets`
+- `bruh_price_quotes`
+- `webhook_updates`
+
+The read-only Cloud audit found an identical access shape on all 11: owner `postgres`, RLS enabled and not forced, zero policies, no Realtime publication membership, no related sequences or exposing public views, and explicit full table grants for `anon`, `authenticated` and `service_role`. `PUBLIC` has none. Ten tables were empty; `supported_assets` contained three rows, none readable through the public REST API because RLS denied all rows.
+
+Source and Cloud function inspection classified all 11 tables as server-only today. `supported_assets` is read by `tips.server.ts` and `miniapp.server.ts`; `bruh_price_quotes` has no application read path. Other access is through server modules using `supabaseAdmin`, service-role scheduler routes, or the service-role-only `claim_telegram_updates` and `complete_wallet_challenge` functions. No current Supabase Auth, Realtime, browser, public token-price UI, Telegram processing or scheduler flow depends on client table grants.
+
+Migration `20260912113000_harden_remaining_table_privileges.sql` applies the same re-entrant remediation to these 11 tables. If a public asset list or public price interface is added later, it must receive a deliberately reviewed narrow server endpoint or narrowly scoped policy and grant; the current restrictive policy must not be removed incidentally.

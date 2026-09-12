@@ -36,6 +36,13 @@
       "when": 1789211071465,
       "tag": "0004_harden_sensitive_table_privileges",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1789212600000,
+      "tag": "0005_harden_remaining_table_privileges",
+      "breakpoints": true
     }
   ]
 }
