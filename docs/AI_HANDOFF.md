@@ -1,8 +1,8 @@
 # BRUH current handoff
 
 Inspection date: 2026-09-12 (America/Toronto).
-Code baseline: `main` at `67f5dfd5ee1cf0e915911b1c8f95ef4b09da8c4b`.
-Documentation branch: `codex/record-telegram-fast-path`.
+Code baseline: `main` at `4b327d40b6a9c1d46a46b00486f68cb81916816e`.
+Production application baseline: `67f5dfd5ee1cf0e915911b1c8f95ef4b09da8c4b`.
 Scope: record the published and verified immediate Telegram reply path, then identify the next provider and devnet safety work. No secret value is included.
 
 ## Access and context
@@ -20,7 +20,7 @@ Scope: record the published and verified immediate Telegram reply path, then ide
 | UI | `src/routes/app.tsx`, marketing/group/token/tiptek routes, policy routes and brand components | Preview observed; complete user journeys not tested |
 | Bot | `src/lib/bot.server.ts`, `telegram.server.ts`, public webhook route | Live `/help` processing and reply verified; broader command journeys remain unverified |
 | Backend | Calls, market, scoring, wallets, tips, Solana, moderation, imports, announcements, data rights, Mini App and session modules under `src/lib/` | Initial selective reading; not a complete audit |
-| Database | Twelve migrations under `supabase/migrations/`; generated types; RLS statements present | The repository Drizzle journal records ten entries through `0009`; Cloud also records Lovable's semantically identical managed duplicate as applied entry `0010` |
+| Database | Twelve migrations under `supabase/migrations/`; generated types; RLS statements present | The repository Drizzle journal records eleven entries through Lovable's semantically identical managed duplicate `0010` |
 | Market | `market.server.ts` includes DexScreener and Jupiter, cross-check and fallback | Historical Phase 7 missing-provider statement is stale; live API support unverified |
 | Fees | `fees.server.ts` has split/quote/record/confirm/report helpers, plus migration/tests | Search found fee record/confirmation definitions without an integrated application swap caller; do not describe complete buy/sell as shipped |
 | Tests | Ten files including scheduler authentication, tip-scope, Telegram `initData` and queue/outbox adversarial cases | 68 tests pass locally; database and live-provider integration coverage remains incomplete |
