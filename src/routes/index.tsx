@@ -113,7 +113,7 @@ const faq = [
   },
   {
     q: "Is the $BRUH token required to use the bot?",
-    a: "No. The bot works today with SOL and USDC. $BRUH is not minted yet, and nothing on this site is an offer to sell it.",
+    a: "No. Call tracking, leaderboards and reputation do not require it. $BRUH is not minted yet, and nothing on this site is an offer to sell it.",
   },
 ];
 
