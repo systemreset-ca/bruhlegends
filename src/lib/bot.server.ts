@@ -26,7 +26,7 @@ function appUrl(): string {
   return process.env["APP_URL"] ?? PROJECT_URL;
 }
 
-type Update = {
+export type TelegramUpdate = {
   update_id: number;
   message?: TgMessage;
   edited_message?: TgMessage;
@@ -106,7 +106,7 @@ async function memberContext(chat: TgChat, from: TgUser) {
   return { group, member };
 }
 
-export async function handleUpdate(update: Update): Promise<void> {
+export async function handleUpdate(update: TelegramUpdate): Promise<void> {
   if (update.my_chat_member) {
     const { chat, new_chat_member } = update.my_chat_member;
     if (["member", "administrator"].includes(new_chat_member.status)) {
@@ -630,7 +630,7 @@ async function handlePassive(message: TgMessage, text: string) {
   );
 }
 
-async function handleCallback(query: NonNullable<Update["callback_query"]>) {
+async function handleCallback(query: NonNullable<TelegramUpdate["callback_query"]>) {
   const data = query.data ?? "";
   if (data.startsWith("tipcheck:")) {
     const intentId = data.slice("tipcheck:".length);

@@ -86,6 +86,7 @@ export const Route = createFileRoute("/api/public/hooks/verify-tips")({
           queued,
           digestsSent: digests.sent,
           prunedObservations: retention.prunedObservations,
+          prunedWebhookUpdates: retention.prunedWebhookUpdates,
         });
       },
     },
