@@ -8,9 +8,16 @@ import {
 } from "../src/lib/telegram-updates.server";
 import {
   TelegramRateLimitError,
+  answerCallbackQuery,
+  sendMessage,
+  telegramActionChatId,
   telegramRetryAfterSeconds,
   telegramSendDelayMs,
 } from "../src/lib/telegram.server";
+import {
+  queueTelegramAction,
+  withTelegramDeliveryContext,
+} from "../src/lib/telegram-delivery-context.server";
 
 describe("Telegram update queue helpers", () => {
   it("accepts only non-negative safe integer update ids", () => {
@@ -63,5 +70,52 @@ describe("Telegram update queue helpers", () => {
   it("honors Telegram retry_after when it exceeds queue backoff", () => {
     expect(retryDelayForErrorSeconds(2, new TelegramRateLimitError("sendMessage", 23))).toBe(23);
     expect(retryDelayForErrorSeconds(4, new TelegramRateLimitError("sendMessage", 3))).toBe(40);
+  });
+
+  it("uses stable action keys when a webhook update is retried", async () => {
+    const first: unknown[] = [];
+    const second: unknown[] = [];
+
+    const run = (captured: unknown[]) =>
+      withTelegramDeliveryContext(
+        42001,
+        async () => {
+          await sendMessage(-100123, "Queued reply", { replyToMessageId: 77 });
+          await answerCallbackQuery("callback-1", "Done");
+        },
+        async (action) => {
+          captured.push(action);
+        },
+      );
+
+    await run(first);
+    await run(second);
+
+    expect(second).toEqual(first);
+    expect(first).toEqual([
+      expect.objectContaining({
+        updateId: 42001,
+        actionKey: "000:sendMessage",
+        method: "sendMessage",
+      }),
+      expect.objectContaining({
+        updateId: 42001,
+        actionKey: "001:answerCallbackQuery",
+        method: "answerCallbackQuery",
+      }),
+    ]);
+  });
+
+  it("does not claim ordinary non-webhook Telegram calls for the outbox", async () => {
+    await expect(queueTelegramAction("sendMessage", { chat_id: 1, text: "x" })).resolves.toBe(
+      false,
+    );
+  });
+
+  it("paces queued chat actions but not callback acknowledgements", () => {
+    expect(telegramActionChatId("sendMessage", { chat_id: -100123 })).toBe(-100123);
+    expect(telegramActionChatId("editMessageText", { chat_id: "@channel" })).toBe("@channel");
+    expect(telegramActionChatId("answerCallbackQuery", { callback_query_id: "x" })).toBeNull();
+    expect(telegramActionChatId("sendMessage", { text: "missing chat" })).toBeNull();
   });
 });

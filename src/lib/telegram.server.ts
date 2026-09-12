@@ -1,4 +1,5 @@
 import { createHash, timingSafeEqual } from "node:crypto";
+import { queueTelegramAction } from "./telegram-delivery-context.server";
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/telegram";
 const PER_CHAT_SEND_INTERVAL_MS = 1_100;
@@ -126,6 +127,25 @@ export async function telegramCall<T = unknown>(
   return parsed.result as T;
 }
 
+export function telegramActionChatId(
+  method: string,
+  payload: Record<string, unknown>,
+): number | string | null {
+  if (method !== "sendMessage" && method !== "editMessageText") return null;
+  const chatId = payload["chat_id"];
+  return typeof chatId === "number" || typeof chatId === "string" ? chatId : null;
+}
+
+/** Sends one already-durable action while retaining the normal per-chat pace. */
+export async function deliverTelegramAction<T = unknown>(
+  method: string,
+  payload: Record<string, unknown>,
+): Promise<T> {
+  const chatId = telegramActionChatId(method, payload);
+  if (chatId !== null) await waitForTelegramChatSlot(chatId);
+  return telegramCall<T>(method, payload);
+}
+
 /** Escapes text for Telegram HTML parse mode. Token metadata is never trusted. */
 export function escapeHtml(value: string | null | undefined): string {
   return (value ?? "")
@@ -142,8 +162,7 @@ export async function sendMessage(
   text: string,
   options: { keyboard?: InlineKeyboard; replyToMessageId?: number; silent?: boolean } = {},
 ) {
-  await waitForTelegramChatSlot(chatId);
-  return telegramCall<{ message_id: number }>("sendMessage", {
+  const body = {
     chat_id: chatId,
     text,
     parse_mode: "HTML",
@@ -151,14 +170,19 @@ export async function sendMessage(
     disable_notification: options.silent ?? false,
     ...(options.replyToMessageId ? { reply_to_message_id: options.replyToMessageId } : {}),
     ...(options.keyboard ? { reply_markup: { inline_keyboard: options.keyboard } } : {}),
-  });
+  };
+  if (await queueTelegramAction("sendMessage", body)) return { message_id: 0 };
+  await waitForTelegramChatSlot(chatId);
+  return telegramCall<{ message_id: number }>("sendMessage", body);
 }
 
 export async function answerCallbackQuery(id: string, text?: string, alert = false) {
-  return telegramCall("answerCallbackQuery", {
+  const body = {
     callback_query_id: id,
     ...(text ? { text, show_alert: alert } : {}),
-  });
+  };
+  if (await queueTelegramAction("answerCallbackQuery", body)) return;
+  return telegramCall("answerCallbackQuery", body);
 }
 
 export async function editMessageText(
@@ -167,15 +191,17 @@ export async function editMessageText(
   text: string,
   keyboard?: InlineKeyboard,
 ) {
-  await waitForTelegramChatSlot(chatId);
-  return telegramCall("editMessageText", {
+  const body = {
     chat_id: chatId,
     message_id: messageId,
     text,
     parse_mode: "HTML",
     disable_web_page_preview: true,
     ...(keyboard ? { reply_markup: { inline_keyboard: keyboard } } : {}),
-  });
+  };
+  if (await queueTelegramAction("editMessageText", body)) return;
+  await waitForTelegramChatSlot(chatId);
+  return telegramCall("editMessageText", body);
 }
 
 export async function isChatAdmin(chatId: number, userId: number): Promise<boolean> {
