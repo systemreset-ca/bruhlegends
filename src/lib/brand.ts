@@ -129,7 +129,7 @@ export const COPY_BLOCKS: Array<{ id: string; label: string; note: string; text:
     id: "token-status",
     label: "$BRUH status line",
     note: "Use verbatim until the mint is live",
-    text: "$BRUH is not minted yet. Nothing on this site is an offer to sell it, and the bot works today with SOL and USDC.",
+    text: "$BRUH is not minted yet. Nothing on this site is an offer to sell it. SOL tipping is in devnet validation before any mainnet release.",
   },
   {
     id: "fee-disclosure",
