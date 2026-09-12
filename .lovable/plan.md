@@ -47,3 +47,32 @@ Migration files pushed through GitHub are plain files in `supabase/migrations/`;
 2. Or, if applying now is not wanted, temporarily type the RPC call site so the gate is green while the database stays as-is — this leaves the runtime call failing until the migrations land, so it is not recommended.
 
 Unrelated observation, for the record: the scheduler hooks `/api/public/hooks/verify-tips` and `/api/public/hooks/refresh-calls` are being called every 1–2 minutes on the preview deployment and returning 401 continuously, because `BRUH_SCHEDULER_SECRET` is not configured on the caller side.
+
+## Read-only preflight (requested before any migration)
+
+**1. PostgreSQL version** — `PostgreSQL 17.6 on x86_64-pc-linux-gnu`. Relevant because `ON DELETE SET NULL (column)` used throughout `20260912064500` requires PostgreSQL 15 or newer; 17.6 supports it.
+
+**2. Rows that would violate each composite relationship** — zero in every case, because the affected tables are empty:
+
+| Constraint | Violating rows | Record IDs |
+| --- | --- | --- |
+| calls → caller membership in same group | 0 | none |
+| calls → season in same group | 0 | none |
+| tip_intents → sender membership in same group | 0 | none |
+| tip_intents → recipient membership in same group | 0 | none |
+| tip_intents → call in same group | 0 | none |
+| disputes → call in same group | 0 | none |
+| disputes → raiser membership in same group | 0 | none |
+| disputes → resolver membership in same group | 0 | none |
+
+Table totals: `calls` 0, `tip_intents` 0, `disputes` 0, `group_members` 0, `seasons` 0. No duplicate `(id, group_id)` pairs are possible, so the three new UNIQUE constraints are also safe. The `VALIDATE CONSTRAINT` block at the end of the migration will therefore pass.
+
+**3. Transactional ordering** — yes. All three files contain only DDL that PostgreSQL allows inside a transaction block: no `CREATE INDEX CONCURRENTLY`, no `VACUUM`, no `ALTER SYSTEM`, no `CREATE DATABASE`, and no explicit `BEGIN`/`COMMIT` of their own. Order matters and is already correct by filename: `20260912042000` (auth credential functions) → `20260912053000` (adds `webhook_updates` columns/indexes plus `claim_telegram_updates`) → `20260912064500` (composite keys and foreign keys). The last one depends on the current shape of `calls`, `tip_intents` and `disputes`, none of which the earlier two alter, so there is no cross-file conflict.
+
+**4. Where the preview scheduler calls come from** — `pg_cron` jobs inside the Lovable Cloud database itself, not an external service:
+
+- job 1 `bruh-refresh-calls`, schedule `*/5 * * * *`, active
+- job 2 `bruh-verify-tips`, schedule `*/2 * * * *`, active
+
+Both use `net.http_post` against `https://project--…-dev.lovable.app/api/public/hooks/…` and send only `Content-Type` and an `apikey` header. They do not send `X-BRUH-Scheduler-Secret`, which is exactly why every invocation returns 401 after PR #2 replaced key-based authorization. There is no cron job for `process-telegram-updates` at all. Fixing this means updating the two job definitions to send the scheduler secret header and adding a third job for the Telegram update worker — separate from the migration work above.
+
