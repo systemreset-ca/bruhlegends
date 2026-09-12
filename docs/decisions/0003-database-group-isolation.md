@@ -25,4 +25,4 @@ The migration validates all existing rows. If legacy cross-group data exists, de
 
 ## Implementation
 
-Implemented on `codex/group-constraints` in `20260912064500_enforce_group_relationships.sql`; reviewed in pull request #6. Record the merge commit here after integration.
+Implemented in `20260912064500_enforce_group_relationships.sql`; merged by pull request #6 as commit `f00c60fb86c0b3b74ce278768756a64f2a3edaad`. Lovable's read-only preflight found zero violating rows, and the migration was applied to the connected Lovable Cloud database on 2026-09-12.
