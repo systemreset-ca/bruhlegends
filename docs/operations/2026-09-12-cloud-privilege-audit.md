@@ -77,9 +77,9 @@ Revoking `anon` and `authenticated` table privileges from these ten tables shoul
 
 `SET LOCAL ROLE anon` and `SET LOCAL ROLE authenticated` could not be used from the Lovable SQL sandbox because its execution role lacks membership in those roles. Public REST probes returned empty successful responses, but all ten tables were empty, so those probes were not conclusive. The effective-access conclusion rests on PostgreSQL catalog evidence: RLS is enabled, no policy grants row access, and neither client role owns the tables or bypasses RLS.
 
-## Recommended remediation
+## Implemented remediation
 
-Use a reviewed migration to remove every client table privilege while preserving explicit server access:
+Migration `20260912110000_harden_sensitive_table_privileges.sql` removes every client table privilege while preserving explicit server access:
 
 ```sql
 REVOKE ALL ON
@@ -93,7 +93,7 @@ REVOKE ALL ON
   public.verified_transfers,
   public.wallet_challenges,
   public.wallets
-FROM anon, authenticated;
+FROM PUBLIC, anon, authenticated;
 
 GRANT ALL ON
   public.group_members,
@@ -109,6 +109,6 @@ GRANT ALL ON
 TO service_role;
 ```
 
-Adding `service_role`-only RLS policies would have no enforcement effect because that role bypasses RLS. Such policies are scanner documentation only. If Lovable continues to warn after the grants are revoked, add those policies in a separately reviewed change and describe them honestly as documentation rather than a security boundary.
+The migration also adds a restrictive `FOR ALL` policy with `USING (false)` and `WITH CHECK (false)` for `anon` and `authenticated` on each table. These policies create a second boundary: an accidental restored grant or permissive client policy does not provide row access until the restrictive deny policy is deliberately removed. A `service_role` policy was not added because that role bypasses RLS and such a policy would have no enforcement effect.
 
 After applying the migration, verify `relacl`, `has_table_privilege` for all seven table privileges, policy inventory, public REST behavior, service-role server routes and the Lovable scanner. The desired result is no table privilege for `anon` or `authenticated`, unchanged full access for `service_role`, and no change to rows or application behavior.
