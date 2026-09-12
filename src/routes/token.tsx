@@ -42,7 +42,7 @@ const mintFacts = [
 const utility = [
   {
     title: "The default tipping asset",
-    body: "Reply-tip a caller in $BRUH the same way you tip SOL or USDC today. The bot resolves the recipient's group wallet, builds the request, and verifies the transfer on-chain.",
+    body: "Reply-tip a caller in $BRUH through the same non-custodial flow used for enabled network assets. The bot resolves the recipient's group wallet, builds the request, and verifies the transfer on-chain.",
   },
   {
     title: "One mint, no spoofs",
@@ -68,7 +68,7 @@ const roadmap = [
   {
     phase: "Now",
     title: "Bot live, token off",
-    body: "Calls, leaderboards, seasons, disputes and tipping in SOL and USDC are shipped. $BRUH sits in the asset registry, disabled.",
+    body: "Calls, leaderboards, seasons and disputes are live. SOL tipping is in devnet validation; USDC remains gated to its network registry. $BRUH sits in the asset registry, disabled.",
   },
   {
     phase: "Next",
