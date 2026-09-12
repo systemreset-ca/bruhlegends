@@ -19,14 +19,14 @@ The migration ledger initially contained only the five original versions through
 
 Lovable reported all three applied successfully. Its follow-up type check passed and its test run passed 62 tests across ten files. The preview bundle was already serving the merged commits; the red preview badge had represented the database-aware type-check gate.
 
-## Remaining operational blocker
+## Scheduler follow-up
 
 Lovable found two active database `pg_cron` jobs:
 
 - `bruh-refresh-calls` every five minutes
 - `bruh-verify-tips` every two minutes
 
-Both call the Lovable development URL with an API-key header and return 401 because the endpoints now require `X-BRUH-Scheduler-Secret`. There is no job for `process-telegram-updates`. Configure one dedicated secret in the server environment and scheduler vault, update the two existing jobs, add the Telegram worker job, and verify authenticated responses before publishing these backend commits.
+Both initially called the Lovable development URL with an API-key header and returned 401 because the endpoints require `X-BRUH-Scheduler-Secret`. There was no job for `process-telegram-updates`. This blocker was resolved later on 2026-09-12; see [Lovable Cloud scheduler configuration](2026-09-12-lovable-scheduler-configuration.md).
 
 ## Verification limits
 
