@@ -36,28 +36,15 @@ export async function createLoginToken(
 
 export async function exchangeLoginToken(token: string): Promise<string | null> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data } = await supabaseAdmin
-    .from("miniapp_login_tokens")
-    .select("id, telegram_user_id, group_id, expires_at, consumed_at")
-    .eq("token_hash", hashToken(token))
-    .maybeSingle();
-
-  if (!data || data.consumed_at || new Date(data.expires_at) < new Date()) return null;
-
-  await supabaseAdmin
-    .from("miniapp_login_tokens")
-    .update({ consumed_at: new Date().toISOString() })
-    .eq("id", data.id);
-
   const sessionToken = newToken();
-  const { error } = await supabaseAdmin.from("miniapp_sessions").insert({
-    session_hash: hashToken(sessionToken),
-    telegram_user_id: data.telegram_user_id,
-    group_id: data.group_id,
-    expires_at: new Date(Date.now() + 12 * 60 * 60_000).toISOString(),
-  });
+  const { data, error } = await supabaseAdmin
+    .rpc("exchange_miniapp_login_token", {
+      p_token_hash: hashToken(token),
+      p_session_hash: hashToken(sessionToken),
+    })
+    .maybeSingle();
   if (error) throw error;
-  return sessionToken;
+  return data ? sessionToken : null;
 }
 
 export async function resolveSession(
@@ -102,7 +89,10 @@ export function verifyInitData(initData: string, maxAgeSeconds = 86_400): number
   if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
 
   const authDate = Number(params.get("auth_date") ?? 0);
-  if (!authDate || Date.now() / 1000 - authDate > maxAgeSeconds) return null;
+  const ageSeconds = Math.floor(Date.now() / 1000) - authDate;
+  if (!Number.isInteger(authDate) || authDate <= 0 || ageSeconds < -30 || ageSeconds > maxAgeSeconds) {
+    return null;
+  }
 
   try {
     const user = JSON.parse(params.get("user") ?? "null") as { id?: number } | null;
