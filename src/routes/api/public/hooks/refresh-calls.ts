@@ -3,6 +3,7 @@ import { refreshCalls } from "@/lib/calls.server";
 import { admin } from "@/lib/db.server";
 import { escapeHtml } from "@/lib/telegram.server";
 import { dispatchAnnouncement, loadGroupAnnounceSettings } from "@/lib/announce.server";
+import { isAuthorizedSchedulerRequest } from "@/lib/scheduler-auth.server";
 
 /**
  * Called by the scheduler. Refreshes open calls, then announces each milestone
@@ -13,10 +14,7 @@ export const Route = createFileRoute("/api/public/hooks/refresh-calls")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const apiKey = request.headers.get("apikey");
-        const expected =
-          process.env["SUPABASE_PUBLISHABLE_KEY"] ?? process.env["SUPABASE_ANON_KEY"];
-        if (!apiKey || !expected || apiKey !== expected) {
+        if (!isAuthorizedSchedulerRequest(request)) {
           return new Response("Unauthorized", { status: 401 });
         }
 

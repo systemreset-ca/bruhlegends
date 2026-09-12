@@ -9,6 +9,13 @@ import {
   publicName,
 } from "@/lib/announce.server";
 import { escapeHtml } from "@/lib/telegram.server";
+import { isAuthorizedSchedulerRequest } from "@/lib/scheduler-auth.server";
+
+type AnnouncementMember = {
+  id: string;
+  display_name: string | null;
+  pseudonym: string | null;
+};
 
 /**
  * Scheduler entry point for money-side maintenance: verify outstanding tips
@@ -20,10 +27,7 @@ export const Route = createFileRoute("/api/public/hooks/verify-tips")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const apiKey = request.headers.get("apikey");
-        const expected =
-          process.env["SUPABASE_PUBLISHABLE_KEY"] ?? process.env["SUPABASE_ANON_KEY"];
-        if (!apiKey || !expected || apiKey !== expected) {
+        if (!isAuthorizedSchedulerRequest(request)) {
           return new Response("Unauthorized", { status: 401 });
         }
 
@@ -46,9 +50,10 @@ export const Route = createFileRoute("/api/public/hooks/verify-tips")({
             .from("group_members")
             .select("id, display_name, pseudonym")
             .in("id", [intent.sender_membership_id, intent.recipient_membership_id]);
-          const sender = (members ?? []).find((m: any) => m.id === intent.sender_membership_id);
-          const recipient = (members ?? []).find(
-            (m: any) => m.id === intent.recipient_membership_id,
+          const announcementMembers = (members ?? []) as AnnouncementMember[];
+          const sender = announcementMembers.find((member) => member.id === intent.sender_membership_id);
+          const recipient = announcementMembers.find(
+            (member) => member.id === intent.recipient_membership_id,
           );
           if (!sender || !recipient) continue;
 

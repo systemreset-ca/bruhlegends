@@ -1,14 +1,14 @@
 # BRUH current handoff
 
 Inspection date: 2026-09-11 (America/Toronto).
-Code baseline: `main` at `ccb84df31d335c9f632c3b85403e21c47de5a474`.
-Documentation branch: `codex/project-coordination`.
-Scope: initial source inspection and coordination documents only. No application, schema, secret or deployment changes. The documentation commit is reported in the PR/handoff message rather than embedding its own circular SHA here.
+Code baseline: `main` at `b491c99839f4986c735eb702e5e28643bc67a46b`.
+Implementation branch: `codex/security-foundation`.
+Scope: first security slice for private scheduler authentication and a reproducible validation baseline. No schema, secret value or scheduler configuration is included.
 
 ## Access and context
 
 - Existing GitHub CLI login reports `ADMIN` for private `systemreset-ca/bruhlegends`; clone succeeded. The separate GitHub connector returned 404, so CLI and connector access must not be conflated.
-- Lovable browser was already signed in; the correct project and BRUH preview opened. Preview indicates unpublished changes; publication has not been performed. The public bruh.tips homepage also loaded and links to @BRUHLegendsBot; its deployed commit and backend health remain unverified.
+- Lovable synchronized and published merge commit `b491c99839f4986c735eb702e5e28643bc67a46b`. The public bruh.tips homepage loaded after publication and links to @BRUHLegendsBot. Backend health remains unverified.
 - Read the owner's pasted attachment, the original plan, fee plan, mint notes/setup guide, later phase plans, repository instructions and existing Work chat `Team Up Chats`.
 - GitHub is the shared authority; Codex leads engineering/integration, Lovable handles UI, Work handles research/documentation proposals. See [delivery plan](PROJECT_PLAN.md) and [Work brief](WORK_CHAT_BRIEF.md).
 
@@ -29,7 +29,7 @@ Scripts: `dev`, `build`, `build:dev`, `preview`, `lint`, `format`, `test`. No ex
 
 ## Priority findings for follow-up
 
-1. **Scheduler authentication:** both public maintenance routes under `src/routes/api/public/hooks/` compare the supplied `apikey` with `SUPABASE_PUBLISHABLE_KEY`/`SUPABASE_ANON_KEY`. These identifiers are used as the route's sole credential. Replace with dedicated server-side authentication and test fail-closed behavior. Live exposure has not been tested.
+1. **Scheduler authentication:** implementation branch `codex/security-foundation` replaces public Supabase-key authorization with a dedicated `BRUH_SCHEDULER_SECRET`, sent in `X-BRUH-Scheduler-Secret`. The helper fails closed when missing or shorter than 32 characters and uses constant-time comparison. Deployment and scheduler configuration remain required before merge/publish.
 2. **Webhook durability:** `src/routes/api/public/telegram/webhook.ts` awaits `handleUpdate`, catches errors and returns success. This does not demonstrate the spec's fast durable receipt plus asynchronous retry behavior. Audit deduplication and crash recovery together so retries neither lose nor duplicate effects.
 3. **Session consumption:** `exchangeLoginToken` in `src/lib/session.server.ts` reads then updates a login token in separate operations. Review concurrent redemption and implement atomic consumption with expiry enforcement. Test forged, stale and future-dated `initData`, not just normal signatures.
 4. **Credential documentation mismatch:** outgoing Telegram calls use the Lovable connector gateway with `LOVABLE_API_KEY` and `TELEGRAM_API_KEY`; `verifyInitData` separately needs `TELEGRAM_BOT_TOKEN`. The plan's gateway statement does not cover that actual requirement.
@@ -40,10 +40,10 @@ These are source-based findings and audit priorities, not proof of an exploited 
 
 ## Configuration inventory (names only)
 
-Observed server references include `LOVABLE_API_KEY`, `TELEGRAM_API_KEY`, `TELEGRAM_BOT_TOKEN`, `APP_URL`, `SOLANA_NETWORK`, `SOLANA_RPC_URL`, `BRUH_TOKEN_MINT`, `FEE_BPS`, `FEE_TREASURY_ADDRESS`, `SUPABASE_PUBLISHABLE_KEY` and `SUPABASE_ANON_KEY`. Supabase integration files also require inspection for the complete client/server inventory. No secret values were requested or copied.
+Observed server references include `LOVABLE_API_KEY`, `TELEGRAM_API_KEY`, `TELEGRAM_BOT_TOKEN`, `APP_URL`, `SOLANA_NETWORK`, `SOLANA_RPC_URL`, `BRUH_TOKEN_MINT`, `FEE_BPS`, `FEE_TREASURY_ADDRESS`, `BRUH_SCHEDULER_SECRET`, `SUPABASE_PUBLISHABLE_KEY` and `SUPABASE_ANON_KEY`. `BRUH_SCHEDULER_SECRET` must be a randomly generated value of at least 32 characters and must be stored in the server secret manager and scheduler vault, never in client code. No secret values were requested or copied.
 
 ## Validation and next action
 
-Documentation links, Git diff whitespace and the changed-file scope are checked for this documentation PR. Application tests, lint, build, live database checks and devnet transfers have not been run during this planning pass. No release readiness is claimed.
+The implementation branch passes 49 tests across eight files, strict TypeScript checking, focused lint for the new scheduler helper/test, and the production build. Repository-wide lint remains blocked by pre-existing CRLF/Prettier failures throughout untouched files. Live database checks, scheduler invocation and devnet transfers have not been run. No release readiness is claimed.
 
-Next: establish the code baseline and implement the scheduler authentication slice described in [PROJECT_PLAN.md](PROJECT_PLAN.md), then durable webhook/replay controls. Work should first reconcile documentation and produce acceptance cases; Lovable should work from the resulting UI briefs.
+Next: configure `BRUH_SCHEDULER_SECRET` in the deployment and scheduler, verify both maintenance routes reject the retired public-key credential in production, then implement durable webhook receipt and replay controls.
