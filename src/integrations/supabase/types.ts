@@ -911,7 +911,7 @@ export type Database = {
           expires_at: string
           group_id: string
           id?: string
-          network: string
+          network?: string
           privacy?: Database["public"]["Enums"]["tip_privacy"]
           quote_id?: string | null
           recipient_address: string
