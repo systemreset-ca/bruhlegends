@@ -1096,27 +1096,42 @@ export type Database = {
         Row: {
           attempt_count: number
           last_error: string | null
+          locked_at: string | null
+          lock_token: string | null
+          next_attempt_at: string
+          payload: Json | null
           processed_at: string | null
           received_at: string
           status: string
+          telegram_chat_id: number | null
           telegram_update_id: number
           update_type: string | null
         }
         Insert: {
           attempt_count?: number
           last_error?: string | null
+          locked_at?: string | null
+          lock_token?: string | null
+          next_attempt_at?: string
+          payload?: Json | null
           processed_at?: string | null
           received_at?: string
           status?: string
+          telegram_chat_id?: number | null
           telegram_update_id: number
           update_type?: string | null
         }
         Update: {
           attempt_count?: number
           last_error?: string | null
+          locked_at?: string | null
+          lock_token?: string | null
+          next_attempt_at?: string
+          payload?: Json | null
           processed_at?: string | null
           received_at?: string
           status?: string
+          telegram_chat_id?: number | null
           telegram_update_id?: number
           update_type?: string | null
         }
@@ -1127,6 +1142,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_telegram_updates: {
+        Args: {
+          p_lease_seconds?: number
+          p_limit?: number
+        }
+        Returns: {
+          attempt_count: number
+          lock_token: string
+          payload: Json
+          telegram_update_id: number
+        }[]
+      }
       complete_wallet_challenge: {
         Args: {
           p_challenge_id: string

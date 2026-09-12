@@ -185,32 +185,46 @@ export async function updateGroupSettings(
   return data;
 }
 
-/** Applies each group's raw-payload retention window to stored observations. */
-export async function pruneRetention(): Promise<{ groups: number; prunedObservations: number }> {
+/** Applies each group's raw-payload retention window to stored provider and Telegram payloads. */
+export async function pruneRetention(): Promise<{
+  groups: number;
+  prunedObservations: number;
+  prunedWebhookUpdates: number;
+}> {
   const db = await admin();
   const { data: groups } = await db
     .from("groups")
-    .select("id, raw_message_retention_days")
+    .select("id, telegram_chat_id, raw_message_retention_days")
     .is("removed_at", null);
 
   let prunedObservations = 0;
+  let prunedWebhookUpdates = 0;
   for (const group of groups ?? []) {
     const days = Number(group.raw_message_retention_days ?? 30);
     if (!Number.isFinite(days) || days <= 0) continue;
     const cutoff = new Date(Date.now() - days * 86_400_000).toISOString();
 
+    const { data: prunedUpdates } = await db
+      .from("webhook_updates")
+      .update({ payload: null })
+      .eq("telegram_chat_id", group.telegram_chat_id)
+      .lt("received_at", cutoff)
+      .not("payload", "is", null)
+      .select("telegram_update_id");
+    prunedWebhookUpdates += prunedUpdates?.length ?? 0;
+
     const { data: calls } = await db.from("calls").select("id").eq("group_id", group.id);
     const callIds = (calls ?? []).map((c: any) => c.id);
-    if (callIds.length === 0) continue;
-
-    const { data: pruned } = await db
-      .from("market_observations")
-      .update({ raw: null })
-      .lt("observed_at", cutoff)
-      .not("raw", "is", null)
-      .in("call_id", callIds)
-      .select("id");
-    prunedObservations += pruned?.length ?? 0;
+    if (callIds.length > 0) {
+      const { data: pruned } = await db
+        .from("market_observations")
+        .update({ raw: null })
+        .lt("observed_at", cutoff)
+        .not("raw", "is", null)
+        .in("call_id", callIds)
+        .select("id");
+      prunedObservations += pruned?.length ?? 0;
+    }
 
     await db
       .from("audit_events")
@@ -220,7 +234,17 @@ export async function pruneRetention(): Promise<{ groups: number; prunedObservat
       .not("after_state", "is", null);
   }
 
-  return { groups: groups?.length ?? 0, prunedObservations };
+  const defaultCutoff = new Date(Date.now() - 30 * 86_400_000).toISOString();
+  const { data: prunedUnscopedUpdates } = await db
+    .from("webhook_updates")
+    .update({ payload: null })
+    .is("telegram_chat_id", null)
+    .lt("received_at", defaultCutoff)
+    .not("payload", "is", null)
+    .select("telegram_update_id");
+  prunedWebhookUpdates += prunedUnscopedUpdates?.length ?? 0;
+
+  return { groups: groups?.length ?? 0, prunedObservations, prunedWebhookUpdates };
 }
 
 /** Removes expired one-shot credentials so nothing lingers past its window. */

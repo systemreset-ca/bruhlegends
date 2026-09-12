@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { deriveTelegramWebhookSecret, safeEqual } from "@/lib/telegram.server";
-import { handleUpdate } from "@/lib/bot.server";
+import { isTelegramUpdate, storeTelegramUpdate } from "@/lib/telegram-updates.server";
 
 export const Route = createFileRoute("/api/public/telegram/webhook")({
   server: {
@@ -11,19 +11,26 @@ export const Route = createFileRoute("/api/public/telegram/webhook")({
           return new Response("Unauthorized", { status: 401 });
         }
 
-        const update = (await request.json()) as { update_id?: number };
-        if (typeof update.update_id !== "number") {
-          return Response.json({ ok: true, ignored: true });
+        let update: unknown;
+        try {
+          update = await request.json();
+        } catch {
+          return new Response("Invalid JSON", { status: 400 });
         }
 
-        // Telegram retries anything that isn't a fast 200, so failures are
-        // logged and swallowed rather than replayed forever.
-        try {
-          await handleUpdate(update as never);
-        } catch (error) {
-          console.error("Telegram update handling failed", error);
+        if (!isTelegramUpdate(update)) {
+          return new Response("Invalid Telegram update", { status: 400 });
         }
-        return Response.json({ ok: true });
+
+        // Acknowledge only after durable receipt. A database failure returns a
+        // retryable response; processing happens through the scheduler worker.
+        try {
+          await storeTelegramUpdate(update);
+        } catch (error) {
+          console.error("Telegram update receipt failed", error);
+          return new Response("Receipt unavailable", { status: 503 });
+        }
+        return Response.json({ ok: true, accepted: true });
       },
     },
   },
