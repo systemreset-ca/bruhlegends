@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   isTipIntentExpired,
+  tipIntentMatchesNetwork,
   tipMembershipScopeError,
+  tipNetworkMetadata,
   type TipMembership,
 } from "../src/lib/tips.server";
 
@@ -60,5 +62,20 @@ describe("tip intent expiry", () => {
   it("keeps a valid future intent and fails closed on an invalid deadline", () => {
     expect(isTipIntentExpired("2026-09-12T00:00:00.001Z", now)).toBe(false);
     expect(isTipIntentExpired("not-a-date", now)).toBe(true);
+  });
+});
+
+describe("tip intent network binding", () => {
+  it("accepts verification only on the network captured by the intent", () => {
+    expect(tipIntentMatchesNetwork("devnet", "devnet")).toBe(true);
+    expect(tipIntentMatchesNetwork("devnet", "mainnet-beta")).toBe(false);
+    expect(tipIntentMatchesNetwork("mainnet-beta", "devnet")).toBe(false);
+  });
+
+  it("labels devnet payment requests as test-only", () => {
+    const metadata = tipNetworkMetadata("devnet");
+    expect(metadata.label).toContain("DEVNET");
+    expect(metadata.message).toContain("DEVNET TEST ONLY");
+    expect(metadata.warning).toContain("Do not send mainnet funds");
   });
 });

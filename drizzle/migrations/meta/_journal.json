@@ -78,6 +78,13 @@
       "when": 1789230461943,
       "tag": "0010_telegram_immediate_claims",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1789239600000,
+      "tag": "0011_pin_tip_intent_network",
+      "breakpoints": true
     }
   ]
 }

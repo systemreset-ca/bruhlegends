@@ -2,7 +2,12 @@ import { admin, logAudit } from "./db.server";
 import { getActiveWallet } from "./wallets.server";
 import { buildSolanaPayUrl, createReferenceKey, verifyTransferByReference } from "./solana.server";
 import { fetchUsdPrice } from "./market.server";
-import { getBruhConfig, USDC_MAINNET_MINT, type BruhConfig } from "./bruh-config.server";
+import {
+  getBruhConfig,
+  USDC_MAINNET_MINT,
+  type BruhConfig,
+  type SolanaNetwork,
+} from "./bruh-config.server";
 
 export type TipAsset = { symbol: string; mint: string | null; decimals: number };
 
@@ -111,6 +116,7 @@ export function toBaseUnits(amount: number, decimals: number): bigint {
 
 export type TipIntent = {
   id: string;
+  network: SolanaNetwork;
   reference: string;
   payUrl: string;
   recipientAddress: string;
@@ -118,6 +124,27 @@ export type TipIntent = {
   assetSymbol: string;
   expiresAt: string;
 };
+
+export function tipNetworkMetadata(network: SolanaNetwork) {
+  return network === "devnet"
+    ? {
+        label: "BRUH DEVNET",
+        message: "BRUH tip — DEVNET TEST ONLY",
+        warning: "DEVNET TEST ONLY — set your wallet to Solana Devnet. Do not send mainnet funds.",
+      }
+    : {
+        label: "BRUH",
+        message: "BRUH tip",
+        warning: "Solana mainnet",
+      };
+}
+
+export function tipIntentMatchesNetwork(
+  intentNetwork: string,
+  currentNetwork: SolanaNetwork,
+): boolean {
+  return intentNetwork === currentNetwork;
+}
 
 /**
  * Builds an unsigned payment request. Nothing is credited here — the tip only
@@ -137,6 +164,7 @@ export async function createTipIntent(input: {
     return { ok: false, reason: "self_tip" };
   }
 
+  const config = getBruhConfig();
   const db = await admin();
   const { data: membershipRows, error: membershipError } = await db
     .from("group_members")
@@ -153,7 +181,8 @@ export async function createTipIntent(input: {
   const recipientAddress = await getActiveWallet(input.recipientMembershipId);
   if (!recipientAddress) return { ok: false, reason: "recipient_wallet_missing" };
 
-  const { tipIntentTtlMinutes } = getBruhConfig();
+  const { network, tipIntentTtlMinutes } = config;
+  const paymentMetadata = tipNetworkMetadata(network);
   const reference = createReferenceKey();
   const expiresAt = new Date(Date.now() + tipIntentTtlMinutes * 60_000).toISOString();
   const usdPrice = asset.mint
@@ -164,6 +193,7 @@ export async function createTipIntent(input: {
     .from("tip_intents")
     .insert({
       group_id: input.groupId,
+      network,
       call_id: input.callId ?? null,
       sender_membership_id: input.senderMembershipId,
       recipient_membership_id: input.recipientMembershipId,
@@ -186,13 +216,15 @@ export async function createTipIntent(input: {
     ok: true,
     intent: {
       id: data.id,
+      network,
       reference,
       payUrl: buildSolanaPayUrl({
         recipient: recipientAddress,
         amountDisplay: input.amount,
         reference,
         splToken: asset.mint,
-        message: "BRUH tip",
+        label: paymentMetadata.label,
+        message: paymentMetadata.message,
       }),
       recipientAddress,
       amountDisplay: input.amount,
@@ -239,6 +271,10 @@ export async function confirmTip(intentId: string): Promise<TipConfirmation> {
       after: { status: "expired" },
     });
     return { status: "expired", reason: "intent_expired" };
+  }
+
+  if (!tipIntentMatchesNetwork(intent.network, getBruhConfig().network)) {
+    return { status: "pending", reason: "network_mismatch" };
   }
 
   const verification = await verifyTransferByReference({
@@ -315,6 +351,7 @@ export async function sweepTipIntents(limit = 40): Promise<TipSweepResult> {
 
 export type PendingTip = {
   id: string;
+  network: SolanaNetwork;
   direction: "sent" | "received";
   assetSymbol: string;
   amountDisplay: number;
@@ -332,7 +369,7 @@ export async function listPendingTips(membershipId: string): Promise<PendingTip[
   const { data } = await db
     .from("tip_intents")
     .select(
-      "id, asset_symbol, asset_mint, amount_display, recipient_address, reference_key, status, expires_at, sender_membership_id, recipient_membership_id",
+      "id, network, asset_symbol, asset_mint, amount_display, recipient_address, reference_key, status, expires_at, sender_membership_id, recipient_membership_id",
     )
     .or(`sender_membership_id.eq.${membershipId},recipient_membership_id.eq.${membershipId}`)
     .in("status", ["created", "awaiting_payment"])
@@ -357,10 +394,13 @@ export async function listPendingTips(membershipId: string): Promise<PendingTip[
   );
 
   return rows.map((row) => {
+    const network = row.network as SolanaNetwork;
+    const paymentMetadata = tipNetworkMetadata(network);
     const direction = row.sender_membership_id === membershipId ? "sent" : "received";
     const otherId = direction === "sent" ? row.recipient_membership_id : row.sender_membership_id;
     return {
       id: row.id as string,
+      network,
       direction: direction as "sent" | "received",
       assetSymbol: row.asset_symbol as string,
       amountDisplay: Number(row.amount_display),
@@ -371,7 +411,8 @@ export async function listPendingTips(membershipId: string): Promise<PendingTip[
         amountDisplay: Number(row.amount_display),
         reference: row.reference_key,
         splToken: row.asset_mint,
-        message: "BRUH tip",
+        label: paymentMetadata.label,
+        message: paymentMetadata.message,
       }),
       status: row.status as string,
       expiresAt: row.expires_at as string,

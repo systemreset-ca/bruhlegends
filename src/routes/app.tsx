@@ -567,6 +567,11 @@ function MiniApp() {
       {tab === "tips" && (
         <section className="rounded-lg border border-border bg-card p-5">
           <h2 className="text-lg font-semibold">Send a tip</h2>
+          {targets?.network === "devnet" && (
+            <p className="mt-3 rounded-md border border-primary/40 bg-primary/10 p-3 text-sm font-semibold text-primary">
+              DEVNET TEST ONLY — set your wallet to Solana Devnet. Do not send mainnet funds.
+            </p>
+          )}
           <p className="mt-1 text-sm text-muted-foreground">
             BRUH builds the request. You approve it in your own wallet — nothing is ever held here.
           </p>
@@ -630,6 +635,11 @@ function MiniApp() {
                     {tip.amountDisplay} {tip.assetSymbol}
                   </span>
                 </div>
+                {tip.network === "devnet" && (
+                  <p className="mt-2 text-xs font-semibold text-primary">
+                    DEVNET TEST ONLY — confirm your wallet network before signing.
+                  </p>
+                )}
                 {tip.direction === "sent" && (
                   <div className="mt-3 flex flex-wrap gap-2">
                     <a
