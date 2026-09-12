@@ -1211,6 +1211,29 @@ export type Database = {
           payload: Json
         }[]
       }
+      claim_telegram_outbox_by_update_id: {
+        Args: {
+          p_lease_seconds?: number
+          p_limit?: number
+          p_telegram_update_id: number
+        }
+        Returns: {
+          attempt_count: number
+          id: string
+          lock_token: string
+          method: string
+          payload: Json
+        }[]
+      }
+      claim_telegram_update_by_id: {
+        Args: { p_lease_seconds?: number; p_telegram_update_id: number }
+        Returns: {
+          attempt_count: number
+          lock_token: string
+          payload: Json
+          telegram_update_id: number
+        }[]
+      }
       claim_telegram_updates: {
         Args: { p_lease_seconds?: number; p_limit?: number }
         Returns: {
