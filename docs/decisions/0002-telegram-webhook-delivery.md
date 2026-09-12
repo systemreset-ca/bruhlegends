@@ -25,4 +25,4 @@ Do not publish the queue-based webhook until the migration is applied and a sche
 
 ## Implementation
 
-Implemented on `codex/durable-webhook` in `20260912053000_durable_telegram_updates.sql`, `src/lib/telegram-updates.server.ts`, and the public webhook/worker routes; reviewed in pull request #5. Record the merge commit here after integration.
+Implemented in `20260912053000_durable_telegram_updates.sql`, `src/lib/telegram-updates.server.ts`, and the public webhook/worker routes; merged by pull request #5 as commit `aaf38f02554d61e22f48a51efcb1355847e7511e`.

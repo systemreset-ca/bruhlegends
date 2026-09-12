@@ -1,9 +1,9 @@
 # BRUH current handoff
 
 Inspection date: 2026-09-12 (America/Toronto).
-Code baseline: `main` at `46c3484dc81e0ab67ac6fe40e5d83d30c6e0a27b`.
-Implementation branch: `codex/durable-webhook`.
-Scope: persist authenticated Telegram updates before acknowledgement, then claim and retry them through a leased scheduler worker. One migration and one scheduler route are included; no secret value or scheduler configuration is included.
+Code baseline: `main` at `aaf38f02554d61e22f48a51efcb1355847e7511e`.
+Implementation branch: `codex/group-constraints`.
+Scope: replace membership, season and call foreign keys with group-scoped composite constraints. One migration is included; no application behavior, secret value or scheduler configuration is included.
 
 ## Access and context
 
@@ -20,7 +20,7 @@ Scope: persist authenticated Telegram updates before acknowledgement, then claim
 | UI | `src/routes/app.tsx`, marketing/group/token/tiptek routes, policy routes and brand components | Preview observed; complete user journeys not tested |
 | Bot | `src/lib/bot.server.ts`, `telegram.server.ts`, public webhook route | Implementation present; live bot identity and processing not verified |
 | Backend | Calls, market, scoring, wallets, tips, Solana, moderation, imports, announcements, data rights, Mini App and session modules under `src/lib/` | Initial selective reading; not a complete audit |
-| Database | Seven migrations under `supabase/migrations/`; generated types; RLS statements present | The seventh migration is on the implementation branch; applied migrations and effective authorization are not tested against the live database |
+| Database | Eight migrations under `supabase/migrations/`; generated types; RLS statements present | The eighth migration is on the implementation branch; applied migrations and effective authorization are not tested against the live database |
 | Market | `market.server.ts` includes DexScreener and Jupiter, cross-check and fallback | Historical Phase 7 missing-provider statement is stale; live API support unverified |
 | Fees | `fees.server.ts` has split/quote/record/confirm/report helpers, plus migration/tests | Search found fee record/confirmation definitions without an integrated application swap caller; do not describe complete buy/sell as shipped |
 | Tests | Ten files including scheduler authentication, tip-scope, Telegram `initData` and queue-helper adversarial cases | 62 tests pass locally; database and live-provider integration coverage remains incomplete |
@@ -30,8 +30,8 @@ Scripts: `dev`, `build`, `build:dev`, `preview`, `lint`, `typecheck`, `format`, 
 ## Priority findings for follow-up
 
 1. **Scheduler authentication:** merged `main` replaces public Supabase-key authorization with a dedicated `BRUH_SCHEDULER_SECRET`, sent in `X-BRUH-Scheduler-Secret`. The helper fails closed when missing or shorter than 32 characters and uses constant-time comparison. Production publication and synchronized scheduler configuration remain required.
-2. **Tip isolation and verification:** merged `main` validates both memberships against the requested group before wallet resolution, rejects banned memberships, expires intents before RPC lookup, scans later reference signatures, and requires the transferred amount to match exactly. Database-level relationship constraints and live devnet verification still remain.
-3. **Webhook durability:** implementation branch `codex/durable-webhook` stores the authenticated raw update before returning success. A scheduler-only route claims ready rows with `FOR UPDATE SKIP LOCKED`, per-attempt lease tokens, bounded exponential retry and a ten-attempt dead-letter state. Database state is protected from concurrent workers; external Telegram sends still cannot be made exactly-once across a process crash, so handlers must continue to make their durable effects idempotent.
+2. **Group isolation and tip verification:** merged `main` validates both memberships against the requested group before wallet resolution, rejects banned memberships, expires intents before RPC lookup, scans later reference signatures, and requires the transferred amount to match exactly. Implementation branch `codex/group-constraints` makes caller, season, sender, recipient, call and dispute relationships group-scoped at the database boundary. Live devnet verification still remains.
+3. **Webhook durability:** merged `main` stores the authenticated raw update before returning success. A scheduler-only route claims ready rows with `FOR UPDATE SKIP LOCKED`, per-attempt lease tokens, bounded exponential retry and a ten-attempt dead-letter state. Database state is protected from concurrent workers; external Telegram sends still cannot be made exactly-once across a process crash, so handlers must continue to make their durable effects idempotent. The migration and scheduler caller are not live-verified.
 4. **Session and wallet challenge consumption:** merged `main` moves login-token exchange and wallet-challenge completion into service-role-only database functions. Each operation locks or conditionally updates its one-time credential and commits its dependent records together. The wallet flow keeps the previous wallet active until its 30-minute replacement cutoff, and authentic `initData` dated more than 30 seconds in the future is rejected. Live database application remains unverified.
 5. **Credential documentation mismatch:** outgoing Telegram calls use the Lovable connector gateway with `LOVABLE_API_KEY` and `TELEGRAM_API_KEY`; `verifyInitData` separately needs `TELEGRAM_BOT_TOKEN`. The plan's gateway statement does not cover that actual requirement.
 6. **Launch defaults:** `bruh-config.server.ts` defaults to mainnet, leaves direct asset tips enabled and enables its BRUH flag based on nonempty mint text. Audit all actual enforcement paths and align network, RPC, allowlist and explicit release gates before claiming launch readiness.
@@ -45,6 +45,6 @@ Observed server references include `LOVABLE_API_KEY`, `TELEGRAM_API_KEY`, `TELEG
 
 ## Validation and next action
 
-The implementation branch passes 62 tests across ten files, strict TypeScript checking, focused lint and the production build. The build still reports existing TanStack `inputValidator` deprecations and an oversized client chunk. Repository-wide lint remains blocked by pre-existing CRLF/Prettier failures throughout untouched files. The queue migration and worker have not been applied or exercised against the live database; scheduler invocation and devnet transfers also have not been run. No release readiness is claimed.
+The implementation branch passes 62 tests across ten files and strict TypeScript checking. The production build passed on the preceding merged webhook slice; this migration-only slice does not change runtime code. Repository-wide lint remains blocked by pre-existing CRLF/Prettier failures throughout untouched files. The new composite constraints have not been applied to the live database, so existing-row validation and effective PostgREST relationships remain unverified. Scheduler invocation and devnet transfers also have not been run. No release readiness is claimed.
 
-Next: review and merge the durable webhook slice, then configure `BRUH_SCHEDULER_SECRET` in both deployment and a caller for `POST /api/public/hooks/process-telegram-updates`. After that, add database-level group constraints and idempotency coverage for update-triggered state changes.
+Next: review and merge the database group-constraint slice, then inspect the live Supabase migration state before publishing any backend commits. Configure `BRUH_SCHEDULER_SECRET` in both deployment and a caller for `POST /api/public/hooks/process-telegram-updates`, then add idempotency coverage for update-triggered state changes.
