@@ -8,7 +8,7 @@ Scope: record the verified conditional scheduler configuration and reduced idle 
 ## Access and context
 
 - Existing GitHub CLI login reports `ADMIN` for private `systemreset-ca/bruhlegends`; clone succeeded. The separate GitHub connector returned 404, so CLI and connector access must not be conflated.
-- Lovable synchronized and published merge commit `b491c99839f4986c735eb702e5e28643bc67a46b`. The public bruh.tips homepage loaded after publication and links to @BRUHLegendsBot. Backend health remains unverified.
+- Lovable synchronized and published merge commit `870cef379e8cf7136f969ccbef546291e855f3b5`. The public bruh.tips homepage loaded after publication and links to @BRUHLegendsBot. Backend health remains unverified. See the [production publish record](operations/2026-09-12-production-publish-870cef37.md).
 - Read the owner's pasted attachment, the original plan, fee plan, mint notes/setup guide, later phase plans, repository instructions and existing Work chat `Team Up Chats`.
 - GitHub is the shared authority; Codex leads engineering/integration, Lovable handles UI, Work handles research/documentation proposals. See [delivery plan](PROJECT_PLAN.md) and [Work brief](WORK_CHAT_BRIEF.md).
 
@@ -36,6 +36,7 @@ Scripts: `dev`, `build`, `build:dev`, `preview`, `lint`, `typecheck`, `format`, 
 5. **Credential documentation mismatch:** outgoing Telegram calls use the Lovable connector gateway with `LOVABLE_API_KEY` and `TELEGRAM_API_KEY`; `verifyInitData` separately needs `TELEGRAM_BOT_TOKEN`. The plan's gateway statement does not cover that actual requirement.
 6. **Launch defaults:** `bruh-config.server.ts` defaults to mainnet, leaves direct asset tips enabled and enables its BRUH flag based on nonempty mint text. Audit all actual enforcement paths and align network, RPC, allowlist and explicit release gates before claiming launch readiness.
 7. **Claims vs evidence:** later plans say Phases 0–6 are shipped while listing unfinished safety tests; current code has features those plans call missing. The mint guide calls fees built, but helpers are not a verified swap product. Build a requirements-to-code-to-test matrix before declaring completion.
+8. **Lovable security warnings:** the post-publish basic scan flags seven sensitive table groups for having no explicit policies. Source migrations enable RLS and grant service-role access, so the current design appears to be deliberate server-only deny-by-default access. Verify effective Cloud database privileges for `anon`, `authenticated` and `service_role` before dismissing the warnings or adding policies; do not run the bulk auto-fix without reviewing each table.
 
 These are source-based findings and audit priorities, not proof of an exploited production service.
 
