@@ -1,9 +1,9 @@
 # BRUH current handoff
 
 Inspection date: 2026-09-12 (America/Toronto).
-Code baseline: `main` at `a6006b150ca54a164562d36799f761f7f9b36044`.
-Implementation branch: `codex/record-scheduler-config`.
-Scope: record the verified Lovable Cloud scheduler credential and authenticated preview-job state. Documentation only; no secret value is included.
+Code baseline: `main` at `d43fc84203a6b81baa410db0e6a4b3fe2b3a7bbd`.
+Implementation branch: `codex/document-scheduler-load-reduction`.
+Scope: record the verified conditional scheduler configuration and reduced idle execution profile. Documentation only; no secret value is included.
 
 ## Access and context
 
@@ -23,13 +23,13 @@ Scope: record the verified Lovable Cloud scheduler credential and authenticated 
 | Database | Eight migrations under `supabase/migrations/`; generated types; RLS statements present | Lovable reported all eight applied to the connected Cloud database on 2026-09-12; production database binding and effective authorization still need independent verification |
 | Market | `market.server.ts` includes DexScreener and Jupiter, cross-check and fallback | Historical Phase 7 missing-provider statement is stale; live API support unverified |
 | Fees | `fees.server.ts` has split/quote/record/confirm/report helpers, plus migration/tests | Search found fee record/confirmation definitions without an integrated application swap caller; do not describe complete buy/sell as shipped |
-| Tests | Ten files including scheduler authentication, tip-scope, Telegram `initData` and queue-helper adversarial cases | 62 tests pass locally; database and live-provider integration coverage remains incomplete |
+| Tests | Ten files including scheduler authentication, tip-scope, Telegram `initData` and queue-helper adversarial cases | 65 tests pass locally; database and live-provider integration coverage remains incomplete |
 
 Scripts: `dev`, `build`, `build:dev`, `preview`, `lint`, `typecheck`, `format`, `test`. No `.github` workflow directory exists yet. CI still needs a reproducible Bun lockfile-based environment.
 
 ## Priority findings for follow-up
 
-1. **Scheduler authentication:** merged `main` replaces public Supabase-key authorization with a dedicated `BRUH_SCHEDULER_SECRET`, sent in `X-BRUH-Scheduler-Secret`. The helper fails closed when missing or shorter than 32 characters and uses constant-time comparison. Lovable generated the credential internally, stored the same value in its server secret store and Supabase Vault, removed obsolete API-key authorization, and configured all three `pg_cron` jobs. Observed preview runs returned HTTP 200 for call refresh every five minutes, tip verification every two minutes and Telegram update processing every minute. See the [scheduler operation record](operations/2026-09-12-lovable-scheduler-configuration.md).
+1. **Scheduler authentication and load:** merged `main` protects scheduler routes with `BRUH_SCHEDULER_SECRET`, sent in `X-BRUH-Scheduler-Secret`. The helper fails closed when missing or shorter than 32 characters and uses constant-time comparison. Lovable preserved the credential in its server secret store and Supabase Vault. Call refresh now checks every 15 minutes, while tip and Telegram checks retain their responsive cadence but make no outbound HTTP request when their database predicates are false. Digest/credential maintenance runs hourly, retention pruning daily, and cron run history is kept for 14 days. A bounded empty-work observation recorded three successful conditional runs and zero outbound requests; safe one-off calls to all five HTTP routes returned 200. Idle application invocations are 25/day, about 750 per 30 days. See the [load-reduction operation record](operations/2026-09-12-scheduler-load-reduction.md).
 2. **Group isolation and tip verification:** merged `main` validates both memberships against the requested group before wallet resolution, rejects banned memberships, expires intents before RPC lookup, scans later reference signatures, and requires the transferred amount to match exactly. PostgreSQL now makes caller, season, sender, recipient, call and dispute relationships group-scoped. Live devnet verification still remains.
 3. **Webhook durability:** merged `main` stores the authenticated raw update before returning success. A scheduler-only route claims ready rows with `FOR UPDATE SKIP LOCKED`, per-attempt lease tokens, bounded exponential retry and a ten-attempt dead-letter state. Database state is protected from concurrent workers; external Telegram sends still cannot be made exactly-once across a process crash, so handlers must continue to make their durable effects idempotent. The migration and scheduler caller are active; real Telegram update processing remains unverified.
 4. **Session and wallet challenge consumption:** merged `main` moves login-token exchange and wallet-challenge completion into service-role-only database functions. Each operation locks or conditionally updates its one-time credential and commits its dependent records together. The wallet flow keeps the previous wallet active until its 30-minute replacement cutoff, and authentic `initData` dated more than 30 seconds in the future is rejected. Lovable reported the database functions applied; live login and wallet-link journeys remain unverified.
@@ -45,6 +45,6 @@ Observed server references include `LOVABLE_API_KEY`, `TELEGRAM_API_KEY`, `TELEG
 
 ## Validation and next action
 
-Local validation passes 62 tests across ten files, strict TypeScript checking, focused lint and the production build. Lovable independently reported a successful bundle, clean type check and the same 62 passing tests after applying migrations. Repository-wide lint remains blocked by pre-existing CRLF/Prettier failures throughout untouched files. Authenticated scheduler invocation is verified in preview; production database binding, effective authorization, real queued work and devnet transfers have not been verified. No release readiness is claimed.
+Local validation passes 65 tests across ten files, strict TypeScript checking, focused lint and the production build. Existing TanStack `inputValidator` deprecation and large-bundle warnings remain. Repository-wide lint remains blocked by pre-existing CRLF/Prettier failures throughout untouched files. Authenticated conditional scheduler behavior is verified in preview with empty work queues; production database binding, effective authorization, real queued work and devnet transfers have not been verified. No release readiness is claimed.
 
 Next: add idempotency coverage for Telegram updates that trigger external replies and durable state changes, then exercise a real end-to-end Telegram update in preview. Production publication still requires a final release check for domain/database binding, Telegram credentials and devnet-safe provider configuration.
