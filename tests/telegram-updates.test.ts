@@ -1,10 +1,16 @@
 import { describe, expect, it } from "vitest";
 import {
   isTelegramUpdate,
+  retryDelayForErrorSeconds,
   retryDelaySeconds,
   telegramChatId,
   telegramUpdateType,
 } from "../src/lib/telegram-updates.server";
+import {
+  TelegramRateLimitError,
+  telegramRetryAfterSeconds,
+  telegramSendDelayMs,
+} from "../src/lib/telegram.server";
 
 describe("Telegram update queue helpers", () => {
   it("accepts only non-negative safe integer update ids", () => {
@@ -41,5 +47,21 @@ describe("Telegram update queue helpers", () => {
     expect(retryDelaySeconds(2)).toBe(10);
     expect(retryDelaySeconds(7)).toBe(300);
     expect(retryDelaySeconds(20)).toBe(300);
+  });
+
+  it("spaces messages to the same chat by more than one second", () => {
+    expect(telegramSendDelayMs(1_000, 1_500)).toBe(600);
+    expect(telegramSendDelayMs(1_000, 2_100)).toBe(0);
+  });
+
+  it("extracts Telegram retry_after values without trusting arbitrary failures", () => {
+    expect(telegramRetryAfterSeconds(429, '{"parameters":{"retry_after":7}}')).toBe(7);
+    expect(telegramRetryAfterSeconds(429, "not-json")).toBe(1);
+    expect(telegramRetryAfterSeconds(500, '{"retry_after":7}')).toBeNull();
+  });
+
+  it("honors Telegram retry_after when it exceeds queue backoff", () => {
+    expect(retryDelayForErrorSeconds(2, new TelegramRateLimitError("sendMessage", 23))).toBe(23);
+    expect(retryDelayForErrorSeconds(4, new TelegramRateLimitError("sendMessage", 3))).toBe(40);
   });
 });

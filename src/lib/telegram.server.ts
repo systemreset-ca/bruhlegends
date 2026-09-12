@@ -1,6 +1,62 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/telegram";
+const PER_CHAT_SEND_INTERVAL_MS = 1_100;
+const lastScheduledSendByChat = new Map<string, number>();
+
+export class TelegramRateLimitError extends Error {
+  constructor(
+    public readonly method: string,
+    public readonly retryAfterSeconds: number,
+  ) {
+    super(`Telegram ${method} rate limited; retry after ${retryAfterSeconds}s`);
+    this.name = "TelegramRateLimitError";
+  }
+}
+
+export function telegramSendDelayMs(previousSendAtMs: number, nowMs: number): number {
+  return Math.max(0, previousSendAtMs + PER_CHAT_SEND_INTERVAL_MS - nowMs);
+}
+
+function retryAfterFromValue(value: unknown, depth = 0): number | null {
+  if (!value || typeof value !== "object" || depth > 4) return null;
+  const record = value as Record<string, unknown>;
+  const direct = record["retry_after"];
+  if (typeof direct === "number" && Number.isFinite(direct) && direct > 0) {
+    return Math.min(300, Math.ceil(direct));
+  }
+  for (const nested of Object.values(record)) {
+    const found = retryAfterFromValue(nested, depth + 1);
+    if (found !== null) return found;
+  }
+  return null;
+}
+
+export function telegramRetryAfterSeconds(status: number, body: string): number | null {
+  if (status !== 429) return null;
+  try {
+    return retryAfterFromValue(JSON.parse(body)) ?? 1;
+  } catch {
+    return 1;
+  }
+}
+
+async function waitForTelegramChatSlot(chatId: number | string): Promise<void> {
+  const key = String(chatId);
+  const now = Date.now();
+  const previous = lastScheduledSendByChat.get(key) ?? 0;
+  const waitMs = telegramSendDelayMs(previous, now);
+  const scheduledAt = now + waitMs;
+  lastScheduledSendByChat.set(key, scheduledAt);
+
+  if (lastScheduledSendByChat.size > 1_000) {
+    for (const [storedKey, storedAt] of lastScheduledSendByChat) {
+      if (storedAt + PER_CHAT_SEND_INTERVAL_MS < now) lastScheduledSendByChat.delete(storedKey);
+    }
+  }
+
+  if (waitMs > 0) await new Promise((resolve) => setTimeout(resolve, waitMs));
+}
 
 function credentials() {
   const lovableKey = process.env["LOVABLE_API_KEY"];
@@ -42,11 +98,28 @@ export async function telegramCall<T = unknown>(
 
   const text = await response.text();
   if (!response.ok) {
-    console.error(`Telegram gateway ${method} failed [${response.status}]: ${text}`);
-    throw new Error(`Telegram request failed [${response.status}]: ${text}`);
+    const retryAfterSeconds = telegramRetryAfterSeconds(response.status, text);
+    if (retryAfterSeconds !== null) {
+      console.error(`Telegram gateway ${method} rate limited; retry after ${retryAfterSeconds}s`);
+      throw new TelegramRateLimitError(method, retryAfterSeconds);
+    }
+    console.error(`Telegram gateway ${method} failed [${response.status}]`);
+    throw new Error(`Telegram request failed [${response.status}]`);
   }
-  const parsed = JSON.parse(text) as { ok: boolean; result?: T; description?: string };
+  const parsed = JSON.parse(text) as {
+    ok: boolean;
+    result?: T;
+    description?: string;
+    error_code?: number;
+    parameters?: { retry_after?: number };
+  };
   if (!parsed.ok) {
+    const retryAfterSeconds = retryAfterFromValue(parsed);
+    if (parsed.error_code === 429 || retryAfterSeconds !== null) {
+      const retryAfter = retryAfterSeconds ?? 1;
+      console.error(`Telegram API ${method} rate limited; retry after ${retryAfter}s`);
+      throw new TelegramRateLimitError(method, retryAfter);
+    }
     console.error(`Telegram API ${method} error: ${parsed.description}`);
     throw new Error(`Telegram API error: ${parsed.description ?? "unknown"}`);
   }
@@ -69,6 +142,7 @@ export async function sendMessage(
   text: string,
   options: { keyboard?: InlineKeyboard; replyToMessageId?: number; silent?: boolean } = {},
 ) {
+  await waitForTelegramChatSlot(chatId);
   return telegramCall<{ message_id: number }>("sendMessage", {
     chat_id: chatId,
     text,
@@ -93,6 +167,7 @@ export async function editMessageText(
   text: string,
   keyboard?: InlineKeyboard,
 ) {
+  await waitForTelegramChatSlot(chatId);
   return telegramCall("editMessageText", {
     chat_id: chatId,
     message_id: messageId,
