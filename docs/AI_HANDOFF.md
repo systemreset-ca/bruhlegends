@@ -1,15 +1,15 @@
 # BRUH current handoff
 
 Inspection date: 2026-09-12 (America/Toronto).
-Code baseline: `main` at `26409d081023e4bb28e75562ff999960d97d9cb1`.
-Production application baseline: `67f5dfd5ee1cf0e915911b1c8f95ef4b09da8c4b`.
-Implementation branch: `codex/format-lint-baseline`.
-Scope: retain the verified Telegram fast path and Solana release gate, record the successful Helius devnet probe, and restore a passing Lovable lint stage. No secret value is included.
+Code baseline: `main` at `a8e43662d7613cb69de4cd2c2dc52530dc2a19d7`.
+Production application baseline: `a8e43662d7613cb69de4cd2c2dc52530dc2a19d7`.
+Implementation branch: none; the release candidate is merged and published.
+Scope: operate the verified Telegram fast path and Solana devnet safety gate, then complete one controlled user-signed devnet SOL tip. No secret value is included.
 
 ## Access and context
 
 - Existing GitHub CLI login reports `ADMIN` for private `systemreset-ca/bruhlegends`; clone succeeded. The separate GitHub connector returned 404, so CLI and connector access must not be conflated.
-- Lovable published exact GitHub `main` commit `67f5dfd5ee1cf0e915911b1c8f95ef4b09da8c4b`. The public homepage returned HTTP 200 and an unauthenticated webhook POST returned HTTP 401. A real private-chat `/help` completed inline in about 2.71 seconds with first-attempt processing and delivery, no error and no scheduler fallback. See the [immediate fast-path rollout](operations/2026-09-12-telegram-immediate-fast-path.md), the [durable outbox rollout](operations/2026-09-12-telegram-outbox.md) and the earlier [production publish record](operations/2026-09-12-production-publish-870cef37.md).
+- Lovable published exact GitHub `main` commit `a8e43662d7613cb69de4cd2c2dc52530dc2a19d7`. The public homepage and token page returned HTTP 200, the corrected devnet copy was present, and an unauthenticated webhook POST returned HTTP 401. A real private-chat `/help` completed inline in about 2.71 seconds with first-attempt processing and delivery, no error and no scheduler fallback. See the [devnet safety publish](operations/2026-09-12-production-publish-a8e43662.md), [immediate fast-path rollout](operations/2026-09-12-telegram-immediate-fast-path.md), and [durable outbox rollout](operations/2026-09-12-telegram-outbox.md).
 - Read the owner's pasted attachment, the original plan, fee plan, mint notes/setup guide, later phase plans, repository instructions and existing Work chat `Team Up Chats`.
 - GitHub is the shared authority; Codex leads engineering/integration, Lovable handles UI, Work handles research/documentation proposals. See [delivery plan](PROJECT_PLAN.md) and [Work brief](WORK_CHAT_BRIEF.md).
 
@@ -47,6 +47,6 @@ Observed server references include `LOVABLE_API_KEY`, `TELEGRAM_API_KEY`, `TELEG
 
 ## Validation and next action
 
-Local validation passes 78 tests across twelve files, strict TypeScript checking and the production build. Existing TanStack `inputValidator` deprecation and large-bundle warnings remain. Repository-wide lint remains blocked by pre-existing CRLF/Prettier failures throughout untouched files. Authenticated conditional scheduler behavior is verified in Cloud with empty work queues; outbox and exact-update claim rules passed rolled-back database exercises; and real Telegram `/help` delivery is verified. Devnet transfers and live Solana-provider behavior have not been verified. No real-funds release readiness is claimed.
+Local validation passes 78 tests across twelve files, strict TypeScript checking and the production build. Lovable's two regenerated Supabase integration files are excluded from ESLint while remaining covered by TypeScript and application tests; this prevents their platform formatting from blocking preview builds. Existing TanStack `inputValidator` deprecation and large-bundle warnings remain. Authenticated conditional scheduler behavior is verified in Cloud with empty work queues; outbox and exact-update claim rules passed rolled-back database exercises; real Telegram `/help` delivery is verified; and the Helius endpoint passed a read-only devnet probe. A user-signed devnet transfer has not been verified. No real-funds release readiness is claimed.
 
-Next: merge the formatting baseline, confirm Lovable can build the current preview, publish the devnet safety gate, and run a controlled end-to-end devnet SOL tip. Before any real-funds launch, add source-update idempotency to multi-write command handlers and complete the provider/security review.
+Next: run one controlled end-to-end devnet SOL tip signed only in the user's wallet. Before any real-funds launch, add source-update idempotency to multi-write command handlers and complete the provider/security review.
