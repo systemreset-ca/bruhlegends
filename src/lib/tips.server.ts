@@ -6,7 +6,11 @@ import {
   verifyTransferByReference,
 } from "./solana.server";
 import { fetchUsdPrice } from "./market.server";
-import { getBruhConfig, USDC_MAINNET_MINT } from "./bruh-config.server";
+import {
+  getBruhConfig,
+  USDC_MAINNET_MINT,
+  type BruhConfig,
+} from "./bruh-config.server";
 
 export type TipAsset = { symbol: string; mint: string | null; decimals: number };
 
@@ -37,8 +41,35 @@ export function isTipIntentExpired(expiresAt: string, nowMs: number = Date.now()
 
 const FALLBACK_ASSETS: Record<string, TipAsset> = {
   SOL: { symbol: "SOL", mint: null, decimals: 9 },
-  USDC: { symbol: "USDC", mint: USDC_MAINNET_MINT, decimals: 6 },
 };
+
+export type RegisteredTipAsset = TipAsset & {
+  enabled: boolean;
+  is_tip_asset: boolean;
+  network: "mainnet-beta" | "devnet";
+};
+
+export function isAllowedRegisteredTipAsset(
+  asset: RegisteredTipAsset,
+  config: Pick<BruhConfig, "network" | "bruhMint" | "bruhTippingEnabled">,
+): boolean {
+  if (!asset.enabled || !asset.is_tip_asset || asset.network !== config.network) return false;
+
+  if (asset.symbol === "SOL") return asset.mint === null;
+  if (asset.symbol === "USDC") {
+    return config.network === "mainnet-beta"
+      ? asset.mint === USDC_MAINNET_MINT
+      : typeof asset.mint === "string" && asset.mint.length > 0;
+  }
+  if (asset.symbol === "BRUH") {
+    return (
+      config.bruhTippingEnabled &&
+      config.bruhMint.length > 0 &&
+      asset.mint === config.bruhMint
+    );
+  }
+  return false;
+}
 
 /**
  * Asset availability is driven by the `supported_assets` registry, so enabling
@@ -46,29 +77,35 @@ const FALLBACK_ASSETS: Record<string, TipAsset> = {
  */
 export async function resolveAsset(symbol: string): Promise<TipAsset | null> {
   const upper = symbol.toUpperCase();
-  const { network, bruhMint, bruhTippingEnabled } = getBruhConfig();
+  const config = getBruhConfig();
+  const { network } = config;
   const db = await admin();
   const { data } = await db
     .from("supported_assets")
-    .select("symbol, mint, decimals, enabled, is_tip_asset")
+    .select("symbol, mint, decimals, enabled, is_tip_asset, network")
     .eq("symbol", upper)
     .eq("network", network)
     .maybeSingle();
 
-  if (upper === "BRUH") {
-    if (!bruhTippingEnabled) return null;
-    const mint = (data?.mint as string | null) ?? bruhMint;
-    if (!mint) return null;
-    return { symbol: "BRUH", mint, decimals: Number(data?.decimals ?? 9) };
-  }
-
   if (data) {
-    if (!data.enabled || !data.is_tip_asset) return null;
-    return {
+    const registered = {
       symbol: data.symbol as string,
       mint: (data.mint as string | null) ?? null,
       decimals: Number(data.decimals),
+      enabled: Boolean(data.enabled),
+      is_tip_asset: Boolean(data.is_tip_asset),
+      network: data.network as "mainnet-beta" | "devnet",
+    } satisfies RegisteredTipAsset;
+    if (!isAllowedRegisteredTipAsset(registered, config)) return null;
+    return {
+      symbol: registered.symbol,
+      mint: registered.mint,
+      decimals: registered.decimals,
     };
+  }
+
+  if (upper === "USDC" && network === "mainnet-beta") {
+    return { symbol: "USDC", mint: USDC_MAINNET_MINT, decimals: 6 };
   }
   return FALLBACK_ASSETS[upper] ?? null;
 }

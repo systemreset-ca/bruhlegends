@@ -18,7 +18,14 @@ import {
   type GroupSettingsPatch,
   type DisputeResolution,
 } from "./moderation.server";
-import { listPendingTips, confirmTip, createTipIntent } from "./tips.server";
+import {
+  listPendingTips,
+  confirmTip,
+  createTipIntent,
+  isAllowedRegisteredTipAsset,
+  type RegisteredTipAsset,
+} from "./tips.server";
+import { getBruhConfig } from "./bruh-config.server";
 import { isChatAdmin } from "./telegram.server";
 import { exportMemberData, forgetMember } from "./datarights.server";
 
@@ -403,6 +410,7 @@ export async function loadTipTargets(input: { session: string; membershipId: str
   const { telegramUserId } = await requireSession(input.session);
   const membership = await ownedMembership(telegramUserId, input.membershipId);
   const db = await admin();
+  const config = getBruhConfig();
 
   const [members, assets] = await Promise.all([
     db
@@ -412,15 +420,24 @@ export async function loadTipTargets(input: { session: string; membershipId: str
       .eq("is_banned", false)
       .neq("id", input.membershipId)
       .limit(200),
-    db.from("supported_assets").select("symbol").eq("is_tip_asset", true).eq("enabled", true),
+    db
+      .from("supported_assets")
+      .select("symbol, mint, decimals, enabled, is_tip_asset, network")
+      .eq("network", config.network),
   ]);
+
+  const registeredAssets = (assets.data ?? []) as RegisteredTipAsset[];
+  const allowedAssets = registeredAssets
+    .filter((asset) => isAllowedRegisteredTipAsset(asset, config))
+    .map((asset) => asset.symbol);
+  if (!registeredAssets.some((asset) => asset.symbol === "SOL")) allowedAssets.push("SOL");
 
   return {
     members: (members.data ?? []).map((row: any) => ({
       membershipId: row.id as string,
       displayName: (row.display_name ?? "member") as string,
     })),
-    assets: (assets.data ?? []).map((row: any) => row.symbol as string),
+    assets: allowedAssets,
   };
 }
 
