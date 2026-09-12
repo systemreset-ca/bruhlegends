@@ -1,5 +1,6 @@
 import { admin } from "./db.server";
 import { handleUpdate, type TelegramUpdate } from "./bot.server";
+import { TelegramRateLimitError } from "./telegram.server";
 
 const MAX_ATTEMPTS = 10;
 
@@ -29,6 +30,13 @@ export function telegramChatId(update: TelegramUpdate): number | null {
 
 export function retryDelaySeconds(attemptCount: number): number {
   return Math.min(300, 5 * 2 ** Math.max(0, attemptCount - 1));
+}
+
+export function retryDelayForErrorSeconds(attemptCount: number, error: unknown): number {
+  const backoff = retryDelaySeconds(attemptCount);
+  return error instanceof TelegramRateLimitError
+    ? Math.max(backoff, error.retryAfterSeconds)
+    : backoff;
 }
 
 export async function storeTelegramUpdate(update: TelegramUpdate): Promise<void> {
@@ -99,7 +107,7 @@ export async function processTelegramUpdateBatch(limit = 10): Promise<{
     } catch (processingError) {
       const exhausted = row.attempt_count >= MAX_ATTEMPTS;
       const retryAt = new Date(
-        Date.now() + retryDelaySeconds(row.attempt_count) * 1000,
+        Date.now() + retryDelayForErrorSeconds(row.attempt_count, processingError) * 1000,
       ).toISOString();
       const { error: failureError } = await db
         .from("webhook_updates")
