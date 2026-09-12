@@ -2,7 +2,7 @@ import { admin, upsertGroup, upsertMember, migrateChatId, logAudit } from "./db.
 import { sendMessage, answerCallbackQuery, escapeHtml, isChatAdmin } from "./telegram.server";
 import { createCall, extractCandidateMints } from "./calls.server";
 import { getLeaderboard, getMemberStats, type LeaderboardWindow } from "./scoring.server";
-import { createTipIntent, confirmTip } from "./tips.server";
+import { createTipIntent, confirmTip, tipNetworkMetadata } from "./tips.server";
 import { getActiveWallet } from "./wallets.server";
 import { createLoginToken } from "./session.server";
 import { getBruhConfig } from "./bruh-config.server";
@@ -485,7 +485,7 @@ async function handleTip(message: TgMessage, group: any, member: any, args: stri
       invalid_amount: "That amount isn't valid.",
       asset_unavailable:
         assetSymbol === "BRUH" && !bruhTippingEnabled
-          ? "BRUH tipping turns on once the token mint is live. Use SOL or USDC for now."
+          ? "BRUH tipping turns on once the token mint is live. Use SOL on the current devnet."
           : "That asset isn't supported.",
       recipient_wallet_missing: `${escapeHtml(recipient.display_name)} hasn't linked a wallet in this group yet.`,
       membership_group_mismatch: "That recipient isn't available in this group.",
@@ -498,10 +498,12 @@ async function handleTip(message: TgMessage, group: any, member: any, args: stri
   }
 
   const intent = result.intent;
+  const networkMetadata = tipNetworkMetadata(intent.network);
   await sendMessage(
     message.chat.id,
     [
       `<b>Tip ready</b> — ${intent.amountDisplay} ${escapeHtml(intent.assetSymbol)} to ${escapeHtml(recipient.display_name)}`,
+      `<b>Network: ${escapeHtml(networkMetadata.warning)}</b>`,
       "",
       "Approve it in your own wallet. BRUH never holds funds.",
       "Once signed, tap <b>I've paid</b> and I'll verify it on-chain.",

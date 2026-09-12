@@ -431,6 +431,7 @@ export async function loadTipTargets(input: { session: string; membershipId: str
       displayName: (row.display_name ?? "member") as string,
     })),
     assets: allowedAssets,
+    network: config.network,
   };
 }
 
