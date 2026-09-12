@@ -1,5 +1,15 @@
 # Crypto Companion Bot
 
+## Project coordination
+
+BRUH Legends is a Telegram bot and Mini App for group-specific call tracking, reputation and non-custodial Solana tipping. The public domain is https://bruh.tips.
+
+- [Current handoff and inspection findings](docs/AI_HANDOFF.md)
+- [Delivery plan and revision workflow](docs/PROJECT_PLAN.md)
+- [Work chat kickoff message](docs/WORK_CHAT_BRIEF.md)
+
+These documents distinguish intended behavior, code found in the repository, and verified deployment. Historical Lovable phase plans remain preserved as source material.
+
 New Project "BRUH" - you have 2 .md files I created with ChatGPT, enable cloud etc etc, we are making a @connector:telegram:"Telegram" Bot that will act as a Utility tool for the Crypto COmmunity - read the 2 attached files and begin building a Plan for us!!
 
 This project was built with [Lovable](https://lovable.dev).
