@@ -8,7 +8,7 @@ Scope: record the applied and verified durable Telegram reply outbox after compl
 ## Access and context
 
 - Existing GitHub CLI login reports `ADMIN` for private `systemreset-ca/bruhlegends`; clone succeeded. The separate GitHub connector returned 404, so CLI and connector access must not be conflated.
-- Lovable synchronized and published merge commit `870cef379e8cf7136f969ccbef546291e855f3b5`. The public bruh.tips homepage loaded after publication and links to @BRUHLegendsBot. Backend health remains unverified. See the [production publish record](operations/2026-09-12-production-publish-870cef37.md).
+- Lovable published exact GitHub `main` commit `240570b00fe9af06001476ffc3e9547a9c517c12` after the durable outbox Cloud rollout. The public bruh.tips homepage loaded after publication and links to @BRUHLegendsBot. The scheduler/outbox database path is verified, but a real Telegram update and reply remain unverified. See the [outbox rollout record](operations/2026-09-12-telegram-outbox.md) and the earlier [production publish record](operations/2026-09-12-production-publish-870cef37.md).
 - Read the owner's pasted attachment, the original plan, fee plan, mint notes/setup guide, later phase plans, repository instructions and existing Work chat `Team Up Chats`.
 - GitHub is the shared authority; Codex leads engineering/integration, Lovable handles UI, Work handles research/documentation proposals. See [delivery plan](PROJECT_PLAN.md) and [Work brief](WORK_CHAT_BRIEF.md).
 
@@ -48,4 +48,4 @@ Observed server references include `LOVABLE_API_KEY`, `TELEGRAM_API_KEY`, `TELEG
 
 Local validation passes 68 tests across ten files, strict TypeScript checking, focused lint and the production build. Existing TanStack `inputValidator` deprecation and large-bundle warnings remain. Repository-wide lint remains blocked by pre-existing CRLF/Prettier failures throughout untouched files. Authenticated conditional scheduler behavior is verified in Cloud with empty work queues, and the outbox's claim and replay rules passed a rolled-back database exercise. Real Telegram delivery, devnet transfers and live-provider behavior have not been verified. No release readiness is claimed.
 
-Next: exercise one real end-to-end Telegram update and reply, then add source-update idempotency to the few multi-write command handlers that can still partially succeed before an internal database failure. Production publication still requires a final release check for domain/database binding, Telegram credentials and devnet-safe provider configuration.
+Next: exercise one real end-to-end Telegram update and reply, then add source-update idempotency to the few multi-write command handlers that can still partially succeed before an internal database failure. Before any real-funds launch, complete the domain/database binding, Telegram credential and devnet-safe provider checks.
