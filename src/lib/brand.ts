@@ -92,7 +92,7 @@ export const VOICE_RULES = {
     "State the 1% service fee openly wherever buying or cashing out is mentioned.",
   ],
   dont: [
-    "Never promise returns, yield, APY, or \"earn by holding\".",
+    'Never promise returns, yield, APY, or "earn by holding".',
     "Never imply $BRUH is on sale or minted before it actually is.",
     "No fake stats, fake testimonials, fake partner logos or fake volume.",
     "Never call the bot a wallet, exchange, custodian or financial advisor.",

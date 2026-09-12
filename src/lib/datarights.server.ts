@@ -21,7 +21,9 @@ export async function exportMemberData(membershipId: string): Promise<string> {
 
   const { data: member } = await db
     .from("group_members")
-    .select("id, group_id, telegram_user_id, display_name, pseudonym, role, detection_opt_out, default_tip_privacy, joined_at, groups(title)")
+    .select(
+      "id, group_id, telegram_user_id, display_name, pseudonym, role, detection_opt_out, default_tip_privacy, joined_at, groups(title)",
+    )
     .eq("id", membershipId)
     .maybeSingle();
   if (!member) throw new Error("Membership not found.");
@@ -29,7 +31,9 @@ export async function exportMemberData(membershipId: string): Promise<string> {
   const [calls, tipsOut, tipsIn, wallets, disputes] = await Promise.all([
     db
       .from("calls")
-      .select("created_at, mint, symbol, status, baseline_price_usd, last_price_usd, ath_multiple, note")
+      .select(
+        "created_at, mint, symbol, status, baseline_price_usd, last_price_usd, ath_multiple, note",
+      )
       .eq("caller_membership_id", membershipId)
       .order("created_at", { ascending: false }),
     db
@@ -88,7 +92,13 @@ export async function exportMemberData(membershipId: string): Promise<string> {
     ]),
     "",
     "# tips sent",
-    toCsv(tipsOut.data ?? [], ["created_at", "asset_symbol", "amount_display", "status", "privacy"]),
+    toCsv(tipsOut.data ?? [], [
+      "created_at",
+      "asset_symbol",
+      "amount_display",
+      "status",
+      "privacy",
+    ]),
     "",
     "# tips received",
     toCsv(tipsIn.data ?? [], ["created_at", "asset_symbol", "amount_display", "status", "privacy"]),
@@ -241,12 +251,7 @@ export async function groupStatus(groupId: string) {
         .order("last_observed_at", { ascending: false })
         .limit(1)
         .maybeSingle(),
-      db
-        .from("seasons")
-        .select("name")
-        .eq("group_id", groupId)
-        .eq("is_active", true)
-        .maybeSingle(),
+      db.from("seasons").select("name").eq("group_id", groupId).eq("is_active", true).maybeSingle(),
     ]);
 
   return {

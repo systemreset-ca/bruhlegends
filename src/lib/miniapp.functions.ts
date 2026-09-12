@@ -49,9 +49,7 @@ export const finishWalletLinkFn = createServerFn({ method: "POST" })
 
 export const unlinkWalletFn = createServerFn({ method: "POST" })
   .inputValidator((input) =>
-    z
-      .object({ session: z.string().min(8).max(200), membershipId: z.string().uuid() })
-      .parse(input),
+    z.object({ session: z.string().min(8).max(200), membershipId: z.string().uuid() }).parse(input),
   )
   .handler(async ({ data }) => {
     const { unlinkWallet } = await import("./miniapp.server");
@@ -66,7 +64,6 @@ export const getGroupBoardFn = createServerFn({ method: "POST" })
         membershipId: z.string().uuid(),
         seasonId: z.string().uuid().nullable().optional(),
         window: z.enum(["7d", "30d", "all"]).optional(),
-
       })
       .parse(input),
   )
@@ -77,9 +74,7 @@ export const getGroupBoardFn = createServerFn({ method: "POST" })
 
 export const getTipsFn = createServerFn({ method: "POST" })
   .inputValidator((input) =>
-    z
-      .object({ session: z.string().min(8).max(200), membershipId: z.string().uuid() })
-      .parse(input),
+    z.object({ session: z.string().min(8).max(200), membershipId: z.string().uuid() }).parse(input),
   )
   .handler(async ({ data }) => {
     const { loadTips } = await import("./miniapp.server");
@@ -103,9 +98,7 @@ export const verifyTipFn = createServerFn({ method: "POST" })
 
 export const getModerationFn = createServerFn({ method: "POST" })
   .inputValidator((input) =>
-    z
-      .object({ session: z.string().min(8).max(200), membershipId: z.string().uuid() })
-      .parse(input),
+    z.object({ session: z.string().min(8).max(200), membershipId: z.string().uuid() }).parse(input),
   )
   .handler(async ({ data }) => {
     const { loadModeration } = await import("./miniapp.server");
@@ -170,7 +163,6 @@ export const importCallsFn = createServerFn({ method: "POST" })
   });
 
 export const getCallsFn = createServerFn({ method: "POST" })
-
   .inputValidator((input) =>
     z
       .object({
@@ -187,9 +179,7 @@ export const getCallsFn = createServerFn({ method: "POST" })
 
 export const getProfileStatsFn = createServerFn({ method: "POST" })
   .inputValidator((input) =>
-    z
-      .object({ session: z.string().min(8).max(200), membershipId: z.string().uuid() })
-      .parse(input),
+    z.object({ session: z.string().min(8).max(200), membershipId: z.string().uuid() }).parse(input),
   )
   .handler(async ({ data }) => {
     const { loadProfileStats } = await import("./miniapp.server");
@@ -198,9 +188,7 @@ export const getProfileStatsFn = createServerFn({ method: "POST" })
 
 export const getTipTargetsFn = createServerFn({ method: "POST" })
   .inputValidator((input) =>
-    z
-      .object({ session: z.string().min(8).max(200), membershipId: z.string().uuid() })
-      .parse(input),
+    z.object({ session: z.string().min(8).max(200), membershipId: z.string().uuid() }).parse(input),
   )
   .handler(async ({ data }) => {
     const { loadTipTargets } = await import("./miniapp.server");
@@ -226,9 +214,7 @@ export const composeTipFn = createServerFn({ method: "POST" })
 
 export const exportMyDataFn = createServerFn({ method: "POST" })
   .inputValidator((input) =>
-    z
-      .object({ session: z.string().min(8).max(200), membershipId: z.string().uuid() })
-      .parse(input),
+    z.object({ session: z.string().min(8).max(200), membershipId: z.string().uuid() }).parse(input),
   )
   .handler(async ({ data }) => {
     const { exportMyData } = await import("./miniapp.server");
@@ -237,9 +223,7 @@ export const exportMyDataFn = createServerFn({ method: "POST" })
 
 export const forgetMeFn = createServerFn({ method: "POST" })
   .inputValidator((input) =>
-    z
-      .object({ session: z.string().min(8).max(200), membershipId: z.string().uuid() })
-      .parse(input),
+    z.object({ session: z.string().min(8).max(200), membershipId: z.string().uuid() }).parse(input),
   )
   .handler(async ({ data }) => {
     const { forgetMe } = await import("./miniapp.server");

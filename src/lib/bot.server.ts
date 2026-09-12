@@ -13,12 +13,7 @@ import {
   listOpenDisputes,
   resolveDispute,
 } from "./moderation.server";
-import {
-  listModerators,
-  setMemberRole,
-  groupStatus,
-  forgetMember,
-} from "./datarights.server";
+import { listModerators, setMemberRole, groupStatus, forgetMember } from "./datarights.server";
 
 const PROJECT_URL = "https://project--e287f314-27c2-40bf-94f4-4685a95781fe.lovable.app";
 
@@ -140,7 +135,6 @@ export async function handleUpdate(update: TelegramUpdate): Promise<void> {
     return;
   }
 
-
   if (update.callback_query) return handleCallback(update.callback_query);
 
   const message = update.message ?? update.edited_message;
@@ -246,7 +240,6 @@ async function handleCommand(message: TgMessage, text: string) {
   }
 }
 
-
 async function handleStart(message: TgMessage, args: string[]) {
   const payload = args[0];
   if (payload?.startsWith("wallet_") || payload === "wallet") {
@@ -308,7 +301,9 @@ async function handleWalletPointer(message: TgMessage, group: any, member: any) 
     `${summary}\n\nManage it privately — wallet actions never happen in group chat.`,
     {
       replyToMessageId: message.message_id,
-      keyboard: [[{ text: "Manage wallet in DM", url: `https://t.me/${await botUsername()}?start=wallet` }]],
+      keyboard: [
+        [{ text: "Manage wallet in DM", url: `https://t.me/${await botUsername()}?start=wallet` }],
+      ],
     },
   );
 }
@@ -366,8 +361,12 @@ async function handleCall(message: TgMessage, group: any, member: any, args: str
       `<b>Call recorded — ${escapeHtml(snapshot.symbol ?? "token")}</b>`,
       `Caller: ${escapeHtml(member.display_name)}`,
       `Baseline: $${snapshot.priceUsd}`,
-      snapshot.marketCapUsd ? `Market cap: $${Math.round(snapshot.marketCapUsd).toLocaleString()}` : "",
-      snapshot.liquidityUsd ? `Liquidity: $${Math.round(snapshot.liquidityUsd).toLocaleString()}` : "",
+      snapshot.marketCapUsd
+        ? `Market cap: $${Math.round(snapshot.marketCapUsd).toLocaleString()}`
+        : "",
+      snapshot.liquidityUsd
+        ? `Liquidity: $${Math.round(snapshot.liquidityUsd).toLocaleString()}`
+        : "",
       "",
       "<i>Baseline is locked. Not financial advice.</i>",
     ]
@@ -381,7 +380,9 @@ async function handleCalls(message: TgMessage, group: any) {
   const db = await admin();
   const { data: calls } = await db
     .from("calls")
-    .select("symbol, mint, ath_multiple, last_price_usd, baseline_price_usd, group_members(display_name)")
+    .select(
+      "symbol, mint, ath_multiple, last_price_usd, baseline_price_usd, group_members(display_name)",
+    )
     .eq("group_id", group.id)
     .eq("status", "active")
     .order("created_at", { ascending: false })
@@ -408,11 +409,9 @@ async function handleCalls(message: TgMessage, group: any) {
 
 async function handleLeaderboard(message: TgMessage, group: any, args: string[] = []) {
   const requested = (args[0] ?? "").toLowerCase();
-  const window: LeaderboardWindow =
-    requested === "7d" || requested === "30d" ? requested : "all";
+  const window: LeaderboardWindow = requested === "7d" || requested === "30d" ? requested : "all";
   const rows = await getLeaderboard(group.id, 10, null, window);
   if (rows.length === 0) {
-
     await sendMessage(message.chat.id, "No ranked callers yet in this group.", {
       replyToMessageId: message.message_id,
     });
@@ -428,7 +427,6 @@ async function handleLeaderboard(message: TgMessage, group: any, args: string[] 
     `<b>BRUH Score — ${escapeHtml(group.title)}</b>\n<i>${label}</i>\n\n${lines.join("\n")}\n\n<i>Group-scoped. Peak multiples use locked baselines. Try /leaderboard 7d or 30d.</i>`,
     { replyToMessageId: message.message_id },
   );
-
 }
 
 async function handleStats(message: TgMessage, group: any, member: any) {
@@ -547,9 +545,13 @@ async function handleTips(message: TgMessage, group: any, member: any) {
 async function handleDispute(message: TgMessage, group: any, member: any, args: string[]) {
   const reason = args.join(" ").trim();
   if (!reason) {
-    await sendMessage(message.chat.id, "Usage: /dispute &lt;reason&gt; (reply to the call message)", {
-      replyToMessageId: message.message_id,
-    });
+    await sendMessage(
+      message.chat.id,
+      "Usage: /dispute &lt;reason&gt; (reply to the call message)",
+      {
+        replyToMessageId: message.message_id,
+      },
+    );
     return;
   }
   const db = await admin();
@@ -654,7 +656,6 @@ async function handleCallback(query: NonNullable<TelegramUpdate["callback_query"
   }
   await answerCallbackQuery(query.id);
 }
-
 
 async function requireAdmin(message: TgMessage, from: TgUser): Promise<boolean> {
   if (await isChatAdmin(message.chat.id, from.id)) return true;
@@ -779,9 +780,13 @@ async function handleSeason(message: TgMessage, group: any, from: TgUser, args: 
     return;
   }
 
-  await sendMessage(message.chat.id, "Usage: /season start &lt;name&gt; · /season end · /season list", {
-    replyToMessageId: message.message_id,
-  });
+  await sendMessage(
+    message.chat.id,
+    "Usage: /season start &lt;name&gt; · /season end · /season list",
+    {
+      replyToMessageId: message.message_id,
+    },
+  );
 }
 
 async function handleSettings(message: TgMessage, group: any, from: TgUser) {
@@ -809,7 +814,6 @@ async function handleSettings(message: TgMessage, group: any, from: TgUser) {
     },
   );
 }
-
 
 async function handleModerators(
   message: TgMessage,

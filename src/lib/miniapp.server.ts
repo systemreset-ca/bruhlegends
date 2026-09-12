@@ -146,7 +146,9 @@ export async function loadGroupBoard(input: {
 
     db
       .from("calls")
-      .select("symbol, mint, baseline_price_usd, last_price_usd, ath_multiple, group_members(display_name)")
+      .select(
+        "symbol, mint, baseline_price_usd, last_price_usd, ath_multiple, group_members(display_name)",
+      )
       .eq("group_id", membership.group_id)
       .eq("status", "active")
       .order("created_at", { ascending: false })
@@ -172,7 +174,6 @@ export async function loadGroupBoard(input: {
   };
 }
 
-
 /** Tips the caller is party to, with a payment link they can act on now. */
 export async function loadTips(input: { session: string; membershipId: string }) {
   const { telegramUserId } = await requireSession(input.session);
@@ -180,11 +181,7 @@ export async function loadTips(input: { session: string; membershipId: string })
   return { tips: await listPendingTips(input.membershipId) };
 }
 
-export async function verifyTip(input: {
-  session: string;
-  membershipId: string;
-  tipId: string;
-}) {
+export async function verifyTip(input: { session: string; membershipId: string; tipId: string }) {
   const { telegramUserId } = await requireSession(input.session);
   await ownedMembership(telegramUserId, input.membershipId);
 
@@ -233,7 +230,8 @@ export async function loadModeration(input: { session: string; membershipId: str
       minTokenAgeMinutes: Number(group.min_token_age_minutes ?? 0),
       allowRepeatCalls: Boolean(group.allow_repeat_calls),
       announceTips: Boolean(group.announce_tips),
-      announcementMode: (group.announcement_mode ?? "immediate") as "immediate" | "hourly" | "daily" | "off",
+      announcementMode: (group.announcement_mode ?? "immediate") as
+        "immediate" | "hourly" | "daily" | "off",
       quietHoursStart: group.quiet_hours_start as number | null,
       quietHoursEnd: group.quiet_hours_end as number | null,
       retentionDays: Number(group.raw_message_retention_days ?? 30),
@@ -252,11 +250,7 @@ export async function saveSettings(input: {
 }
 
 /** Admin-only bulk import of historical calls; stored as unscored history. */
-export async function importCalls(input: {
-  session: string;
-  membershipId: string;
-  csv: string;
-}) {
+export async function importCalls(input: { session: string; membershipId: string; csv: string }) {
   const { group, membership } = await requireGroupAdmin(input.session, input.membershipId);
   const { importHistoricalCalls } = await import("./import.server");
   return importHistoricalCalls({
@@ -265,7 +259,6 @@ export async function importCalls(input: {
     csv: input.csv,
   });
 }
-
 
 export async function settleDispute(input: {
   session: string;

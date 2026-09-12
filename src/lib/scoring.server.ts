@@ -10,7 +10,6 @@ export type LeaderboardRow = {
   tipsReceived: number;
   ranked: boolean;
   score: number;
-
 };
 
 function median(values: number[]): number {
@@ -84,11 +83,13 @@ export async function getLeaderboard(
   if (cutoff) callQuery = callQuery.gte("created_at", cutoff);
   const { data: calls } = await callQuery;
 
-
   const { data: milestones } = await db
     .from("milestones")
     .select("call_id")
-    .in("call_id", (calls ?? []).map((c: { id: string }) => c.id));
+    .in(
+      "call_id",
+      (calls ?? []).map((c: { id: string }) => c.id),
+    );
 
   let tipQuery = db
     .from("tip_intents")
@@ -97,7 +98,6 @@ export async function getLeaderboard(
     .eq("status", "confirmed");
   if (cutoff) tipQuery = tipQuery.gte("created_at", cutoff);
   const { data: tips } = await tipQuery;
-
 
   const milestoneByCall = new Map<string, number>();
   for (const row of milestones ?? []) {
@@ -151,7 +151,6 @@ export async function getLeaderboard(
     .sort((a, b) => (a.ranked === b.ranked ? b.score - a.score : a.ranked ? -1 : 1))
     .slice(0, limit);
 }
-
 
 export async function getMemberStats(groupId: string, membershipId: string) {
   const board = await getLeaderboard(groupId, 1000);

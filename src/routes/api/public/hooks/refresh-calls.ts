@@ -65,4 +65,3 @@ export const Route = createFileRoute("/api/public/hooks/refresh-calls")({
     },
   },
 });
-

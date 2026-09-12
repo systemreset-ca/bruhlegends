@@ -162,7 +162,9 @@ export type FeeTotals = {
 /** Treasury reporting: what has actually been collected, never estimated. */
 export async function feeTotals(groupId?: string | null): Promise<FeeTotals> {
   const db = await admin();
-  let query = db.from("fee_events").select("asset_symbol, fee_base_units, usd_reference_at_execution, status");
+  let query = db
+    .from("fee_events")
+    .select("asset_symbol, fee_base_units, usd_reference_at_execution, status");
   if (groupId) query = query.eq("group_id", groupId);
   const { data } = await query;
 

@@ -10,10 +10,7 @@ function FlowFrame() {
     const measure = () => {
       const doc = ref.current?.contentDocument;
       if (!doc) return;
-      const h = Math.max(
-        doc.body?.scrollHeight ?? 0,
-        doc.documentElement?.scrollHeight ?? 0,
-      );
+      const h = Math.max(doc.body?.scrollHeight ?? 0, doc.documentElement?.scrollHeight ?? 0);
       if (h > 0) setHeight(h);
     };
     const id = window.setInterval(measure, 500);
@@ -35,7 +32,6 @@ function FlowFrame() {
     />
   );
 }
-
 
 export const Route = createFileRoute("/tiptek")({
   head: () => ({
@@ -90,7 +86,6 @@ function TipTekPage() {
           <FlowFrame />
         </div>
       </section>
-
     </SiteShell>
   );
 }
