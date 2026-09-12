@@ -1,9 +1,9 @@
 # BRUH current handoff
 
 Inspection date: 2026-09-12 (America/Toronto).
-Code baseline: `main` at `123510e9239b7ff2e872a75c1f04f504e6ca9825`.
-Implementation branch: `codex/harden-remaining-table-privileges`.
-Scope: complete effective Cloud privilege verification and hardening for every table flagged by Lovable's basic security scanner. No secret value is included.
+Code baseline: `main` at `941fdf163f92d289f9ef6eadb51ca65e419e3ffe`.
+Implementation branch: `codex/record-complete-privilege-hardening`.
+Scope: record completed Cloud privilege verification and hardening for every table flagged by Lovable's basic security scanner. No secret value is included.
 
 ## Access and context
 
@@ -20,7 +20,7 @@ Scope: complete effective Cloud privilege verification and hardening for every t
 | UI | `src/routes/app.tsx`, marketing/group/token/tiptek routes, policy routes and brand components | Preview observed; complete user journeys not tested |
 | Bot | `src/lib/bot.server.ts`, `telegram.server.ts`, public webhook route | Implementation present; live bot identity and processing not verified |
 | Backend | Calls, market, scoring, wallets, tips, Solana, moderation, imports, announcements, data rights, Mini App and session modules under `src/lib/` | Initial selective reading; not a complete audit |
-| Database | Ten migrations under `supabase/migrations/`; generated types; RLS statements present | Nine are applied to the connected Cloud database; the second privilege-hardening migration is pending review and application |
+| Database | Ten migrations under `supabase/migrations/`; generated types; RLS statements present | The managed Drizzle journal records seven applied entries through `0006`; both privilege migrations are applied and verified |
 | Market | `market.server.ts` includes DexScreener and Jupiter, cross-check and fallback | Historical Phase 7 missing-provider statement is stale; live API support unverified |
 | Fees | `fees.server.ts` has split/quote/record/confirm/report helpers, plus migration/tests | Search found fee record/confirmation definitions without an integrated application swap caller; do not describe complete buy/sell as shipped |
 | Tests | Ten files including scheduler authentication, tip-scope, Telegram `initData` and queue-helper adversarial cases | 65 tests pass locally; database and live-provider integration coverage remains incomplete |
@@ -36,7 +36,7 @@ Scripts: `dev`, `build`, `build:dev`, `preview`, `lint`, `typecheck`, `format`, 
 5. **Credential documentation mismatch:** outgoing Telegram calls use the Lovable connector gateway with `LOVABLE_API_KEY` and `TELEGRAM_API_KEY`; `verifyInitData` separately needs `TELEGRAM_BOT_TOKEN`. The plan's gateway statement does not cover that actual requirement.
 6. **Launch defaults:** `bruh-config.server.ts` defaults to mainnet, leaves direct asset tips enabled and enables its BRUH flag based on nonempty mint text. Audit all actual enforcement paths and align network, RPC, allowlist and explicit release gates before claiming launch readiness.
 7. **Claims vs evidence:** later plans say Phases 0–6 are shipped while listing unfinished safety tests; current code has features those plans call missing. The mint guide calls fees built, but helpers are not a verified swap product. Build a requirements-to-code-to-test matrix before declaring completion.
-8. **Lovable security warnings:** the first hardening migration is applied and verified on ten sensitive tables; its original seven warnings cleared. The scanner then surfaced 11 tables with the same explicit client grants. A second read-only audit found every one server-only today and safe to harden, including `supported_assets` and `bruh_price_quotes`. Migration `20260912113000_harden_remaining_table_privileges.sql` removes their client grants, preserves service-role access and adds restrictive false client policies. The platform-managed `supabase_admin` defaults remain unchanged. See the [Cloud privilege audit](operations/2026-09-12-cloud-privilege-audit.md).
+8. **Lovable security warnings:** both hardening migrations are applied and verified across all 21 flagged tables. `PUBLIC`, `anon` and `authenticated` have no table privileges; `service_role` retains full access; each table has one restrictive false client policy; rows are unchanged; server probes pass; and the Lovable scanner reports no issues. Lovable's managed owner path recorded re-entrant duplicates as `0004` and `0006`; preserve all four migration records as applied history. The platform-managed `supabase_admin` defaults remain unchanged. See the [Cloud privilege audit](operations/2026-09-12-cloud-privilege-audit.md).
 
 These are source-based findings and audit priorities, not proof of an exploited production service.
 
@@ -48,4 +48,4 @@ Observed server references include `LOVABLE_API_KEY`, `TELEGRAM_API_KEY`, `TELEG
 
 Local validation passes 65 tests across ten files, strict TypeScript checking, focused lint and the production build. Existing TanStack `inputValidator` deprecation and large-bundle warnings remain. Repository-wide lint remains blocked by pre-existing CRLF/Prettier failures throughout untouched files. Authenticated conditional scheduler behavior is verified in preview with empty work queues; production database binding, effective authorization, real queued work and devnet transfers have not been verified. No release readiness is claimed.
 
-Next: review, merge and apply the second privilege migration, then verify ACLs, policies, unchanged rows, safe server routes and a clean Lovable scanner result for all 11 tables. After that, add idempotency coverage for Telegram updates that trigger external replies and durable state changes and exercise a real end-to-end Telegram update in preview. Production publication still requires a final release check for domain/database binding, Telegram credentials and devnet-safe provider configuration.
+Next: add idempotency coverage for Telegram updates that trigger external replies and durable state changes, then exercise a real end-to-end Telegram update in preview. Production publication still requires a final release check for domain/database binding, Telegram credentials and devnet-safe provider configuration.
