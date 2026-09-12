@@ -136,3 +136,21 @@ The read-only Cloud audit found an identical access shape on all 11: owner `post
 Source and Cloud function inspection classified all 11 tables as server-only today. `supported_assets` is read by `tips.server.ts` and `miniapp.server.ts`; `bruh_price_quotes` has no application read path. Other access is through server modules using `supabaseAdmin`, service-role scheduler routes, or the service-role-only `claim_telegram_updates` and `complete_wallet_challenge` functions. No current Supabase Auth, Realtime, browser, public token-price UI, Telegram processing or scheduler flow depends on client table grants.
 
 Migration `20260912113000_harden_remaining_table_privileges.sql` applies the same re-entrant remediation to these 11 tables. If a public asset list or public price interface is added later, it must receive a deliberately reviewed narrow server endpoint or narrowly scoped policy and grant; the current restrictive policy must not be removed incidentally.
+
+## Remaining-table remediation result
+
+Lovable applied the pending `0005` migration and an owner-path-generated, semantically identical `0006` migration on 2026-09-12. Both journal entries and files remain in source as applied history. The re-entrant statements produced exactly one policy per table.
+
+Post-application verification passed for all 11 tables:
+
+- owner remains `postgres`; RLS remains enabled and FORCE RLS remains off;
+- exact ACL is `{postgres=arwdDxtm/postgres, service_role=arwdDxtm/postgres, sandbox_exec=ar/postgres}`;
+- `PUBLIC`, `anon` and `authenticated` have zero of 77 checked table privileges; `service_role` has all 77;
+- every table has exactly one restrictive `ALL` policy for `{anon,authenticated}` with false `USING` and `WITH CHECK` predicates;
+- row counts are unchanged: `supported_assets` remains at three and the other ten remain empty;
+- public REST probes return HTTP 401 / PostgreSQL `42501 permission denied` without data;
+- authenticated non-mutating probes for call refresh, tip verification, Telegram update processing, hourly maintenance and retention pruning return HTTP 200 with zero-work results;
+- relevant SECURITY DEFINER functions, triggers and all six scheduler jobs remain unchanged and recent scheduler runs succeeded;
+- the Lovable basic security scan reports no issues.
+
+No application code, default ACL, secret, scheduler configuration, domain setting or deployment was changed. The site was not published for this database-only operation.
