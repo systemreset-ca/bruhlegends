@@ -25,4 +25,4 @@ The migration validates all existing rows. If legacy cross-group data exists, de
 
 ## Implementation
 
-Implemented on `codex/group-constraints` in `20260912064500_enforce_group_relationships.sql`. Record the pull request and merge commit here after integration.
+Implemented on `codex/group-constraints` in `20260912064500_enforce_group_relationships.sql`; reviewed in pull request #6. Record the merge commit here after integration.
