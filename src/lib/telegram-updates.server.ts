@@ -62,25 +62,22 @@ type ClaimedUpdate = {
   lock_token: string;
 };
 
+type TelegramUpdateBatchResult = {
+  claimed: number;
+  processed: number;
+  failed: number;
+  deadLettered: number;
+};
+
 function errorMessage(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error);
   return message.slice(0, 1000);
 }
 
-export async function processTelegramUpdateBatch(limit = 10): Promise<{
-  claimed: number;
-  processed: number;
-  failed: number;
-  deadLettered: number;
-}> {
-  const db = await admin();
-  const { data, error } = await db.rpc("claim_telegram_updates", {
-    p_limit: limit,
-    p_lease_seconds: 300,
-  });
-  if (error) throw error;
-
-  const claimed = (data ?? []) as ClaimedUpdate[];
+async function processClaimedTelegramUpdates(
+  db: Awaited<ReturnType<typeof admin>>,
+  claimed: ClaimedUpdate[],
+): Promise<TelegramUpdateBatchResult> {
   let processed = 0;
   let failed = 0;
   let deadLettered = 0;
@@ -131,6 +128,28 @@ export async function processTelegramUpdateBatch(limit = 10): Promise<{
   return { claimed: claimed.length, processed, failed, deadLettered };
 }
 
+export async function processTelegramUpdateBatch(limit = 10): Promise<TelegramUpdateBatchResult> {
+  const db = await admin();
+  const { data, error } = await db.rpc("claim_telegram_updates", {
+    p_limit: limit,
+    p_lease_seconds: 300,
+  });
+  if (error) throw error;
+  return processClaimedTelegramUpdates(db, (data ?? []) as ClaimedUpdate[]);
+}
+
+export async function processTelegramUpdateById(
+  telegramUpdateId: number,
+): Promise<TelegramUpdateBatchResult> {
+  const db = await admin();
+  const { data, error } = await db.rpc("claim_telegram_update_by_id", {
+    p_telegram_update_id: telegramUpdateId,
+    p_lease_seconds: 300,
+  });
+  if (error) throw error;
+  return processClaimedTelegramUpdates(db, (data ?? []) as ClaimedUpdate[]);
+}
+
 type ClaimedAction = {
   id: string;
   method: string;
@@ -139,20 +158,17 @@ type ClaimedAction = {
   lock_token: string;
 };
 
-export async function processTelegramOutboxBatch(limit = 20): Promise<{
+type TelegramOutboxBatchResult = {
   claimed: number;
   sent: number;
   failed: number;
   deadLettered: number;
-}> {
-  const db = await admin();
-  const { data, error } = await db.rpc("claim_telegram_outbox", {
-    p_limit: limit,
-    p_lease_seconds: 300,
-  });
-  if (error) throw error;
+};
 
-  const claimed = (data ?? []) as ClaimedAction[];
+async function processClaimedTelegramActions(
+  db: Awaited<ReturnType<typeof admin>>,
+  claimed: ClaimedAction[],
+): Promise<TelegramOutboxBatchResult> {
   let sent = 0;
   let failed = 0;
   let deadLettered = 0;
@@ -203,4 +219,27 @@ export async function processTelegramOutboxBatch(limit = 20): Promise<{
   }
 
   return { claimed: claimed.length, sent, failed, deadLettered };
+}
+
+export async function processTelegramOutboxBatch(limit = 20): Promise<TelegramOutboxBatchResult> {
+  const db = await admin();
+  const { data, error } = await db.rpc("claim_telegram_outbox", {
+    p_limit: limit,
+    p_lease_seconds: 300,
+  });
+  if (error) throw error;
+  return processClaimedTelegramActions(db, (data ?? []) as ClaimedAction[]);
+}
+
+export async function processTelegramOutboxByUpdateId(
+  telegramUpdateId: number,
+): Promise<TelegramOutboxBatchResult> {
+  const db = await admin();
+  const { data, error } = await db.rpc("claim_telegram_outbox_by_update_id", {
+    p_telegram_update_id: telegramUpdateId,
+    p_limit: 20,
+    p_lease_seconds: 300,
+  });
+  if (error) throw error;
+  return processClaimedTelegramActions(db, (data ?? []) as ClaimedAction[]);
 }
