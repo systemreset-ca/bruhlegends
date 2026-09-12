@@ -24,4 +24,4 @@ This preserves the security delay without creating a period in which a member ha
 
 ## Implementation
 
-Implemented on `codex/atomic-auth` in `20260912042000_atomic_auth_credentials.sql` and `src/lib/wallets.server.ts`. Record the pull request and merge commit here after integration.
+Implemented on `codex/atomic-auth` in `20260912042000_atomic_auth_credentials.sql` and `src/lib/wallets.server.ts`; reviewed in pull request #4. Record the merge commit here after integration.
