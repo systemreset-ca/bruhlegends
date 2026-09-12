@@ -220,10 +220,10 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "calls_caller_membership_id_fkey"
-            columns: ["caller_membership_id"]
+            columns: ["caller_membership_id", "group_id"]
             isOneToOne: false
             referencedRelation: "group_members"
-            referencedColumns: ["id"]
+            referencedColumns: ["id", "group_id"]
           },
           {
             foreignKeyName: "calls_group_id_fkey"
@@ -234,10 +234,10 @@ export type Database = {
           },
           {
             foreignKeyName: "calls_season_id_fkey"
-            columns: ["season_id"]
+            columns: ["season_id", "group_id"]
             isOneToOne: false
             referencedRelation: "seasons"
-            referencedColumns: ["id"]
+            referencedColumns: ["id", "group_id"]
           },
         ]
       }
@@ -281,10 +281,10 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "disputes_call_id_fkey"
-            columns: ["call_id"]
+            columns: ["call_id", "group_id"]
             isOneToOne: false
             referencedRelation: "calls"
-            referencedColumns: ["id"]
+            referencedColumns: ["id", "group_id"]
           },
           {
             foreignKeyName: "disputes_group_id_fkey"
@@ -295,17 +295,17 @@ export type Database = {
           },
           {
             foreignKeyName: "disputes_raised_by_membership_id_fkey"
-            columns: ["raised_by_membership_id"]
+            columns: ["raised_by_membership_id", "group_id"]
             isOneToOne: false
             referencedRelation: "group_members"
-            referencedColumns: ["id"]
+            referencedColumns: ["id", "group_id"]
           },
           {
             foreignKeyName: "disputes_resolved_by_membership_id_fkey"
-            columns: ["resolved_by_membership_id"]
+            columns: ["resolved_by_membership_id", "group_id"]
             isOneToOne: false
             referencedRelation: "group_members"
-            referencedColumns: ["id"]
+            referencedColumns: ["id", "group_id"]
           },
         ]
       }
@@ -884,10 +884,10 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "tip_intents_call_id_fkey"
-            columns: ["call_id"]
+            columns: ["call_id", "group_id"]
             isOneToOne: false
             referencedRelation: "calls"
-            referencedColumns: ["id"]
+            referencedColumns: ["id", "group_id"]
           },
           {
             foreignKeyName: "tip_intents_group_id_fkey"
@@ -905,17 +905,17 @@ export type Database = {
           },
           {
             foreignKeyName: "tip_intents_recipient_membership_id_fkey"
-            columns: ["recipient_membership_id"]
+            columns: ["recipient_membership_id", "group_id"]
             isOneToOne: false
             referencedRelation: "group_members"
-            referencedColumns: ["id"]
+            referencedColumns: ["id", "group_id"]
           },
           {
             foreignKeyName: "tip_intents_sender_membership_id_fkey"
-            columns: ["sender_membership_id"]
+            columns: ["sender_membership_id", "group_id"]
             isOneToOne: false
             referencedRelation: "group_members"
-            referencedColumns: ["id"]
+            referencedColumns: ["id", "group_id"]
           },
         ]
       }

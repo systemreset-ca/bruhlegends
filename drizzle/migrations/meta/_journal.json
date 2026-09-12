@@ -15,6 +15,13 @@
       "when": 1789191187746,
       "tag": "0001_durable_telegram_updates",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789191212541,
+      "tag": "0002_enforce_group_relationships",
+      "breakpoints": true
     }
   ]
 }
