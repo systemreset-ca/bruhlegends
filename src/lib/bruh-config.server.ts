@@ -20,8 +20,9 @@ export type BruhConfig = {
   feeEnabled: boolean;
 };
 
+export type SolanaNetwork = BruhConfig["network"];
+
 const DEVNET_RPC = "https://api.devnet.solana.com";
-const MAINNET_RPC = "https://api.mainnet-beta.solana.com";
 
 const DEFAULT_FEE_BPS = 100;
 /** Hard ceiling so a bad env value can never quietly tax users into oblivion. */
@@ -34,18 +35,38 @@ export function parseFeeBps(raw: string | undefined): number {
   return Math.min(Math.floor(value), MAX_FEE_BPS);
 }
 
+export function resolveSolanaNetwork(env: NodeJS.ProcessEnv = process.env): SolanaNetwork {
+  const requested = env["SOLANA_NETWORK"]?.trim();
+  if (!requested || requested === "devnet") return "devnet";
+  if (requested !== "mainnet-beta") {
+    throw new Error("SOLANA_NETWORK must be devnet or mainnet-beta");
+  }
+  if (env["SOLANA_MAINNET_ENABLED"] !== "true") {
+    throw new Error("Mainnet requires SOLANA_MAINNET_ENABLED=true");
+  }
+  return "mainnet-beta";
+}
+
+export function resolveSolanaRpcUrl(
+  network: SolanaNetwork,
+  env: NodeJS.ProcessEnv = process.env,
+): string {
+  const configured = env["SOLANA_RPC_URL"]?.trim();
+  if (network === "mainnet-beta" && !configured) {
+    throw new Error("Mainnet requires an explicit SOLANA_RPC_URL");
+  }
+  return configured ?? DEVNET_RPC;
+}
+
 export function getBruhConfig(): BruhConfig {
-  const network = (process.env["SOLANA_NETWORK"] === "devnet" ? "devnet" : "mainnet-beta") as
-    | "mainnet-beta"
-    | "devnet";
+  const network = resolveSolanaNetwork();
   const bruhMint = process.env["BRUH_TOKEN_MINT"] ?? "";
   const feeBps = parseFeeBps(process.env["FEE_BPS"]);
   const feeTreasuryAddress = process.env["FEE_TREASURY_ADDRESS"] ?? "";
 
   return {
     network,
-    rpcUrl:
-      process.env["SOLANA_RPC_URL"] ?? (network === "devnet" ? DEVNET_RPC : MAINNET_RPC),
+    rpcUrl: resolveSolanaRpcUrl(network),
     bruhMint,
     bruhTippingEnabled: bruhMint.length > 0,
     directAssetTipsEnabled: true,
