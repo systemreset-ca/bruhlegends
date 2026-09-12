@@ -1,9 +1,9 @@
 # BRUH current handoff
 
 Inspection date: 2026-09-12 (America/Toronto).
-Code baseline: `main` at `d43fc84203a6b81baa410db0e6a4b3fe2b3a7bbd`.
-Implementation branch: `codex/document-scheduler-load-reduction`.
-Scope: record the verified conditional scheduler configuration and reduced idle execution profile. Documentation only; no secret value is included.
+Code baseline: `main` at `378885cf5ff15a603bf613acdedb662fb8be452e`.
+Implementation branch: `codex/cloud-privilege-audit`.
+Scope: record the read-only effective Cloud privilege audit for the ten sensitive tables behind Lovable's seven basic security warnings. No secret value is included.
 
 ## Access and context
 
@@ -36,7 +36,7 @@ Scripts: `dev`, `build`, `build:dev`, `preview`, `lint`, `typecheck`, `format`, 
 5. **Credential documentation mismatch:** outgoing Telegram calls use the Lovable connector gateway with `LOVABLE_API_KEY` and `TELEGRAM_API_KEY`; `verifyInitData` separately needs `TELEGRAM_BOT_TOKEN`. The plan's gateway statement does not cover that actual requirement.
 6. **Launch defaults:** `bruh-config.server.ts` defaults to mainnet, leaves direct asset tips enabled and enables its BRUH flag based on nonempty mint text. Audit all actual enforcement paths and align network, RPC, allowlist and explicit release gates before claiming launch readiness.
 7. **Claims vs evidence:** later plans say Phases 0–6 are shipped while listing unfinished safety tests; current code has features those plans call missing. The mint guide calls fees built, but helpers are not a verified swap product. Build a requirements-to-code-to-test matrix before declaring completion.
-8. **Lovable security warnings:** the post-publish basic scan flags seven sensitive table groups for having no explicit policies. Source migrations enable RLS and grant service-role access, so the current design appears to be deliberate server-only deny-by-default access. Verify effective Cloud database privileges for `anon`, `authenticated` and `service_role` before dismissing the warnings or adding policies; do not run the bulk auto-fix without reviewing each table.
+8. **Lovable security warnings:** the effective Cloud audit found no current REST exposure: all ten flagged tables have RLS enabled, no policies, and client roles that neither own nor bypass RLS. It also found explicit full table grants, including `TRUNCATE`, for `anon` and `authenticated`. PostgREST does not expose truncate and no callable function supplies that path, but these grants create latent risk if a permissive policy or SQL path is added later. Source inspection confirms current BRUH access uses the server-only service role. Remove client grants in a reviewed migration, retain service-role grants, and do not alter the platform-managed `supabase_admin` defaults. See the [Cloud privilege audit](operations/2026-09-12-cloud-privilege-audit.md).
 
 These are source-based findings and audit priorities, not proof of an exploited production service.
 
@@ -48,4 +48,4 @@ Observed server references include `LOVABLE_API_KEY`, `TELEGRAM_API_KEY`, `TELEG
 
 Local validation passes 65 tests across ten files, strict TypeScript checking, focused lint and the production build. Existing TanStack `inputValidator` deprecation and large-bundle warnings remain. Repository-wide lint remains blocked by pre-existing CRLF/Prettier failures throughout untouched files. Authenticated conditional scheduler behavior is verified in preview with empty work queues; production database binding, effective authorization, real queued work and devnet transfers have not been verified. No release readiness is claimed.
 
-Next: add idempotency coverage for Telegram updates that trigger external replies and durable state changes, then exercise a real end-to-end Telegram update in preview. Production publication still requires a final release check for domain/database binding, Telegram credentials and devnet-safe provider configuration.
+Next: migrate the ten sensitive tables to explicit server-only table privileges and verify the effective ACLs in Cloud. Then add idempotency coverage for Telegram updates that trigger external replies and durable state changes and exercise a real end-to-end Telegram update in preview. Production publication still requires a final release check for domain/database binding, Telegram credentials and devnet-safe provider configuration.
