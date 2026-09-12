@@ -109,6 +109,6 @@ GRANT ALL ON
 TO service_role;
 ```
 
-The migration also adds a restrictive `FOR ALL` policy with `USING (false)` and `WITH CHECK (false)` for `anon` and `authenticated` on each table. These policies create a second boundary: an accidental restored grant or permissive client policy does not provide row access until the restrictive deny policy is deliberately removed. A `service_role` policy was not added because that role bypasses RLS and such a policy would have no enforcement effect.
+The migration also adds a restrictive `FOR ALL` policy with `USING (false)` and `WITH CHECK (false)` for `anon` and `authenticated` on each table. Each policy is dropped by its exact name before creation so the Lovable migration runner can safely execute its validation pass more than once. These policies create a second boundary: an accidental restored grant or permissive client policy does not provide row access until the restrictive deny policy is deliberately removed. A `service_role` policy was not added because that role bypasses RLS and such a policy would have no enforcement effect.
 
 After applying the migration, verify `relacl`, `has_table_privilege` for all seven table privileges, policy inventory, public REST behavior, service-role server routes and the Lovable scanner. The desired result is no table privilege for `anon` or `authenticated`, unchanged full access for `service_role`, and no change to rows or application behavior.
