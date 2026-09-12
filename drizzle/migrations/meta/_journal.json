@@ -57,6 +57,13 @@
       "when": 1789216200000,
       "tag": "0007_durable_telegram_outbox",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1789216230453,
+      "tag": "0008_durable_telegram_outbox",
+      "breakpoints": true
     }
   ]
 }
