@@ -58,6 +58,33 @@ function fixture() {
   return { deps, body, wallet, request };
 }
 describe("isolated provisioning bridge receiver", () => {
+  it("accepts the exact BRUH gateway wire contract without a shared receiver secret", async () => {
+    const { provisionThroughCustodyGateway } = await import("../src/lib/custody-gateway.server");
+    const f = fixture();
+    const secret = randomBytes(48).toString("hex");
+    f.deps.expectedPublicKey = bridgeCallerPublicKey(secret);
+    f.deps.clock = Date.now;
+    const result = await provisionThroughCustodyGateway(
+      {
+        session: "fixture-session",
+        membershipId: f.body.membership_approval.membershipId,
+        initData: "fixture-only",
+      },
+      {
+        enabled: true,
+        callerSecret: secret,
+        callerKeyId: "test-receiver-v1",
+        signerOrigin: "https://bruh-devnet-guardian.lovable.app",
+        session: async () => ({ telegramUserId: 123, groupId: null }),
+        telegram: () => 123,
+        membership: async () => ({ ...f.body.membership_approval, approved: true as const }),
+        transport: (async (url, init) =>
+          receiveProvisionBridge(new Request(url, init), f.deps)) as typeof fetch,
+      },
+    );
+    expect(result).toEqual({ ok: true, created: true, wallet: f.wallet });
+    expect(f.deps.provision).toHaveBeenCalledTimes(1);
+  });
   it("binds a real service signature to independent Telegram identity and exact frozen scope", async () => {
     const f = fixture(),
       response = await receiveProvisionBridge(f.request(), f.deps);
