@@ -18,3 +18,7 @@
 - Preserve non-custodial operation, server-verified Telegram identity, per-group wallet/stat isolation, immutable call baselines and auditable invalidations. Never store seed phrases or private keys or sign user transactions server-side.
 - Keep BRUH acquisition/cash-out and real-funds launch gated until implementation and the specified validation are complete. Do not infer tokenomics or deployed configuration from draft mint notes.
 - Keep secret values out of commits, chat and logs. Document variable names and purpose only.
+
+## Owner-authorized funded wallets — 2026-09-13
+
+The owner has revised the future wallet architecture to BRUH-generated, self-managed funded wallets, with user-authorized server signing. This supersedes the no-server-signing rule only for the separately gated custody implementation. The existing external-wallet flow remains unchanged until that implementation is ready. Preserve Telegram verification, group isolation, transaction proof and auditability. Telegram two-step verification is recommended, not claimed as verified. Never import user private keys or expose generated keys in chat/logs; require isolated encrypted custody, spending controls, stronger withdrawal/export authentication and devnet validation before real-funds activation. See decision 0006.

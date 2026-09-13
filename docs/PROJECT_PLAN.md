@@ -4,6 +4,8 @@ Created 2026-09-11. Status: proposed operating plan grounded in an initial repos
 
 ## Product direction
 
+The [2026-09-13 funded-wallet revision](decisions/0006-funded-bot-wallet-proposal.md) makes self-managed funded BRUH wallets the next engineering priority: encrypted isolated custody, confirmed deposit accounting, atomic reservations, Telegram-authorized signing, passkey-controlled withdrawals/export and reconciliation. It is devnet-gated and not yet an active service. Telegram two-step verification is recommended only. This replaces external-wallet linking as the planned default onboarding after custody is ready; current live external-wallet behavior remains intact until then. No presale or token launch is implied. Issue #45 and the custody source-validation record track implementation and gaps.
+
 The accepted [2026-09-13 grassroots addendum](decisions/0004-grassroots-participation.md) governs new participation and token-launch work: no presale or escrow, allocation points rather than fixed BRUH entitlement, bounded tester recognition, beta application fees off, and complete revision evidence. Its A–E milestones supplement the engineering slices below. Original files remain historical sources; no token economics or mainnet activation is implied.
 
 BRUH should make a group's call history trustworthy and useful: capture a baseline, preserve attribution, measure performance transparently, resolve disputes, and let members voluntarily recognize a caller through a transfer to that caller's wallet in that group. The bot is the core product. The Mini App makes detailed workflows usable; the website explains and onboards.

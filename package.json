@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "test": "vitest run",
-    "test:participation-db": "node --test tools/db-validation/participation.pg.mjs"
+    "test:participation-db": "node --test tools/db-validation/participation.pg.mjs",
+    "test:custody-db": "node --test tools/db-validation/custody.pg.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

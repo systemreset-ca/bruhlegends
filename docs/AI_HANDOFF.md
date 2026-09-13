@@ -1,5 +1,9 @@
 # BRUH current handoff
 
+## Owner-authorized self-managed funded wallets — 2026-09-13
+
+Decision [0006](decisions/0006-funded-bot-wallet-proposal.md) supersedes the future no-server-signing architecture for a separate, devnet-gated custody implementation. Telegram 2FA is recommended, not verified. Issue #45 tracks the revision. First source slice adds isolated encrypted-key primitives and inactive SQL accounting/reservations; [validation and remaining work](operations/2026-09-13-devnet-custody-source-validation.md). No custodial wallet, signing route, Cloud schema or funded activation exists yet. Existing published external-wallet flow remains the live behavior; do not describe future custody as non-custodial. Owner input is pending for an isolated signing/key-management hosting account.
+
 ## Current published application — 2026-09-13
 
 Published exact `152f5baa16f269871ebbebd521ff2fdf7760b1db` to `bruh.tips` using Lovable Publish. Exact-source main CI and managed preview passed; local/preview 107 tests and 20 isolated SQL tests pass. Public routes returned 200 and unauthenticated webhook 401. See [release evidence](operations/2026-09-13-production-publish-152f5baa.md). GitHub is PUBLIC with preserved history and passing pinned validation. Participation storage/schema is configured but zero seasons/awards; authenticated ledger/mobile journeys, owner-signed two-account devnet tip and multi-session concurrency remain unverified. Issue #41 tracks unapproved economics/anti-farming gates. No new secrets needed. PR #32, funded rewards, mint and mainnet remain separate/gated. Earlier sections are historical.
