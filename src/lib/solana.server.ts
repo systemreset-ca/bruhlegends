@@ -4,23 +4,36 @@ import { getBruhConfig } from "./bruh-config.server";
 
 type RpcResult<T> = { result?: T; error?: { code: number; message: string } };
 
-async function rpc<T>(method: string, params: unknown[]): Promise<T> {
+async function rpc<T>(method: string, params: unknown[], deadline?: AbortSignal): Promise<T> {
   const { rpcUrl } = getBruhConfig();
-  const response = await fetch(rpcUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
-  });
+  let response: Response;
+  try {
+    response = await fetch(rpcUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
+      signal: deadline
+        ? AbortSignal.any([deadline, AbortSignal.timeout(8_000)])
+        : AbortSignal.timeout(8_000),
+    });
+  } catch {
+    // Provider URLs and error messages can contain API keys. Never propagate them.
+    throw new Error(`Solana RPC ${method} unavailable`);
+  }
   if (!response.ok) {
-    const body = await response.text();
-    console.error(`Solana RPC ${method} failed [${response.status}]: ${body}`);
     throw new Error(`Solana RPC failed [${response.status}]`);
   }
-  const json = (await response.json()) as RpcResult<T>;
-  if (json.error) {
-    console.error(`Solana RPC ${method} error: ${json.error.message}`);
-    throw new Error(`Solana RPC error: ${json.error.message}`);
+  let json: RpcResult<T>;
+  try {
+    json = (await response.json()) as RpcResult<T>;
+  } catch {
+    throw new Error("Solana RPC invalid response");
   }
+  if (!json || typeof json !== "object") throw new Error("Solana RPC invalid response");
+  if (json.error) {
+    throw new Error("Solana RPC provider error");
+  }
+  if (!("result" in json)) throw new Error("Solana RPC missing result");
   return json.result as T;
 }
 
@@ -106,15 +119,27 @@ export function recipientDelta(
   if (mint) {
     const matches = (balance: { owner?: string; mint: string }) =>
       balance.owner === recipient && balance.mint === mint;
-    const before = tx.meta.preTokenBalances?.find(matches);
-    const after = tx.meta.postTokenBalances?.find(matches);
-    if (!before && !after) return null;
-    return BigInt(after?.uiTokenAmount.amount ?? "0") - BigInt(before?.uiTokenAmount.amount ?? "0");
+    const before = tx.meta.preTokenBalances?.filter(matches) ?? [];
+    const after = tx.meta.postTokenBalances?.filter(matches) ?? [];
+    if (before.length === 0 && after.length === 0) return null;
+    const sum = (balances: typeof before) =>
+      balances.reduce((total, balance) => total + BigInt(balance.uiTokenAmount.amount), 0n);
+    return sum(after) - sum(before);
   }
 
   const index = tx.transaction.message.accountKeys.findIndex((key) => key.pubkey === recipient);
   if (index < 0) return null;
-  return BigInt(tx.meta.postBalances[index] ?? 0) - BigInt(tx.meta.preBalances[index] ?? 0);
+  const before = tx.meta.preBalances[index];
+  const after = tx.meta.postBalances[index];
+  // Missing or rounded JSON balances must not manufacture a matching credit.
+  if (
+    typeof before !== "number" ||
+    typeof after !== "number" ||
+    !Number.isSafeInteger(before) ||
+    !Number.isSafeInteger(after)
+  )
+    return null;
+  return BigInt(after) - BigInt(before);
 }
 
 export function transferAmountMatches(
@@ -140,22 +165,34 @@ export async function verifyTransferByReference(input: {
   /** Allowed shortfall in base units (0 = exact). */
   toleranceBaseUnits?: bigint;
 }): Promise<TransferVerification> {
-  const signatures = await rpc<{ signature: string; err: unknown }[]>("getSignaturesForAddress", [
-    input.reference,
-    { limit: 10 },
-  ]);
+  if (input.amountBaseUnits <= 0n) return { verified: false, reason: "invalid_amount" };
+  const deadline = AbortSignal.timeout(15_000);
+  const signatures = await rpc<{ signature: string; err: unknown }[]>(
+    "getSignaturesForAddress",
+    [input.reference, { limit: 10, commitment: "confirmed" }],
+    deadline,
+  );
   if (signatures.length === 0) return { verified: false, reason: "no_transaction_found" };
 
   const tolerance = input.toleranceBaseUnits ?? 0n;
   let mismatch: TransferVerification | null = null;
 
-  for (const entry of signatures) {
+  // Enforce the request cap locally even if the provider ignores the limit.
+  for (const entry of signatures.slice(0, 10)) {
     if (entry.err) continue;
-    const tx = await rpc<ParsedTransaction | null>("getTransaction", [
-      entry.signature,
-      { encoding: "jsonParsed", commitment: "confirmed", maxSupportedTransactionVersion: 0 },
-    ]);
+    const tx = await rpc<ParsedTransaction | null>(
+      "getTransaction",
+      [
+        entry.signature,
+        { encoding: "jsonParsed", commitment: "confirmed", maxSupportedTransactionVersion: 0 },
+      ],
+      deadline,
+    );
     if (!tx?.meta || tx.meta.err) continue;
+    if (!tx.transaction.message.accountKeys.some((key) => key.pubkey === input.reference)) {
+      mismatch = { verified: false, reason: "reference_missing", signature: entry.signature };
+      continue;
+    }
 
     const delta = recipientDelta(tx, input.recipient, input.mint);
     if (delta === null) {
