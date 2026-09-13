@@ -1,10 +1,16 @@
 # BRUH current handoff
 
 Inspection date: 2026-09-12 (America/Toronto).
-Code baseline: `main` at `a8e43662d7613cb69de4cd2c2dc52530dc2a19d7`.
-Production application baseline: `a8e43662d7613cb69de4cd2c2dc52530dc2a19d7`.
-Implementation branch: none; the release candidate is merged and published.
-Scope: operate the verified Telegram fast path and Solana devnet safety gate, then complete one controlled user-signed devnet SOL tip. No secret value is included.
+Code baseline: `main` at `9fc8fbe17cbfab29ddd4f1a49020d673893f392c`.
+Production application baseline: `59fa4b0882948de1b73c827461656d283b58e580`.
+Implementation branch: `codex/atomic-tip-confirmation`; not deployed.
+Scope: atomic tip settlement while the owner prepares the second Telegram account/phone for one controlled user-signed devnet SOL tip. No secret value is included.
+
+## Latest engineering slice
+
+The network-pinned tip release is published; homepage and token page returned 200 and the unauthenticated webhook returned 401. See the [publication record](operations/2026-09-12-production-publish-59fa4b08.md). Current source has 80 passing tests before the new settlement work.
+
+The review branch replaces separate unchecked receipt/status/audit writes with service-role-only `settle_tip_intent`, including locked expiry, snapshot checks, and unique-receipt conflict handling. Seven new application tests pass (87 total). See the [decision and Cloud validation runbook](decisions/0002-atomic-tip-settlement.md). Cloud application, database concurrency/failure exercises, and deployment are pending. The historical inventory below records earlier release evidence; it does not establish validation of this new function.
 
 ## Access and context
 
