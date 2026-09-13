@@ -2,6 +2,8 @@
 
 ## Current direction and review slice — 2026-09-13
 
+Published application source is now `1d458ffcfdb8aff1b3b21aa8083bcb8253f85416` (PR #35). See [publication evidence](operations/2026-09-13-production-publish-1d458ffc.md): Lovable completion, revised public token page/homepage 200, unauthenticated webhook 401. Earning stays off; personal ledger and authenticated/live command checks are not complete. GitHub milestones A–E and ledger issue #36 are created. Earlier baseline/deployment statements below are historical.
+
 Accepted owner direction: [grassroots participation](decisions/0004-grassroots-participation.md). No presale/escrow; allocation points, capped tester recognition and preserved revision history. This review slice adds inactive `/credits` and Mini App status screens and replaces outdated token-page mint/fee promises. No earning ledger, rewards, token, mainnet gate or Cloud migration is enabled. Source baseline: `275a60e9d892581b0476ada2d6d8739dfa1f6b28`; branch `codex/grassroots-participation`. Validation and exact submitted SHA are recorded in the PR/operation record. The pending settlement branch and its unvalidated Cloud function remain separate. Public repository visibility and history-safety review are pending.
 
 Next implementation: append-only participation ledger with atomic uniqueness/caps, approved versioned rules, group-scoped reads and privacy integration. Earning remains off until weights, caps and eligibility are approved. Before mainnet, complete the outstanding two-account devnet flow and settlement validation. See the A–E milestones in the addendum.
