@@ -107,6 +107,11 @@ export class DevnetSolRpc {
     await this.assertDevnetGenesis();
     const recent = await this.connection.getLatestBlockhash("finalized");
     const snapshot = { ...approval, ...recent };
+    await this.verifyFee(snapshot);
+    return snapshot;
+  }
+  async verifyFee(snapshot: SolTransferApproval) {
+    await this.assertDevnetGenesis();
     const transaction = buildSolTransfer(snapshot);
     const fee = await this.connection.getFeeForMessage(transaction.message, "finalized");
     if (
@@ -117,7 +122,6 @@ export class DevnetSolRpc {
     ) {
       throw new Error("SOL network fee unavailable or exceeds reserved cap.");
     }
-    return snapshot;
   }
   async broadcast(record: ReturnType<typeof signSolTransfer>, approval: SolTransferApproval) {
     await this.assertDevnetGenesis();
@@ -128,10 +132,7 @@ export class DevnetSolRpc {
       maxRetries: 2,
     });
   }
-  private validateSigned(
-    record: ReturnType<typeof signSolTransfer>,
-    approval: SolTransferApproval,
-  ) {
+  validateSigned(record: ReturnType<typeof signSolTransfer>, approval: SolTransferApproval) {
     const transaction = VersionedTransaction.deserialize(Buffer.from(record.wireBase64, "base64"));
     const expected = buildSolTransfer(approval);
     if (

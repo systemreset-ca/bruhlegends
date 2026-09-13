@@ -107,6 +107,10 @@ test("signed bytes commit once; exact replay succeeds and replacement fails", as
   await rejects(() => persistSubmission(), /Prepare/);
   await prepareSubmission();
   assert.deepEqual((await persistSubmission()).rows[0].chosen, syntheticSigned);
+  const stored = (await db.query("SELECT get_devnet_custody_submission($1) snapshot", [r])).rows[0]
+    .snapshot;
+  assert.deepEqual(stored.signed, syntheticSigned);
+  assert.equal(stored.approval.reservationId, r);
   assert.deepEqual((await persistSubmission()).rows[0].chosen, syntheticSigned);
   await rejects(
     () =>
@@ -160,6 +164,7 @@ test("outbox grants deny client writes and all existing-role RPC execution", asy
     );
     for (const rpc of [
       "prepare_devnet_custody_submission(uuid,text,bigint,text)",
+      "get_devnet_custody_submission(uuid)",
       "persist_devnet_custody_signed(uuid,jsonb)",
       "settle_signed_devnet_custody(uuid,text,bigint,bigint)",
     ])

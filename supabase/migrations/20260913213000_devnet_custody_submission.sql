@@ -71,5 +71,10 @@ REVOKE ALL ON public.custody_submission_snapshots FROM PUBLIC,anon,authenticated
 GRANT SELECT ON public.custody_submission_snapshots TO service_role;
 REVOKE ALL ON FUNCTION public.custody_submission_immutable(),public.prepare_devnet_custody_submission(uuid,text,bigint,text),public.persist_devnet_custody_signed(uuid,jsonb),public.settle_signed_devnet_custody(uuid,text,bigint,bigint) FROM PUBLIC,anon,authenticated,service_role;
 -- SQL validates structural storage, not Ed25519 signatures/on-chain execution.
+CREATE FUNCTION public.get_devnet_custody_submission(p_id uuid) RETURNS jsonb
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path=pg_catalog,public AS $$
+ SELECT jsonb_build_object('approval',approval,'signed',signed_record) FROM public.custody_submission_snapshots WHERE reservation_id=p_id;
+$$;
+REVOKE ALL ON FUNCTION public.get_devnet_custody_submission(uuid) FROM PUBLIC,anon,authenticated,service_role;
 -- Future isolated signer must validate SDK message/signature before persistence;
 -- verifier must match finalized proof before calling signed settlement.

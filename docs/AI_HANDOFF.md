@@ -1,5 +1,11 @@
 # BRUH current handoff
 
+## Dedicated signer setup and SQL runtime — 2026-09-13
+
+Created [BRUH Devnet Guardian](https://lovable.dev/projects/fe274b3a-1273-4254-8b49-25d0be0f47df) in the owner's existing workspace. Its Lovable agent reports Cloud enabled with a separate backend and secret scope, an inert status page and no signing endpoints, keys or funding. This is not proof of production signing compatibility; actual SDK/runtime validation and fail-closed request authentication were requested next. No additional Supabase signup or paid upgrade was performed. Separate GitHub source connection remains to be established.
+
+Draft PR #46 now adds a SQL runtime adapter requiring explicit server-side spending authorization, immutable approval/signed persistence before broadcast, exact finalized reconciliation and a denied-by-default snapshot getter. Failed/ambiguous transactions keep reservations; fee-aware failure release, deposits, withdrawal/export step-up, HTTP integration and multi-session concurrency remain incomplete. The application type check now includes signer service source. No BRUH Cloud migrations or grants were applied; existing bot operation is unchanged.
+
 ## Owner-authorized self-managed funded wallets — 2026-09-13
 
 Decision [0006](decisions/0006-funded-bot-wallet-proposal.md) supersedes the future no-server-signing architecture for a separate, devnet-gated custody implementation. Telegram 2FA is recommended, not verified. Issue #45 tracks the revision. First source slice adds isolated encrypted-key primitives, inactive SQL accounting/reservations and an adapter-based durable-first submission protocol; [validation and remaining work](operations/2026-09-13-devnet-custody-source-validation.md). No usable custodial wallet, signing route, Cloud schema or funded activation exists yet. Existing published external-wallet flow remains the live behavior; do not describe future custody as non-custodial. An owner-supplied reference application confirms a Lovable frontend can use an external Supabase signing backend. Evaluate a dedicated BRUH signing backend with independent secrets; account access and deployment isolation remain unverified. An AWS/GCP/Azure account is not assumed necessary.

@@ -17,7 +17,9 @@ Install this package separately with `pnpm --dir services/custody-signer install
 
 The proposed submission migration stores one immutable blockhash/approval snapshot and one signed record per reservation, with controlled replay-safe RPCs and matching-signature settlement. Eighteen actual isolated PostgreSQL custody tests pass. These functions have no existing-role execution grants and are not applied to Cloud.
 
-No HTTP endpoint or bot integration is active. SQL runtime adapters, authenticated spending approval and deposit discovery, dedicated backend deployment and withdrawal/export step-up remain required. No production wrapping key or real user wallet was created. Cryptography and SDK signatures are tested using ephemeral wallets; RPC responses are mocked in tests. Concurrent workers and independent review are NOT RUN. Do not enable mainnet or collect real funds from this slice.
+`sql-runtime.ts` connects the vault and real SDK to controlled SQL RPCs. It requires an explicit authenticated authorization callback and database client, stores approval and signed bytes before sending, validates the SQL-selected blockhash and fee, and settles only exact finalized proof. Six runtime tests cover durable ordering, repeated/concurrent calls, persistence failure, ambiguous broadcast, denied authorization and reconciliation. Concurrent calls in these tests use an in-memory store, not multiple PostgreSQL sessions. Failed transactions retain their reservations for manual review until fee-aware release is implemented.
+
+No HTTP endpoint or bot integration is active. Authenticated spending approval and deposit discovery, dedicated backend deployment and withdrawal/export step-up remain required. No production wrapping key or real user wallet was created. Cryptography and SDK signatures are tested using ephemeral wallets; RPC responses are mocked in tests. Multi-session concurrency and independent review are NOT RUN. Do not enable mainnet or collect real funds from this slice.
 
 ## Live smoke experiment — 2026-09-13
 

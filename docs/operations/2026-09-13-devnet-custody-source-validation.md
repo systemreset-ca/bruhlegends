@@ -1,5 +1,13 @@
 # Devnet custody core source validation
 
+## SQL runtime and dedicated project follow-up
+
+`services/custody-signer/sql-runtime.ts` integrates the encrypted vault, real SDK and controlled SQL RPCs with mandatory spending authorization. Six tests use real ephemeral signatures and mocked transport/storage to check durable ordering, retry/concurrent snapshot reuse, write failure, ambiguous broadcast, denied authorization and exact reconciliation. The getter is denied to existing roles, and the actual PostgreSQL tests check stored snapshot reads and its execution ACL. All 18 custody SQL tests pass. Actual multi-session concurrency remains untested. Failed transactions retain holds pending fee-aware release.
+
+Follow-up validation: all 148 application tests pass with one worker; full TypeScript checking (including signer service files), changed-file ESLint and diff whitespace checks pass. An initial parallel run timed out one SDK test and the SQL initialization hook under local load; the serial reruns passed without weakening test timeouts. Prior exact baseline CI build remains the recorded build; this follow-up's CI/build is pending.
+
+The owner-authorized dedicated Lovable project is [BRUH Devnet Guardian](https://lovable.dev/projects/fe274b3a-1273-4254-8b49-25d0be0f47df). Its agent reports Cloud enabled with independent backend/secrets and an inert status page. SDK/runtime tests and server-only request authentication are the next assigned slice. No new paid plan, master key, user funding, BRUH migration application or public signing endpoint occurred. Source synchronization to a dedicated GitHub repository still needs verification.
+
 Branch: `codex/devnet-custody-core`. Baseline: `cf6aa6fbd822bef4e50d85ddf504e5d0159d0c09`. Scope: first inactive implementation of owner-authorized self-managed funded wallets, issue #45. Accepted direction is decision 0006; user rejected the managed-wallet-provider proposal. Telegram two-step verification is a recommendation only.
 
 ## Implemented and tested
