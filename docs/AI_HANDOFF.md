@@ -1,5 +1,11 @@
 # BRUH current handoff
 
+## Isolated wallet connection in progress — 2026-09-13
+
+BRUH source `b801d366dcc20168281e64d63e5f879eb16510c2` adds a dormant service-signed provisioning receiver and passing gateway-to-receiver contract test. Thirty targeted authentication/gateway/receiver tests passed, with fixture Telegram and wallet callbacks. Receiver source `400fa34a5dff899091b646a6d172feda97e65dd0` passed exact CI; local types and receiver lint pass. Guardian integration is assigned to its own Lovable project; no BRUH custody schema or wallet flow is deployed. See [connection evidence](operations/2026-09-13-guardian-bridge-validation.md).
+
+Guardian GitHub is now PUBLIC under explicit owner approval, with a fresh 112-commit redacted scan clean. Both deployed diagnostic POSTs independently returned 404/no-store after shutdown publication. Actual Worker offline crypto passed earlier; live devnet RPC did not return genesis and remains unproven. Reviewed transport-status-only diagnostics will identify the failure; a separate direct genesis read confirmed the configured full devnet identifier is correct. Do not ask the owner's two accounts to fund or link an external wallet for the new flow yet. Earlier dated sections below are historical.
+
 ## Dedicated signer setup and SQL runtime — 2026-09-13
 
 Created [BRUH Devnet Guardian](https://lovable.dev/projects/fe274b3a-1273-4254-8b49-25d0be0f47df) in the owner's existing workspace, with Cloud and separate backend/secret scope reported by Lovable. Connected its own [private GitHub repository](https://github.com/systemreset-ca/bruh-devnet-guardian); editor reports synchronized and a local clone succeeded at `88e0590fdae9316effaae50f83753d6243ab7fa1`. No additional Supabase signup or paid upgrade was performed. Local Node smoke tests and Worker bundle build pass according to its recorded evidence; actual deployed Worker crypto execution is not verified. Source review found process-local nonce storage, unbound caller key ID and an authenticated diagnostic route left by an interrupted run. Hardening and diagnostic removal were assigned; verify the resulting commits before integration. No user funding, production wrapping key or funded signing endpoint exists.
