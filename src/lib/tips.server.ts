@@ -1,4 +1,4 @@
-import { admin, logAudit } from "./db.server";
+import { admin } from "./db.server";
 import { getActiveWallet } from "./wallets.server";
 import { buildSolanaPayUrl, createReferenceKey, verifyTransferByReference } from "./solana.server";
 import { fetchUsdPrice } from "./market.server";
@@ -241,36 +241,29 @@ export type TipConfirmation =
 /** Idempotent: re-checking a confirmed tip returns the stored signature. */
 export async function confirmTip(intentId: string): Promise<TipConfirmation> {
   const db = await admin();
-  const { data: intent } = await db
+  const { data: intent, error: intentError } = await db
     .from("tip_intents")
     .select("*")
     .eq("id", intentId)
     .maybeSingle();
+  if (intentError) throw intentError;
   if (!intent) return { status: "not_found" };
 
   if (intent.status === "confirmed") {
-    const { data: transfer } = await db
+    const { data: transfer, error: transferError } = await db
       .from("verified_transfers")
       .select("signature")
       .eq("tip_intent_id", intentId)
       .maybeSingle();
-    return { status: "confirmed", signature: transfer?.signature ?? "" };
+    if (transferError) throw transferError;
+    if (!transfer?.signature) throw new Error("Confirmed tip has no stored receipt");
+    return { status: "confirmed", signature: transfer.signature };
   }
 
   if (intent.status === "expired") return { status: "expired", reason: "intent_expired" };
 
   if (isTipIntentExpired(intent.expires_at)) {
-    await db.from("tip_intents").update({ status: "expired" }).eq("id", intentId);
-    await logAudit({
-      groupId: intent.group_id,
-      actorType: "system",
-      eventType: "tip_expired",
-      entityType: "tip_intent",
-      entityId: intentId,
-      before: { status: intent.status },
-      after: { status: "expired" },
-    });
-    return { status: "expired", reason: "intent_expired" };
+    return settleTipIntent(db, intent, null);
   }
 
   if (!tipIntentMatchesNetwork(intent.network, getBruhConfig().network)) {
@@ -285,34 +278,52 @@ export async function confirmTip(intentId: string): Promise<TipConfirmation> {
   });
 
   if (!verification.verified) {
-    await db.from("tip_intents").update({ status: "awaiting_payment" }).eq("id", intentId);
+    const { error } = await db
+      .from("tip_intents")
+      .update({ status: "awaiting_payment" })
+      .eq("id", intentId)
+      .in("status", ["created", "awaiting_payment"]);
+    if (error) throw error;
     return { status: "pending", reason: verification.reason };
   }
 
-  await db.from("verified_transfers").insert({
-    tip_intent_id: intentId,
-    signature: verification.signature,
-    slot: verification.slot ?? null,
-    recipient_address: intent.recipient_address,
-    asset_mint: intent.asset_mint,
-    amount_base_units: intent.amount_base_units,
-    usd_reference_at_execution: intent.usd_reference,
-    confirmed_at: new Date().toISOString(),
-    raw: verification.raw as never,
-  });
-  await db.from("tip_intents").update({ status: "confirmed" }).eq("id", intentId);
+  if (!verification.signature) throw new Error("Verified transfer has no signature");
+  return settleTipIntent(db, intent, verification);
+}
 
-  await logAudit({
-    groupId: intent.group_id,
-    actorType: "member",
-    actorId: intent.sender_membership_id,
-    eventType: "tip_confirmed",
-    entityType: "tip_intent",
-    entityId: intentId,
-    after: { signature: verification.signature },
+/** The database locks the intent and commits receipt, status and audit together. */
+async function settleTipIntent(
+  db: Awaited<ReturnType<typeof admin>>,
+  intent: {
+    id: string;
+    network: string;
+    reference_key: string;
+    recipient_address: string;
+    asset_mint: string | null;
+    amount_base_units: string | number;
+  },
+  verification: { signature?: string; slot?: number; raw?: unknown } | null,
+): Promise<TipConfirmation> {
+  const { data, error } = await db.rpc("settle_tip_intent", {
+    p_intent_id: intent.id,
+    p_network: intent.network,
+    p_reference: intent.reference_key,
+    p_recipient: intent.recipient_address,
+    p_mint: intent.asset_mint,
+    p_amount: String(intent.amount_base_units),
+    p_signature: verification?.signature ?? null,
+    p_slot: verification?.slot ?? null,
+    p_raw: verification?.raw ?? null,
   });
-
-  return { status: "confirmed", signature: verification.signature! };
+  if (error) throw error;
+  const result = Array.isArray(data) ? data[0] : data;
+  if (result?.status === "confirmed" && result.signature) {
+    return { status: "confirmed", signature: result.signature };
+  }
+  if (["pending", "expired", "not_found"].includes(result?.status)) {
+    return { status: result.status, reason: result.reason ?? undefined };
+  }
+  throw new Error("Invalid tip settlement result");
 }
 
 export type TipSweepResult = {
