@@ -99,6 +99,13 @@
       "when": 1789308000000,
       "tag": "0014_participation_ledger",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1789318117777,
+      "tag": "0014_participation_ledger_managed",
+      "breakpoints": true
     }
   ]
 }

@@ -397,6 +397,7 @@ export type Database = {
           id: string
           is_banned: boolean
           joined_at: string
+          participation_opt_out: boolean
           pseudonym: string | null
           role: Database["public"]["Enums"]["member_role"]
           telegram_user_id: number
@@ -410,6 +411,7 @@ export type Database = {
           id?: string
           is_banned?: boolean
           joined_at?: string
+          participation_opt_out?: boolean
           pseudonym?: string | null
           role?: Database["public"]["Enums"]["member_role"]
           telegram_user_id: number
@@ -423,6 +425,7 @@ export type Database = {
           id?: string
           is_banned?: boolean
           joined_at?: string
+          participation_opt_out?: boolean
           pseudonym?: string | null
           role?: Database["public"]["Enums"]["member_role"]
           telegram_user_id?: number
@@ -656,6 +659,267 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "miniapp_sessions_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      participation_events: {
+        Row: {
+          actor_id: string | null
+          counterparty_id: string | null
+          created_at: string
+          earning_day: string
+          group_id: string
+          id: string
+          membership_id: string
+          points: number
+          reason_code: string
+          reverses_event_id: string | null
+          rule_version: string
+          season_id: string
+          source_id: string
+          source_kind: string
+          status: string
+        }
+        Insert: {
+          actor_id?: string | null
+          counterparty_id?: string | null
+          created_at?: string
+          earning_day: string
+          group_id: string
+          id?: string
+          membership_id: string
+          points: number
+          reason_code: string
+          reverses_event_id?: string | null
+          rule_version: string
+          season_id: string
+          source_id: string
+          source_kind: string
+          status: string
+        }
+        Update: {
+          actor_id?: string | null
+          counterparty_id?: string | null
+          created_at?: string
+          earning_day?: string
+          group_id?: string
+          id?: string
+          membership_id?: string
+          points?: number
+          reason_code?: string
+          reverses_event_id?: string | null
+          rule_version?: string
+          season_id?: string
+          source_id?: string
+          source_kind?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "participation_events_actor_id_group_id_fkey"
+            columns: ["actor_id", "group_id"]
+            isOneToOne: false
+            referencedRelation: "group_members"
+            referencedColumns: ["id", "group_id"]
+          },
+          {
+            foreignKeyName: "participation_events_counterparty_id_group_id_fkey"
+            columns: ["counterparty_id", "group_id"]
+            isOneToOne: false
+            referencedRelation: "group_members"
+            referencedColumns: ["id", "group_id"]
+          },
+          {
+            foreignKeyName: "participation_events_membership_id_group_id_fkey"
+            columns: ["membership_id", "group_id"]
+            isOneToOne: false
+            referencedRelation: "group_members"
+            referencedColumns: ["id", "group_id"]
+          },
+          {
+            foreignKeyName: "participation_events_reverses_event_id_fkey"
+            columns: ["reverses_event_id"]
+            isOneToOne: false
+            referencedRelation: "participation_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "participation_events_season_id_group_id_fkey"
+            columns: ["season_id", "group_id"]
+            isOneToOne: false
+            referencedRelation: "participation_seasons"
+            referencedColumns: ["id", "group_id"]
+          },
+        ]
+      }
+      participation_jobs: {
+        Row: {
+          attempts: number
+          available_at: string
+          created_at: string
+          error_code: string | null
+          group_id: string
+          id: string
+          season_id: string
+          status: string
+          tip_id: string
+        }
+        Insert: {
+          attempts?: number
+          available_at?: string
+          created_at?: string
+          error_code?: string | null
+          group_id: string
+          id?: string
+          season_id: string
+          status?: string
+          tip_id: string
+        }
+        Update: {
+          attempts?: number
+          available_at?: string
+          created_at?: string
+          error_code?: string | null
+          group_id?: string
+          id?: string
+          season_id?: string
+          status?: string
+          tip_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "participation_jobs_season_id_group_id_fkey"
+            columns: ["season_id", "group_id"]
+            isOneToOne: false
+            referencedRelation: "participation_seasons"
+            referencedColumns: ["id", "group_id"]
+          },
+          {
+            foreignKeyName: "participation_jobs_tip_id_fkey"
+            columns: ["tip_id"]
+            isOneToOne: false
+            referencedRelation: "tip_intents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      participation_reviews: {
+        Row: {
+          evidence_id: string
+          group_id: string
+          id: string
+          membership_id: string
+          reviewed_at: string
+          reviewer_id: string
+          season_id: string
+          source_kind: string
+        }
+        Insert: {
+          evidence_id: string
+          group_id: string
+          id?: string
+          membership_id: string
+          reviewed_at?: string
+          reviewer_id: string
+          season_id: string
+          source_kind: string
+        }
+        Update: {
+          evidence_id?: string
+          group_id?: string
+          id?: string
+          membership_id?: string
+          reviewed_at?: string
+          reviewer_id?: string
+          season_id?: string
+          source_kind?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "participation_reviews_membership_id_group_id_fkey"
+            columns: ["membership_id", "group_id"]
+            isOneToOne: false
+            referencedRelation: "group_members"
+            referencedColumns: ["id", "group_id"]
+          },
+          {
+            foreignKeyName: "participation_reviews_reviewer_id_group_id_fkey"
+            columns: ["reviewer_id", "group_id"]
+            isOneToOne: false
+            referencedRelation: "group_members"
+            referencedColumns: ["id", "group_id"]
+          },
+          {
+            foreignKeyName: "participation_reviews_season_id_group_id_fkey"
+            columns: ["season_id", "group_id"]
+            isOneToOne: false
+            referencedRelation: "participation_seasons"
+            referencedColumns: ["id", "group_id"]
+          },
+        ]
+      }
+      participation_seasons: {
+        Row: {
+          approval_record: string | null
+          created_at: string
+          ends_at: string
+          group_id: string
+          id: string
+          member_daily_cap: number
+          member_season_cap: number
+          name: string
+          network: string
+          pair_daily_cap: number
+          rule_version: string
+          season_budget: number
+          starts_at: string
+          status: string
+          tester_cap: number
+          weights: Json
+        }
+        Insert: {
+          approval_record?: string | null
+          created_at?: string
+          ends_at: string
+          group_id: string
+          id?: string
+          member_daily_cap: number
+          member_season_cap: number
+          name: string
+          network: string
+          pair_daily_cap: number
+          rule_version: string
+          season_budget: number
+          starts_at: string
+          status?: string
+          tester_cap: number
+          weights: Json
+        }
+        Update: {
+          approval_record?: string | null
+          created_at?: string
+          ends_at?: string
+          group_id?: string
+          id?: string
+          member_daily_cap?: number
+          member_season_cap?: number
+          name?: string
+          network?: string
+          pair_daily_cap?: number
+          rule_version?: string
+          season_budget?: number
+          starts_at?: string
+          status?: string
+          tester_cap?: number
+          weights?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "participation_seasons_group_id_fkey"
             columns: ["group_id"]
             isOneToOne: false
             referencedRelation: "groups"
@@ -1204,6 +1468,37 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      award_participation: {
+        Args: {
+          p_kind: string
+          p_member: string
+          p_season: string
+          p_source: string
+        }
+        Returns: {
+          actor_id: string | null
+          counterparty_id: string | null
+          created_at: string
+          earning_day: string
+          group_id: string
+          id: string
+          membership_id: string
+          points: number
+          reason_code: string
+          reverses_event_id: string | null
+          rule_version: string
+          season_id: string
+          source_id: string
+          source_kind: string
+          status: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "participation_events"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       claim_telegram_outbox: {
         Args: { p_lease_seconds?: number; p_limit?: number }
         Returns: {
@@ -1259,6 +1554,24 @@ export type Database = {
           wallet_address: string
         }[]
       }
+      create_participation_season: {
+        Args: {
+          p_approval_record?: string
+          p_budget: number
+          p_daily: number
+          p_end: string
+          p_group: string
+          p_member: number
+          p_name: string
+          p_network: string
+          p_pair: number
+          p_start: string
+          p_tester: number
+          p_version: string
+          p_weights: Json
+        }
+        Returns: string
+      }
       enqueue_telegram_action: {
         Args: {
           p_action_key: string
@@ -1274,6 +1587,61 @@ export type Database = {
           group_id: string
           telegram_user_id: number
         }[]
+      }
+      participation_member_job_counts: {
+        Args: { p_group: string; p_member: string }
+        Returns: Json
+      }
+      participation_member_total: {
+        Args: { p_group: string; p_member: string }
+        Returns: number
+      }
+      process_participation_jobs: { Args: { p_limit?: number }; Returns: Json }
+      retry_participation_job: { Args: { p_job: string }; Returns: undefined }
+      reverse_participation: {
+        Args: {
+          p_actor: string
+          p_event: string
+          p_reason: string
+          p_request: string
+        }
+        Returns: {
+          actor_id: string | null
+          counterparty_id: string | null
+          created_at: string
+          earning_day: string
+          group_id: string
+          id: string
+          membership_id: string
+          points: number
+          reason_code: string
+          reverses_event_id: string | null
+          rule_version: string
+          season_id: string
+          source_id: string
+          source_kind: string
+          status: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "participation_events"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      review_participation_activity: {
+        Args: {
+          p_evidence: string
+          p_kind: string
+          p_member: string
+          p_reviewer: string
+          p_season: string
+        }
+        Returns: string
+      }
+      set_participation_season_status: {
+        Args: { p_season: string; p_status: string }
+        Returns: undefined
       }
     }
     Enums: {
