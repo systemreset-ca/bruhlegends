@@ -1,5 +1,9 @@
 # BRUH current handoff
 
+## Current published application — 2026-09-13
+
+Published exact `152f5baa16f269871ebbebd521ff2fdf7760b1db` to `bruh.tips` using Lovable Publish. Exact-source main CI and managed preview passed; local/preview 107 tests and 20 isolated SQL tests pass. Public routes returned 200 and unauthenticated webhook 401. See [release evidence](operations/2026-09-13-production-publish-152f5baa.md). GitHub is PUBLIC with preserved history and passing pinned validation. Participation storage/schema is configured but zero seasons/awards; authenticated ledger/mobile journeys, owner-signed two-account devnet tip and multi-session concurrency remain unverified. Issue #41 tracks unapproved economics/anti-farming gates. No new secrets needed. PR #32, funded rewards, mint and mainnet remain separate/gated. Earlier sections are historical.
+
 ## Cloud participation and public CI — 2026-09-13
 
 Ledger PR #38 and public validation PR #39 are merged. GitHub is now public with anonymous access verified and the first locked public CI run passing. Managed Cloud ledger source is `b17d54c550a8fb4ef513953612bd9b1d61dac787`; schema access and the existing conditional scheduler were verified by Lovable, storage configured, zero seasons/awards. Preserve the original no-op journal entry and applied managed SQL duplicate. A follow-up isolates the inactive credits test from Cloud configuration and prevents points-RPC outages blocking confirmed-tip announcements. See [rollout evidence and limits](operations/2026-09-13-participation-cloud-rollout.md). Application publication is still pending; PR #32 and mainnet remain separate/gated. Statements below describe earlier dated states.
