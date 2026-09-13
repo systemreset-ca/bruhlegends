@@ -8,9 +8,11 @@ The earlier Forbidden error was an obsolete app entry URL, unrelated to key cust
 
 Verified Telegram identity → provision embedded BRUH wallet → show deposit address/network → confirmed deposit → display spendable balance → user authorizes a Telegram tip → protected signing/broadcast → server confirms exact on-chain transfer → group-scoped receipt/statistics/participation. Withdrawals return funds to a user-selected, verified destination. Balance must distinguish confirmed funds, reserved outgoing funds and pending transfers.
 
-Do not put private keys in bot messages, Supabase application rows, source, logs or ordinary configuration secrets. Evaluate managed embedded-wallet signing with isolated key infrastructure, user recovery/export through an authenticated wallet flow, scoped/revocable application authorization, spending limits and step-up approval for withdrawals/key export. Never export a key into Telegram chat. A provider-specific design and threat model are still required.
+Do not put plaintext private keys in bot messages, Supabase application rows, source, logs or ordinary bot configuration secrets. Store only authenticated encrypted envelopes under separately controlled signing authority. Build user recovery/export through an authenticated wallet flow, scoped/revocable application authorization, spending limits and step-up approval for withdrawals/key export. Never export a key into Telegram chat. A deployment-specific design and threat model are still required.
 
 Earlier managed-provider suggestions were rejected by the owner. Build a separately controlled BRUH signer; do not introduce Privy/Turnkey dependency or create paid accounts as an assumed requirement.
+
+Read-only inspection of an owner-supplied reference application confirms that Lovable frontends can use an external Supabase Edge Function backend for wallet generation and server signing. This does not establish that the current BRUH deployment supports isolated secrets. Evaluate a dedicated BRUH signing backend/project with its own credentials and encryption authority; do not copy reference wallet inventory, private keys, operator trading configuration or unrelated function permissions. External AWS/GCP/Azure hosting is an option, not a mandatory provider requirement. Backend provisioning, independent secret scope, narrowly privileged database access and actual devnet signing remain unverified.
 
 ## Security model change
 
