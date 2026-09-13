@@ -15,7 +15,9 @@ Install this package separately with `pnpm --dir services/custody-signer install
 3. Sign through the isolated vault. Durably store the immutable signed transaction before broadcast. Reuse its signature/bytes after timeouts.
 4. Verify finalized exact proof and settle atomically with the actual fee and immutable audit receipt. Definitive failures still incur fees and need separate reconciled release handling.
 
-No HTTP endpoint or bot integration is active. The SQL outbox/authorization adapters, authenticated deposit discovery, dedicated backend deployment and withdrawal/export step-up remain required. No production wrapping key or real user wallet was created. Cryptography and SDK signatures are tested using ephemeral wallets; RPC responses are mocked in tests. Concurrent workers and independent review are NOT RUN. Do not enable mainnet or collect real funds from this slice.
+The proposed submission migration stores one immutable blockhash/approval snapshot and one signed record per reservation, with controlled replay-safe RPCs and matching-signature settlement. Eighteen actual isolated PostgreSQL custody tests pass. These functions have no existing-role execution grants and are not applied to Cloud.
+
+No HTTP endpoint or bot integration is active. SQL runtime adapters, authenticated spending approval and deposit discovery, dedicated backend deployment and withdrawal/export step-up remain required. No production wrapping key or real user wallet was created. Cryptography and SDK signatures are tested using ephemeral wallets; RPC responses are mocked in tests. Concurrent workers and independent review are NOT RUN. Do not enable mainnet or collect real funds from this slice.
 
 ## Live smoke experiment — 2026-09-13
 

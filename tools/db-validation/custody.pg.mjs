@@ -21,6 +21,7 @@ before(
       "supabase/migrations/20260809033130_768fc15d-33c4-4d3f-9d1b-79f705430b94.sql",
       "supabase/migrations/20260912064500_enforce_group_relationships.sql",
       "supabase/migrations/20260913210000_devnet_custody_core.sql",
+      "supabase/migrations/20260913213000_devnet_custody_submission.sql",
     ])
       await db.exec(await readFile(new URL(path, root), "utf8"));
   },
@@ -67,6 +68,108 @@ async function rejects(action, message) {
 }
 const balances = () =>
   db.query("SELECT confirmed_lamports,reserved_lamports FROM custody_accounts WHERE id=$1", [wa]);
+
+const prepareSubmission = (hash = "6".repeat(32)) =>
+  db.query("SELECT prepare_devnet_custody_submission($1,$2,100,$3) chosen", [
+    r,
+    hash,
+    "7".repeat(32),
+  ]);
+const syntheticSigned = {
+  reservationId: r,
+  network: "devnet",
+  signature: tipSig,
+  wireBase64: Buffer.alloc(100, 1).toString("base64"),
+  lastValidBlockHeight: 100,
+};
+const persistSubmission = (record = syntheticSigned) =>
+  db.query("SELECT persist_devnet_custody_signed($1,$2) chosen", [r, record]);
+test("preparation preserves its first blockhash and exact reservation snapshot", async () => {
+  await deposit();
+  await reserve();
+  const first = (await prepareSubmission()).rows[0].chosen;
+  assert.equal(first.lamports, "600");
+  assert.equal(first.feeCapLamports, "10");
+  assert.equal(first.groupId, g);
+  assert.equal(first.sender, "4".repeat(32));
+  assert.deepEqual((await prepareSubmission("8".repeat(32))).rows[0].chosen, first);
+  await rejects(
+    () =>
+      db.query("UPDATE custody_submission_snapshots SET approval='{}' WHERE reservation_id=$1", [
+        r,
+      ]),
+    /Immutable/,
+  );
+});
+test("signed bytes commit once; exact replay succeeds and replacement fails", async () => {
+  await deposit();
+  await reserve();
+  await rejects(() => persistSubmission(), /Prepare/);
+  await prepareSubmission();
+  assert.deepEqual((await persistSubmission()).rows[0].chosen, syntheticSigned);
+  assert.deepEqual((await persistSubmission()).rows[0].chosen, syntheticSigned);
+  await rejects(
+    () =>
+      persistSubmission({
+        ...syntheticSigned,
+        wireBase64: Buffer.alloc(100, 2).toString("base64"),
+      }),
+    /conflict/,
+  );
+  await rejects(
+    () => persistSubmission({ ...syntheticSigned, network: "mainnet-beta" }),
+    /Invalid/,
+  );
+  await rejects(
+    () => db.query("DELETE FROM custody_submission_snapshots WHERE reservation_id=$1", [r]),
+    /Immutable/,
+  );
+  assert.equal((await balances()).rows[0].confirmed_lamports, 1000);
+  assert.equal((await balances()).rows[0].reserved_lamports, 610);
+});
+test("signed settlement rejects unknown proof and accounts the matching receipt", async () => {
+  await deposit();
+  await reserve();
+  await prepareSubmission();
+  await rejects(
+    () => db.query("SELECT settle_signed_devnet_custody($1,$2,5,2)", [r, tipSig]),
+    /matching/,
+  );
+  await persistSubmission();
+  await rejects(
+    () => db.query("SELECT settle_signed_devnet_custody($1,$2,5,2)", [r, sig]),
+    /matching/,
+  );
+  assert.equal(
+    (await db.query("SELECT settle_signed_devnet_custody($1,$2,5,2) done", [r, tipSig])).rows[0]
+      .done,
+    true,
+  );
+  assert.equal((await balances()).rows[0].confirmed_lamports, 395);
+});
+test("outbox grants deny client writes and all existing-role RPC execution", async () => {
+  for (const role of ["anon", "authenticated", "service_role"]) {
+    assert.equal(
+      (
+        await db.query(
+          "SELECT has_table_privilege($1,'custody_submission_snapshots','INSERT,UPDATE,DELETE') allowed",
+          [role],
+        )
+      ).rows[0].allowed,
+      false,
+    );
+    for (const rpc of [
+      "prepare_devnet_custody_submission(uuid,text,bigint,text)",
+      "persist_devnet_custody_signed(uuid,jsonb)",
+      "settle_signed_devnet_custody(uuid,text,bigint,bigint)",
+    ])
+      assert.equal(
+        (await db.query("SELECT has_function_privilege($1,$2,'EXECUTE') allowed", [role, rpc]))
+          .rows[0].allowed,
+        false,
+      );
+  }
+});
 test("confirmed deposits are idempotent, conflicting proofs are rejected", async () => {
   assert.equal((await deposit()).rows[0].credit_devnet_custody, true);
   assert.equal((await deposit()).rows[0].credit_devnet_custody, false);

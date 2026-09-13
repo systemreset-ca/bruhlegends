@@ -28,6 +28,10 @@ Twelve new tests exercise actual SDK signatures/messages and mocked RPC genesis,
 
 The ephemeral public devnet smoke attempt caught and corrected a truncated genesis identifier. After direct RPC verification of the complete hash, the faucet returned an internal error. No live transfer was broadcast; funding/confirmation remain NOT VERIFIED. No user funds, production wrapping key or reference wallets were accessed. See the signer README for reproducible steps and remaining integration work.
 
+## Durable SQL submission extension
+
+The proposed second custody migration adds immutable approval snapshots with one blockhash and unique reference per reservation, one-time signed-byte persistence with exact replay checks, and settlement restricted to the stored signature. Four additional actual PostgreSQL tests pass, bringing custody SQL validation to 18. Snapshot values derive sender/recipient/scope/amount/fee cap from the locked reservation, not caller-supplied identity or amount. Preparing a retry returns the original blockhash; timers and leases cannot replace it. Signed persistence does not credit tips or release the hold. Client writes and all existing-role custody RPC execution remain denied. SQL checks storage structure; the isolated signer must verify the actual SDK message/signature, and the verifier must supply exact finalized chain proof. No Cloud application or grants occurred.
+
 ## Existing managed Cloud capability report
 
 Lovable performed a read-only inspection and reported one Nitro/Cloudflare Worker deployment, no current separately deployed signing unit, and project-wide shared secret injection with no per-route secret scope. A wrapping key added to this project would be readable by its bot runtime. The tool reported owner-capable CREATEROLE, but no tested narrowly privileged signer connection or separately scoped secret deployment path. Database role ACLs and RLS are distinct: BYPASSRLS does not by itself grant SELECT on our new key table; owner-level connection authority still must be accounted for in the full threat model. No existing project isolation is inferred from another project's ability to store keys.
