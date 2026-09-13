@@ -1,0 +1,50 @@
+name: Public source validation
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: validation-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    # Do not consume private-repository runner minutes before publication.
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24.19.0'
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: '1.4.2'
+      - name: Install locked application dependencies
+        run: bun install --frozen-lockfile
+      - name: Application tests and types
+        run: |
+          bun run test
+          bun run typecheck
+      - name: Production build
+        run: bun run build
+      - name: Isolated PostgreSQL validation
+        run: |
+          npm install --global pnpm@11.19.0
+          pnpm --dir tools/db-validation install --frozen-lockfile
+          bun run test:participation-db
+      - name: Verify secret scanner checksum
+        run: |
+          curl -fsSL https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz -o /tmp/gitleaks.tar.gz
+          echo '551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  /tmp/gitleaks.tar.gz' | sha256sum -c -
+          mkdir -p /tmp/bruh-gitleaks
+          tar -xzf /tmp/gitleaks.tar.gz -C /tmp/bruh-gitleaks
+      - name: Full fetched history secret scan
+        run: /tmp/bruh-gitleaks/gitleaks git . --log-opts=--all --redact=100 --no-banner --ignore-gitleaks-allow --timeout=120
