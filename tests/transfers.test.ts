@@ -34,6 +34,22 @@ function splTx(owner: string, mint: string, before: string, after: string): Pars
 }
 
 describe("transfer verification", () => {
+  it("sums the recipient's matching mint across multiple token accounts", () => {
+    const tx = splTx(RECIPIENT, USDC, "20", "20");
+    tx.meta!.postTokenBalances!.push({
+      owner: RECIPIENT,
+      mint: USDC,
+      uiTokenAmount: { amount: "100" },
+    });
+    expect(recipientDelta(tx, RECIPIENT, USDC)).toBe(100n);
+  });
+
+  it("rejects missing and unsafe SOL balance entries", () => {
+    expect(recipientDelta(solTx([RECIPIENT], [], [100]), RECIPIENT, null)).toBeNull();
+    expect(
+      recipientDelta(solTx([RECIPIENT], [0], [Number.MAX_SAFE_INTEGER + 1]), RECIPIENT, null),
+    ).toBeNull();
+  });
   it("credits the expected SOL recipient only", () => {
     const tx = solTx([OTHER, RECIPIENT], [0, 0], [0, 1_000_000_000]);
     expect(recipientDelta(tx, RECIPIENT, null)).toBe(1_000_000_000n);
