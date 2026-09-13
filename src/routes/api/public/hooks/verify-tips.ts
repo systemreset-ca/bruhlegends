@@ -26,7 +26,6 @@ export const Route = createFileRoute("/api/public/hooks/verify-tips")({
         }
 
         const sweep = await sweepTipIntents();
-        const participation = await processParticipationJobs();
         const db = await admin();
         let announced = 0;
         let queued = 0;
@@ -72,6 +71,15 @@ export const Route = createFileRoute("/api/public/hooks/verify-tips")({
           else if (decision === "queue") queued += 1;
         }
 
+        // Points are independent of financial confirmation/notification. An RPC
+        // outage leaves durable jobs available for the next conditional run.
+        let participation: { processed: number; failed: number } | null = null;
+        try {
+          participation = await processParticipationJobs();
+        } catch {
+          // Do not expose database errors or claim zero work on an unavailable worker.
+        }
+
         return Response.json({
           ok: true,
           checked: sweep.checked,
@@ -79,8 +87,9 @@ export const Route = createFileRoute("/api/public/hooks/verify-tips")({
           expired: sweep.expired,
           announced,
           queued,
-          participationProcessed: participation.processed,
-          participationFailed: participation.failed,
+          participationAvailable: participation !== null,
+          participationProcessed: participation?.processed ?? null,
+          participationFailed: participation?.failed ?? null,
         });
       },
     },

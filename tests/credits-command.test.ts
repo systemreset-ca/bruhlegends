@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   send: vi.fn(),
@@ -33,9 +33,11 @@ function update(type: string = "supergroup", text = "/credits") {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.stubEnv("BRUH_PARTICIPATION_STORAGE_ENABLED", "false");
   mocks.group.mockResolvedValue({ id: "group-a", is_paused: false });
   mocks.member.mockResolvedValue({ id: "member-a", is_banned: false });
 });
+afterEach(() => vi.unstubAllEnvs());
 
 describe("inactive credits command", () => {
   it("responds in a DM without querying memberships, balances or RPC", async () => {
