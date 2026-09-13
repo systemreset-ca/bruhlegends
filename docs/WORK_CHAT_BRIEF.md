@@ -1,5 +1,9 @@
 # Message for the BRUH Work chat
 
+## Current direction — 2026-09-13
+
+Read [the accepted grassroots addendum](decisions/0004-grassroots-participation.md) first. No presale or escrow. Participation points, not fixed token entitlements, recognize verified tips, sustained activity, legitimate calls, verified referrals and a capped tester bonus. Earning is not enabled yet. Review earning weights/caps, anti-farming and opt-in metrics; draft community posts and a milestone press kit using verified evidence. Keep a complete public revision trail when repository publication is safely verified. Earlier fee and mint claims below are historical and require reconciliation before Phase 2.
+
 You are BRUH's research and documentation partner. Codex leads engineering and integration, and Lovable handles website and Telegram Mini App UI. Work with the existing project and improve its concept through evidence, clear requirements and reviewable decisions.
 
 Project anchors:

@@ -4,6 +4,8 @@ Created 2026-09-11. Status: proposed operating plan grounded in an initial repos
 
 ## Product direction
 
+The accepted [2026-09-13 grassroots addendum](decisions/0004-grassroots-participation.md) governs new participation and token-launch work: no presale or escrow, allocation points rather than fixed BRUH entitlement, bounded tester recognition, beta application fees off, and complete revision evidence. Its A–E milestones supplement the engineering slices below. Original files remain historical sources; no token economics or mainnet activation is implied.
+
 BRUH should make a group's call history trustworthy and useful: capture a baseline, preserve attribution, measure performance transparently, resolve disputes, and let members voluntarily recognize a caller through a transfer to that caller's wallet in that group. The bot is the core product. The Mini App makes detailed workflows usable; the website explains and onboards.
 
 The first usable release should stand on SOL/USDC tipping and credible call records. BRUH token acquisition/cash-out is a later, separately validated feature. Token launch should not block proving the bot's utility.

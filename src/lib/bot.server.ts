@@ -6,6 +6,7 @@ import { createTipIntent, confirmTip, tipNetworkMetadata } from "./tips.server";
 import { getActiveWallet } from "./wallets.server";
 import { createLoginToken } from "./session.server";
 import { getBruhConfig } from "./bruh-config.server";
+import { creditsMessage } from "./participation";
 import {
   startSeason,
   endSeason,
@@ -62,6 +63,7 @@ const HELP = [
   "/calls — open calls in this group",
   "/leaderboard — this group's BRUH Score ranking",
   "/stats — your own record here",
+  "/credits — participation season status (earning not started)",
   "",
   "<b>Wallet &amp; tips</b>",
   "/wallet — link or review your wallet (DM only)",
@@ -173,6 +175,9 @@ async function handleCommand(message: TgMessage, text: string) {
       case "/privacy":
         await sendMessage(message.chat.id, PRIVACY);
         return;
+      case "/credits":
+        await sendMessage(message.chat.id, escapeHtml(creditsMessage()));
+        return;
       case "/wallet":
         return handleWalletDm(message);
       default:
@@ -204,6 +209,11 @@ async function handleCommand(message: TgMessage, text: string) {
 
     case "/stats":
       return handleStats(message, group, member);
+    case "/credits":
+      await sendMessage(message.chat.id, escapeHtml(creditsMessage()), {
+        replyToMessageId: message.message_id,
+      });
+      return;
     case "/wallet":
       return handleWalletPointer(message, group, member);
     case "/tip":
