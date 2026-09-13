@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { PARTICIPATION } from "@/lib/participation";
 import {
   exchangeInitDataFn,
   exchangeLoginTokenFn,
@@ -61,13 +62,14 @@ type ExplorerCall = {
   liquidityUsd: number;
 };
 
-type TabId = "wallet" | "board" | "calls" | "tips" | "profile" | "admin";
+type TabId = "wallet" | "board" | "calls" | "tips" | "credits" | "profile" | "admin";
 
 const TABS: { id: TabId; label: string }[] = [
   { id: "wallet", label: "Wallet" },
   { id: "board", label: "Board" },
   { id: "calls", label: "Calls" },
   { id: "tips", label: "Tips" },
+  { id: "credits", label: "Credits" },
   { id: "profile", label: "Profile" },
 ];
 
@@ -486,6 +488,21 @@ function MiniApp() {
             </div>
           )}
           {status && <p className="mt-3 text-sm text-accent">{status}</p>}
+        </section>
+      )}
+
+      {tab === "credits" && current && (
+        <section className="mt-6 rounded-lg border border-border bg-card p-5">
+          <h2 className="text-lg font-semibold">{PARTICIPATION.title}</h2>
+          <p className="mt-3 text-sm text-muted-foreground">Group: {current.title}</p>
+          <p className="mt-3 text-sm text-muted-foreground">{PARTICIPATION.description}</p>
+          <p className="mt-3 text-sm text-muted-foreground">{PARTICIPATION.disclosure}</p>
+          <p className="mt-3 text-sm text-accent">{PARTICIPATION.next}</p>
+          <p className="mt-3 text-sm text-muted-foreground">
+            {current.wallet
+              ? "A wallet is linked for this group. No BRUH allocation has been finalized."
+              : "Verify your wallet in the Wallet tab before any future allocation is finalized."}
+          </p>
         </section>
       )}
 

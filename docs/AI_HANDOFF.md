@@ -1,5 +1,11 @@
 # BRUH current handoff
 
+## Current direction and review slice — 2026-09-13
+
+Accepted owner direction: [grassroots participation](decisions/0004-grassroots-participation.md). No presale/escrow; allocation points, capped tester recognition and preserved revision history. This review slice adds inactive `/credits` and Mini App status screens and replaces outdated token-page mint/fee promises. No earning ledger, rewards, token, mainnet gate or Cloud migration is enabled. Source baseline: `275a60e9d892581b0476ada2d6d8739dfa1f6b28`; branch `codex/grassroots-participation`. Validation and exact submitted SHA are recorded in the PR/operation record. The pending settlement branch and its unvalidated Cloud function remain separate. Public repository visibility and history-safety review are pending.
+
+Next implementation: append-only participation ledger with atomic uniqueness/caps, approved versioned rules, group-scoped reads and privacy integration. Earning remains off until weights, caps and eligibility are approved. Before mainnet, complete the outstanding two-account devnet flow and settlement validation. See the A–E milestones in the addendum.
+
 Inspection date: 2026-09-12 (America/Toronto).
 Code baseline: `main` at `a8e43662d7613cb69de4cd2c2dc52530dc2a19d7`.
 Production application baseline: `a8e43662d7613cb69de4cd2c2dc52530dc2a19d7`.

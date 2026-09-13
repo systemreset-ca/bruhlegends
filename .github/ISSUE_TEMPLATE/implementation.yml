@@ -1,0 +1,30 @@
+name: Implementation milestone slice
+description: Track a bounded BRUH change with acceptance evidence.
+title: "[Slice] "
+body:
+  - type: textarea
+    id: purpose
+    attributes:
+      label: Problem and desired behavior
+      description: Include the governing specification or decision and the milestone.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Include group isolation, replay/cap handling and privacy cases where applicable.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence and current state
+      description: Exact baseline SHA, tests, known gaps, owner and affected subsystem. Separate planned, implemented, tested and live.
+    validations:
+      required: true
+  - type: textarea
+    id: gates
+    attributes:
+      label: Dependencies and release gates
+      description: Configuration names only; no credentials or private user data. Record migration, rollout and rollback needs.
