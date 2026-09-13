@@ -10,6 +10,8 @@ Install this package separately with `pnpm --dir services/custody-signer install
 
 ## Required integration sequence
 
+`DevnetHttpSolRpc` provides the same runtime port without constructing SDK `Connection` or a WebSocket client. This addresses the isolated Worker's throwing WebSocket build stub. It requires an explicit server-owned HTTPS endpoint, checks devnet genesis before sending, requests finalized blockhash/fees and transaction proofs, broadcasts only validated signed bytes with preflight enabled, and compares complete finalized wire bytes before counting a tip. Provider failures produce opaque diagnostics; HTTP redirects are rejected, response size is capped at 128 KiB and each call has a five-second abort deadline with no automatic HTTP retries. Thirteen mock-transport tests cover wrong network, fees, contradictory acknowledgment, wire mismatch, finalized failures, missing history and malformed/oversized provider responses. These tests do not prove deployment, real RPC connectivity or funded transaction success. RPC reference: [getTransaction](https://solana.com/docs/rpc/http/gettransaction), [sendTransaction](https://solana.com/docs/rpc/http/sendtransaction).
+
 1. Authenticate Telegram identity and obtain the exact group/member-owned wallet and immutable tip reservation using controlled database operations. Never accept an authorization snapshot directly from an unauthenticated client.
 2. Prepare and durably store one blockhash/approval snapshot per reservation before signing. Concurrent workers must reuse that snapshot; an expiring lease must not create a second signed transaction.
 3. Sign through the isolated vault. Durably store the immutable signed transaction before broadcast. Reuse its signature/bytes after timeouts.
