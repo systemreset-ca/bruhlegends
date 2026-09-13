@@ -2,9 +2,11 @@
 
 ## Dedicated signer setup and SQL runtime — 2026-09-13
 
-Created [BRUH Devnet Guardian](https://lovable.dev/projects/fe274b3a-1273-4254-8b49-25d0be0f47df) in the owner's existing workspace. Its Lovable agent reports Cloud enabled with a separate backend and secret scope, an inert status page and no signing endpoints, keys or funding. This is not proof of production signing compatibility; actual SDK/runtime validation and fail-closed request authentication were requested next. No additional Supabase signup or paid upgrade was performed. Separate GitHub source connection remains to be established.
+Created [BRUH Devnet Guardian](https://lovable.dev/projects/fe274b3a-1273-4254-8b49-25d0be0f47df) in the owner's existing workspace, with Cloud and separate backend/secret scope reported by Lovable. Connected its own [private GitHub repository](https://github.com/systemreset-ca/bruh-devnet-guardian); editor reports synchronized and a local clone succeeded at `88e0590fdae9316effaae50f83753d6243ab7fa1`. No additional Supabase signup or paid upgrade was performed. Local Node smoke tests and Worker bundle build pass according to its recorded evidence; actual deployed Worker crypto execution is not verified. Source review found process-local nonce storage, unbound caller key ID and an authenticated diagnostic route left by an interrupted run. Hardening and diagnostic removal were assigned; verify the resulting commits before integration. No user funding, production wrapping key or funded signing endpoint exists.
 
 Draft PR #46 now adds a SQL runtime adapter requiring explicit server-side spending authorization, immutable approval/signed persistence before broadcast, exact finalized reconciliation and a denied-by-default snapshot getter. Failed/ambiguous transactions keep reservations; fee-aware failure release, deposits, withdrawal/export step-up, HTTP integration and multi-session concurrency remain incomplete. The application type check now includes signer service source. No BRUH Cloud migrations or grants were applied; existing bot operation is unchanged.
+
+Source `94e94ef8ae8ecbacd2d142cf313dbd9ad7f06f09` passed [exact-commit CI](https://github.com/systemreset-ca/bruhlegends/actions/runs/34784524897): 148 application tests, types, production build, both isolated SQL suites and full-history secret scan. Draft PR #46 remains unmerged and custody inactive.
 
 ## Owner-authorized self-managed funded wallets — 2026-09-13
 
