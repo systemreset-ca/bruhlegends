@@ -1,0 +1,12 @@
+{
+  "name": "bruh-db-validation",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.19.0",
+  "scripts": {
+    "test": "node --test *.pg.mjs"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.3.14"
+  }
+}

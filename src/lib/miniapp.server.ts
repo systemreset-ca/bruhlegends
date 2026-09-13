@@ -35,6 +35,13 @@ async function requireSession(session: string) {
   return resolved;
 }
 
+export async function loadMyParticipation(input: { session: string; membershipId: string }) {
+  const { telegramUserId } = await requireSession(input.session);
+  const membership = await ownedMembership(telegramUserId, input.membershipId);
+  const { loadParticipation } = await import("./participation.server");
+  return loadParticipation(membership.group_id, membership.id);
+}
+
 /** Every membership the caller owns; nothing outside their own Telegram id. */
 async function ownedMembership(telegramUserId: number, membershipId: string) {
   const db = await admin();

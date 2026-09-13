@@ -1,6 +1,15 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
+export const getParticipationFn = createServerFn({ method: "POST" })
+  .inputValidator((input) =>
+    z.object({ session: z.string().min(8).max(200), membershipId: z.string().uuid() }).parse(input),
+  )
+  .handler(async ({ data }) => {
+    const { loadMyParticipation } = await import("./miniapp.server");
+    return loadMyParticipation(data);
+  });
+
 export const exchangeLoginTokenFn = createServerFn({ method: "POST" })
   .inputValidator((input) => z.object({ token: z.string().min(8).max(200) }).parse(input))
   .handler(async ({ data }) => {
