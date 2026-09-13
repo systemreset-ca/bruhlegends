@@ -31,6 +31,8 @@ jobs:
         run: bun install --frozen-lockfile
       - name: Application tests and types
         run: |
+          npm install --global pnpm@11.19.0
+          pnpm --dir services/custody-signer install --frozen-lockfile --ignore-scripts
           bun run test
           bun run typecheck
       - name: Production build

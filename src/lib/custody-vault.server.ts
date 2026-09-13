@@ -1,6 +1,11 @@
 import { webcrypto } from "node:crypto";
 import { ed25519 } from "@noble/curves/ed25519.js";
 import bs58 from "bs58";
+import {
+  buildSolTransfer,
+  signSolTransfer,
+  type SolTransferApproval,
+} from "../../services/custody-signer/sol-transfer.ts";
 
 const crypto = webcrypto as unknown as Crypto;
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -187,6 +192,28 @@ export class DevnetCustodyVault {
   async validate(envelope: CustodyEnvelope, expected: CustodyIdentity): Promise<void> {
     const seed = await this.unseal(envelope, expected);
     seed.fill(0);
+  }
+  /** Isolated signer only. The caller must claim and authenticate the immutable
+   * reservation first. This constructs one SOL transfer, never arbitrary bytes. */
+  async signSolTransfer(
+    envelope: CustodyEnvelope,
+    expected: CustodyIdentity,
+    approval: SolTransferApproval,
+  ) {
+    buildSolTransfer(approval);
+    if (
+      approval.sender !== envelope.address ||
+      Object.entries(identity(expected)).some(
+        ([key, value]) => approval[key as keyof CustodyIdentity] !== value,
+      )
+    )
+      throw new Error("Wrong wallet approval.");
+    const seed = await this.unseal(envelope, expected);
+    try {
+      return signSolTransfer(seed, approval);
+    } finally {
+      seed.fill(0);
+    }
   }
   async rotate(
     envelope: CustodyEnvelope,
