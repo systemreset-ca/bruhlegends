@@ -92,6 +92,13 @@
       "when": 1789240513499,
       "tag": "0012_pin_tip_intent_network",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1789308000000,
+      "tag": "0014_participation_ledger",
+      "breakpoints": true
     }
   ]
 }

@@ -4,6 +4,7 @@ import { sweepTipIntents } from "@/lib/tips.server";
 import { dispatchAnnouncement, loadGroupAnnounceSettings, publicName } from "@/lib/announce.server";
 import { escapeHtml } from "@/lib/telegram.server";
 import { isAuthorizedSchedulerRequest } from "@/lib/scheduler-auth.server";
+import { processParticipationJobs } from "@/lib/participation.server";
 
 type AnnouncementMember = {
   id: string;
@@ -25,6 +26,7 @@ export const Route = createFileRoute("/api/public/hooks/verify-tips")({
         }
 
         const sweep = await sweepTipIntents();
+        const participation = await processParticipationJobs();
         const db = await admin();
         let announced = 0;
         let queued = 0;
@@ -77,6 +79,8 @@ export const Route = createFileRoute("/api/public/hooks/verify-tips")({
           expired: sweep.expired,
           announced,
           queued,
+          participationProcessed: participation.processed,
+          participationFailed: participation.failed,
         });
       },
     },

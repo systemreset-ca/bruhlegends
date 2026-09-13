@@ -7,6 +7,7 @@ import { getActiveWallet } from "./wallets.server";
 import { createLoginToken } from "./session.server";
 import { getBruhConfig } from "./bruh-config.server";
 import { creditsMessage } from "./participation";
+import { loadParticipation } from "./participation.server";
 import {
   startSeason,
   endSeason,
@@ -209,11 +210,16 @@ async function handleCommand(message: TgMessage, text: string) {
 
     case "/stats":
       return handleStats(message, group, member);
-    case "/credits":
-      await sendMessage(message.chat.id, escapeHtml(creditsMessage()), {
+    case "/credits": {
+      const participation = await loadParticipation(group.id, member.id);
+      const text = participation.storageReady
+        ? `Participation points: ${participation.totalPoints}\n\n${participation.earningEnabled ? "An earning season is active in this group." : "No earning season is currently active in this group."}\n\nPoints are not BRUH tokens or a guaranteed token quantity. Open the Mini App Credits tab for your audited history.`
+        : creditsMessage();
+      await sendMessage(message.chat.id, escapeHtml(text), {
         replyToMessageId: message.message_id,
       });
       return;
+    }
     case "/wallet":
       return handleWalletPointer(message, group, member);
     case "/tip":

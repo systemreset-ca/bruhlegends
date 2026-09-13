@@ -22,6 +22,7 @@ import {
   composeTipFn,
   exportMyDataFn,
   forgetMeFn,
+  getParticipationFn,
 } from "@/lib/miniapp.functions";
 
 export const Route = createFileRoute("/app")({
@@ -102,6 +103,7 @@ function MiniApp() {
   const composeTip = useServerFn(composeTipFn);
   const exportMyData = useServerFn(exportMyDataFn);
   const forgetMe = useServerFn(forgetMeFn);
+  const getParticipation = useServerFn(getParticipationFn);
 
   const [session, setSession] = useState<string | null>(null);
   const [groups, setGroups] = useState<GroupEntry[]>([]);
@@ -119,6 +121,28 @@ function MiniApp() {
   const [tips, setTips] = useState<Awaited<ReturnType<typeof getTipsFn>>["tips"]>([]);
   const [mod, setMod] = useState<Awaited<ReturnType<typeof getModerationFn>> | null>(null);
   const [tab, setTab] = useState<TabId>("wallet");
+  const [participation, setParticipation] = useState<Awaited<
+    ReturnType<typeof getParticipationFn>
+  > | null>(null);
+  const [participationError, setParticipationError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setParticipation(null);
+    setParticipationError(null);
+    if (!session || !selected || tab !== "credits") return;
+    let cancelled = false;
+    getParticipation({ data: { session, membershipId: selected } })
+      .then((result) => {
+        if (!cancelled) setParticipation(result);
+      })
+      .catch(() => {
+        if (!cancelled)
+          setParticipationError("Participation history is unavailable. Try again later.");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [session, selected, tab]);
   const [explorer, setExplorer] = useState<Awaited<ReturnType<typeof getCallsFn>> | null>(null);
   const [openCallId, setOpenCallId] = useState<string | null>(null);
   const [profile, setProfile] = useState<Awaited<ReturnType<typeof getProfileStatsFn>> | null>(
@@ -493,11 +517,60 @@ function MiniApp() {
 
       {tab === "credits" && current && (
         <section className="mt-6 rounded-lg border border-border bg-card p-5">
-          <h2 className="text-lg font-semibold">{PARTICIPATION.title}</h2>
+          <h2 className="text-lg font-semibold">
+            {participation?.storageReady ? "Community participation points" : PARTICIPATION.title}
+          </h2>
           <p className="mt-3 text-sm text-muted-foreground">Group: {current.title}</p>
           <p className="mt-3 text-sm text-muted-foreground">{PARTICIPATION.description}</p>
           <p className="mt-3 text-sm text-muted-foreground">{PARTICIPATION.disclosure}</p>
-          <p className="mt-3 text-sm text-accent">{PARTICIPATION.next}</p>
+          {!participation?.storageReady && (
+            <p className="mt-3 text-sm text-accent">{PARTICIPATION.next}</p>
+          )}
+          {participation?.storageReady && (
+            <p className="mt-3 text-sm text-accent">
+              {participation.earningEnabled
+                ? "An earning season is active in this group."
+                : "No earning season is currently active in this group. Existing history is preserved."}
+            </p>
+          )}
+          {participationError && (
+            <p className="mt-3 text-sm text-destructive">{participationError}</p>
+          )}
+          {!participation && !participationError && (
+            <p className="mt-3 text-sm text-muted-foreground">Loading participation status…</p>
+          )}
+          {participation?.storageReady && (
+            <>
+              <p className="mt-4 font-mono">Participation points: {participation.totalPoints}</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Tips awaiting point processing: {participation.pendingTips} · Tips needing review:{" "}
+                {participation.tipsNeedingReview}
+              </p>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Not a token balance. Recent history shows up to 50 entries; the total includes all
+                entries.
+              </p>
+              {participation.events.length === 0 && (
+                <p className="mt-3 text-sm text-muted-foreground">
+                  No participation events recorded.
+                </p>
+              )}
+              <ul className="mt-3 divide-y divide-border">
+                {participation.events.map((event) => (
+                  <li key={event.id} className="py-3 text-sm">
+                    <span>
+                      {event.source_kind.replaceAll("_", " ")} · {event.status} · {event.points}{" "}
+                      points
+                    </span>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Rule {event.rule_version} · {event.reason_code.replaceAll("_", " ")} ·{" "}
+                      {new Date(event.created_at).toLocaleString()}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
           <p className="mt-3 text-sm text-muted-foreground">
             {current.wallet
               ? "A wallet is linked for this group. No BRUH allocation has been finalized."

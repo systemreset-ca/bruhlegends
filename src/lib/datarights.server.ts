@@ -1,4 +1,5 @@
 import { admin, logAudit } from "./db.server";
+import { participationStorageEnabled } from "./participation.server";
 
 function csvEscape(value: unknown): string {
   if (value === null || value === undefined) return "";
@@ -111,6 +112,29 @@ export async function exportMemberData(membershipId: string): Promise<string> {
     "",
   ];
 
+  if (participationStorageEnabled()) {
+    const participation = await db
+      .from("participation_events")
+      .select("created_at,season_id,source_kind,rule_version,status,points,reason_code")
+      .eq("group_id", member.group_id)
+      .eq("membership_id", membershipId)
+      .order("created_at", { ascending: false });
+    if (participation.error) throw new Error("Participation export failed.");
+    sections.push(
+      "# participation points",
+      toCsv(participation.data ?? [], [
+        "created_at",
+        "season_id",
+        "source_kind",
+        "rule_version",
+        "status",
+        "points",
+        "reason_code",
+      ]),
+      "",
+    );
+  }
+
   await logAudit({
     groupId: member.group_id,
     actorType: "member",
@@ -139,6 +163,14 @@ export async function forgetMember(membershipId: string): Promise<{ pseudonym: s
   if (!member) throw new Error("Membership not found.");
 
   const pseudonym = `anon-${membershipId.slice(0, 6)}`;
+
+  if (participationStorageEnabled()) {
+    const optOut = await db
+      .from("group_members")
+      .update({ participation_opt_out: true })
+      .eq("id", membershipId);
+    if (optOut.error) throw new Error("Participation opt-out failed.");
+  }
 
   await db
     .from("wallets")

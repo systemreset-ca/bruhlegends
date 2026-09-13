@@ -1,5 +1,9 @@
 # BRUH current handoff
 
+## Participation ledger implementation — 2026-09-13
+
+Branch: `codex/participation-ledger`, source baseline `bb174fe52c4d68a14e4585054c023d282ba44fef`. Implements issue #36: immutable rule seasons, audited awards/holds/reversals, reviewed activity sources, durable bounded tip jobs and authenticated history. See [ledger decision/runbook](decisions/0005-participation-ledger.md). Storage is gated by `BRUH_PARTICIPATION_STORAGE_ENABLED`; no seasons/economics are seeded. Exact validation and submitted SHA belong in the PR. Cloud schema application, storage gate, predicate update and deployment are not yet verified. The earlier foundation is the recorded deployed application. PR #32 remains separate and unapplied.
+
 ## Current direction and review slice — 2026-09-13
 
 Published application source is now `1d458ffcfdb8aff1b3b21aa8083bcb8253f85416` (PR #35). See [publication evidence](operations/2026-09-13-production-publish-1d458ffc.md): Lovable completion, revised public token page/homepage 200, unauthenticated webhook 401. Earning stays off; personal ledger and authenticated/live command checks are not complete. GitHub milestones A–E and ledger issue #36 are created. Earlier baseline/deployment statements below are historical.
