@@ -1,0 +1,6 @@
+# Exact reviewed historical false positives; do not add broad path exemptions.
+# See docs/operations/2026-09-13-public-history-review.md.
+1038d0db698a58997d1a42df6b371ad38e6ba77b:tests/scheduler-auth.test.ts:generic-api-key:7
+b87f8676f1fd35c54d7e423b3d7c324f6e3e2b09:tests/scheduler-auth.test.ts:generic-api-key:7
+c088f3799e29149fa0a93f2cfc8635844da6f3fb:.env:generic-api-key:2
+c088f3799e29149fa0a93f2cfc8635844da6f3fb:.env:generic-api-key:5

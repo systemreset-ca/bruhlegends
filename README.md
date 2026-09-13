@@ -1,4 +1,18 @@
-# Crypto Companion Bot
+# BRUH Legends
+
+Telegram calls, group-specific reputation and wallet-authorized Solana tipping. Product first; BRUH later. No presale. Participation earning and token launch remain gated.
+
+## Inspect the evidence
+
+- [Accepted grassroots strategy and A–E milestones](docs/decisions/0004-grassroots-participation.md)
+- [Changelog and release references](CHANGELOG.md)
+- [Dated runtime/deployment evidence](docs/operations/)
+- [Participation ledger, controls and remaining gates](docs/decisions/0005-participation-ledger.md)
+- [History review and public validation workflow](docs/operations/2026-09-13-public-history-review.md)
+
+Follow issues → pull requests → exact commits → tests → deployment records → verified on-chain receipts when available. Planned, implemented, tested and live are different states. A public repository or green build is not a guarantee of security or token value.
+
+Never send private keys, seed phrases or reservation deposits. The app does not sign user transactions server-side. Do not infer a mint, allocation, liquidity lock or deployed feature from an old draft or an unreleased branch.
 
 ## Project coordination
 
