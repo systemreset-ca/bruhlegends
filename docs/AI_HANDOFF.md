@@ -1,5 +1,9 @@
 # BRUH current handoff
 
+## Cloud participation and public CI — 2026-09-13
+
+Ledger PR #38 and public validation PR #39 are merged. GitHub is now public with anonymous access verified and the first locked public CI run passing. Managed Cloud ledger source is `b17d54c550a8fb4ef513953612bd9b1d61dac787`; schema access and the existing conditional scheduler were verified by Lovable, storage configured, zero seasons/awards. Preserve the original no-op journal entry and applied managed SQL duplicate. A follow-up isolates the inactive credits test from Cloud configuration and prevents points-RPC outages blocking confirmed-tip announcements. See [rollout evidence and limits](operations/2026-09-13-participation-cloud-rollout.md). Application publication is still pending; PR #32 and mainnet remain separate/gated. Statements below describe earlier dated states.
+
 ## Participation ledger implementation — 2026-09-13
 
 Branch: `codex/participation-ledger`, source baseline `bb174fe52c4d68a14e4585054c023d282ba44fef`. Implements issue #36: immutable rule seasons, audited awards/holds/reversals, reviewed activity sources, durable bounded tip jobs and authenticated history. See [ledger decision/runbook](decisions/0005-participation-ledger.md). Storage is gated by `BRUH_PARTICIPATION_STORAGE_ENABLED`; no seasons/economics are seeded. Exact validation and submitted SHA belong in the PR. Cloud schema application, storage gate, predicate update and deployment are not yet verified. The earlier foundation is the recorded deployed application. PR #32 remains separate and unapplied.
