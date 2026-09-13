@@ -1,6 +1,6 @@
 # Atomic tip settlement
 
-Status: implemented in a review branch; Cloud migration and database validation pending.
+Status: implemented in a review branch; local PostgreSQL tests pass; Cloud migration and concurrent-session validation pending.
 Date: 2026-09-12.
 Owner: Codex engineering.
 Requirements: original BRUH plan Phase 4, server-verified transfers, controlled sensitive writes, auditable records, and expired-intent rejection.
@@ -16,6 +16,10 @@ The function is executable only by `service_role`. It does not perform chain ver
 ## Validation and rollout
 
 Application tests cover checked database errors, missing receipts, malformed RPC success, receipt conflict, idempotent confirmed reads, and expiry without provider calls. These mocks do not establish PostgreSQL behavior.
+
+The isolated [PostgreSQL harness](../../tools/db-validation/README.md) now executes the committed SQL in an in-memory database: all twelve tests pass, including forced audit/status failures, uniqueness conflict, snapshot mismatch, expiry, retry and role privileges. Every test rolls back and checks zero residue. This verifies sequential PostgreSQL behavior, not Cloud application or multi-session concurrency.
+
+Lovable's restricted interactive role cannot define functions in a rolled-back owner transaction. Its owner-capable migration path is durable. A rollback-only Cloud request therefore stopped without creating the function or fixtures; all Cloud cases remain unrun. Use the additive managed rollout after source review, with isolated rollback of fixtures, and retain the competing-session cases for a disposable full PostgreSQL environment.
 
 Apply the additive migration before deploying application code; the old application does not call the new function. Keep the current production application running until these owner-capable Cloud tests pass in fully rolled-back transactions:
 

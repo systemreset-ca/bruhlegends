@@ -11,7 +11,8 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:db": "node --test tools/db-validation/settlement.test.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
