@@ -36,6 +36,29 @@ function mock(answer: (call: RpcCall) => unknown) {
   }) as unknown as typeof fetch;
 }
 describe("devnet HTTP-only custody RPC", () => {
+  it("preserves the global receiver for the default Worker fetch transport", async () => {
+    const { approval } = fixture();
+    const previous = globalThis.fetch;
+    globalThis.fetch = async function (this: unknown, _input, init) {
+      if (this !== globalThis) throw new TypeError("Illegal invocation");
+      const call = JSON.parse(String(init?.body)) as RpcCall;
+      return Response.json({
+        jsonrpc: "2.0",
+        id: call.id,
+        result:
+          call.method === "getGenesisHash"
+            ? DEVNET_GENESIS
+            : call.method === "getLatestBlockhash"
+              ? { value: { blockhash: approval.blockhash, lastValidBlockHeight: 99 } }
+              : { value: 5000 },
+      });
+    };
+    try {
+      expect(await new DevnetHttpSolRpc("https://rpc.invalid").prepare(approval)).toEqual(approval);
+    } finally {
+      globalThis.fetch = previous;
+    }
+  });
   it("rejects missing HTTPS and URL credentials", () => {
     expect(() => new DevnetHttpSolRpc("http://rpc.invalid")).toThrow();
     expect(() => new DevnetHttpSolRpc("https://user:password@rpc.invalid")).toThrow();

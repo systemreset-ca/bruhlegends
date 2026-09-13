@@ -21,7 +21,9 @@ export class DevnetHttpSolRpc {
   private id = 0;
   constructor(
     private readonly endpoint: string,
-    private readonly transport: typeof fetch = fetch,
+    // Worker host functions may require their global receiver. Never invoke the
+    // native fetch as a method of this adapter instance.
+    private readonly transport: typeof fetch = (input, init) => globalThis.fetch(input, init),
   ) {
     let url: URL;
     try {
