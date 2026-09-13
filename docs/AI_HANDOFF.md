@@ -1,7 +1,7 @@
 # BRUH current handoff
 
 Inspection date: 2026-09-12 (America/Toronto).
-Code baseline: `main` at `9fc8fbe17cbfab29ddd4f1a49020d673893f392c`.
+Code baseline: `main` at `275a60e9d892581b0476ada2d6d8739dfa1f6b28`.
 Production application baseline: `59fa4b0882948de1b73c827461656d283b58e580`.
 Implementation branch: `codex/atomic-tip-confirmation`; not deployed.
 Scope: atomic tip settlement while the owner prepares the second Telegram account/phone for one controlled user-signed devnet SOL tip. No secret value is included.
@@ -10,7 +10,7 @@ Scope: atomic tip settlement while the owner prepares the second Telegram accoun
 
 The network-pinned tip release is published; homepage and token page returned 200 and the unauthenticated webhook returned 401. See the [publication record](operations/2026-09-12-production-publish-59fa4b08.md). Current source has 80 passing tests before the new settlement work.
 
-The review branch replaces separate unchecked receipt/status/audit writes with service-role-only `settle_tip_intent`, including locked expiry, snapshot checks, and unique-receipt conflict handling. Seven new application tests pass (87 total). See the [decision and Cloud validation runbook](decisions/0002-atomic-tip-settlement.md). Cloud application, database concurrency/failure exercises, and deployment are pending. The historical inventory below records earlier release evidence; it does not establish validation of this new function.
+The review branch replaces separate unchecked receipt/status/audit writes with service-role-only `settle_tip_intent`, including locked expiry, snapshot checks, and unique-receipt conflict handling. It incorporates merged PR #33's bounded, reference-checked verifier. All 99 tests across fourteen files and strict TypeScript pass. See the [settlement decision and Cloud runbook](decisions/0002-atomic-tip-settlement.md) and [verifier decision](decisions/0003-bounded-solana-verification.md). Cloud application, database concurrency/failure exercises, and deployment are pending. The historical inventory below records earlier release evidence; it does not establish validation of the new function.
 
 ## Access and context
 
