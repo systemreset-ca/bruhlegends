@@ -17,10 +17,10 @@ import {
 } from "./moderation.server";
 import { listModerators, setMemberRole, groupStatus, forgetMember } from "./datarights.server";
 
-const PROJECT_URL = "https://project--e287f314-27c2-40bf-94f4-4685a95781fe.lovable.app";
+const PROJECT_URL = "https://bruh.tips";
 
 function appUrl(): string {
-  return process.env["APP_URL"] ?? PROJECT_URL;
+  return process.env["APP_URL"]?.trim().replace(/\/+$/, "") || PROJECT_URL;
 }
 
 export type TelegramUpdate = {
@@ -298,6 +298,7 @@ async function handleWalletDm(message: TgMessage) {
       "",
       "Wallets are linked <b>per group</b>, so your identity stays isolated.",
       "Open the BRUH app below, pick the group, and sign a one-off message to prove ownership.",
+      "Pasting an address here does not link it; complete the signing step in the app.",
       "",
       "<i>Signing proves control of the address. It never moves funds.</i>",
     ].join("\n"),
