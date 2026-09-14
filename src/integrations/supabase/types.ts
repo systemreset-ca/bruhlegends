@@ -125,6 +125,48 @@ export type Database = {
           },
         ]
       }
+      bruh_account_tip_authorizations: {
+        Row: {
+          consumed_at: string | null
+          created_at: string
+          expires_at: string
+          intent_id: string
+          telegram_user_id: number
+          token_hash: string
+        }
+        Insert: {
+          consumed_at?: string | null
+          created_at?: string
+          expires_at: string
+          intent_id: string
+          telegram_user_id: number
+          token_hash: string
+        }
+        Update: {
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          intent_id?: string
+          telegram_user_id?: number
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bruh_account_tip_authorizations_intent_id_fkey"
+            columns: ["intent_id"]
+            isOneToOne: false
+            referencedRelation: "bruh_account_tip_intents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bruh_account_tip_authorizations_telegram_user_id_fkey"
+            columns: ["telegram_user_id"]
+            isOneToOne: false
+            referencedRelation: "bruh_secure_action_credentials"
+            referencedColumns: ["telegram_user_id"]
+          },
+        ]
+      }
       bruh_account_tip_execution: {
         Row: {
           actual_fee_lamports: number | null
@@ -399,6 +441,93 @@ export type Database = {
           provider?: string
           quoted_at?: string
           raw?: Json | null
+        }
+        Relationships: []
+      }
+      bruh_secure_action_audit: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: number
+          intent_id: string | null
+          telegram_user_id: number
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: never
+          intent_id?: string | null
+          telegram_user_id: number
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: never
+          intent_id?: string | null
+          telegram_user_id?: number
+        }
+        Relationships: []
+      }
+      bruh_secure_action_credentials: {
+        Row: {
+          attempt_expires_at: string | null
+          attempt_intent_id: string | null
+          attempt_nonce: string | null
+          created_at: string
+          failures: number
+          hash_hex: string
+          iterations: number
+          locked_until: string | null
+          next_attempt_at: string | null
+          salt_hex: string
+          telegram_user_id: number
+        }
+        Insert: {
+          attempt_expires_at?: string | null
+          attempt_intent_id?: string | null
+          attempt_nonce?: string | null
+          created_at?: string
+          failures?: number
+          hash_hex: string
+          iterations: number
+          locked_until?: string | null
+          next_attempt_at?: string | null
+          salt_hex: string
+          telegram_user_id: number
+        }
+        Update: {
+          attempt_expires_at?: string | null
+          attempt_intent_id?: string | null
+          attempt_nonce?: string | null
+          created_at?: string
+          failures?: number
+          hash_hex?: string
+          iterations?: number
+          locked_until?: string | null
+          next_attempt_at?: string | null
+          salt_hex?: string
+          telegram_user_id?: number
+        }
+        Relationships: []
+      }
+      bruh_secure_action_setup_leases: {
+        Row: {
+          expires_at: string | null
+          next_attempt_at: string
+          nonce: string | null
+          telegram_user_id: number
+        }
+        Insert: {
+          expires_at?: string | null
+          next_attempt_at: string
+          nonce?: string | null
+          telegram_user_id: number
+        }
+        Update: {
+          expires_at?: string | null
+          next_attempt_at?: string
+          nonce?: string | null
+          telegram_user_id?: number
         }
         Relationships: []
       }
@@ -1769,6 +1898,21 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      bruh_account_tip_authorized_read: {
+        Args: { p_id: string; p_token_hash: string; p_user_id: number }
+        Returns: Json
+      }
+      bruh_account_tip_authorized_signed: {
+        Args: {
+          p_id: string
+          p_last_height: number
+          p_signature: string
+          p_token_hash: string
+          p_transaction: string
+          p_user_id: number
+        }
+        Returns: Json
+      }
       bruh_account_tip_cancel: {
         Args: { p_id: string; p_user_id: number }
         Returns: Json
@@ -1817,6 +1961,33 @@ export type Database = {
       bruh_external_wallet_register: {
         Args: { p_address: string; p_id: string; p_user_id: string }
         Returns: Json
+      }
+      bruh_secure_action_begin: {
+        Args: { p_intent_id: string; p_user_id: number }
+        Returns: Json
+      }
+      bruh_secure_action_enroll: {
+        Args: {
+          p_hash: string
+          p_nonce: string
+          p_salt: string
+          p_user_id: number
+        }
+        Returns: boolean
+      }
+      bruh_secure_action_finish: {
+        Args: {
+          p_intent_id: string
+          p_nonce: string
+          p_ok: boolean
+          p_token_hash: string
+          p_user_id: number
+        }
+        Returns: boolean
+      }
+      bruh_secure_action_setup_begin: {
+        Args: { p_user_id: number }
+        Returns: string
       }
       claim_telegram_outbox: {
         Args: { p_lease_seconds?: number; p_limit?: number }
