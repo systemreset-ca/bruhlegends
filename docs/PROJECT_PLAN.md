@@ -4,6 +4,8 @@ Created 2026-09-11. Status: proposed operating plan grounded in an initial repos
 
 ## Product direction
 
+Community caller/tipper backend and bot selectors are now applied and published from reviewed main `7fdbb0712e677ffc0212b8e654f3ba50aac200d2`. [Release evidence](operations/2026-09-14-community-leaderboard-publication.md) supersedes earlier pending Cloud/publication statements for this slice. Next: real Telegram command acceptance, community group/token boards and own overall rank, followed by explicit anti-farming policy. Wallet spending remains disabled and its proposed storage unapplied.
+
 BRUH is explicitly a Telegram-wide community leaderboard network with additional per-group boards. [Decision 0011](decisions/0011-community-and-group-rankings.md) supersedes earlier restrictions against community aggregation. Canonical accounts combine calls, performance, confirmed tip activity and group contributions; source attribution and scoped administration remain local. Issue #60 tracks community caller/tipper projections and bot commands, then group/token boards, own overall rank and anti-farming policy. Website design/copy stays with the owner/Lovable.
 
 Codex now owns only bot/backend, Helius/Solana and GitHub engineering records; website design/marketing belongs to the owner and Lovable. Next backend slice is [account-tip reservation and finalized reconciliation](operations/2026-09-14-account-tip-state-machine.md): source implements immutable intents, serialized fee-inclusive reservation, signed-before-broadcast persistence and idempotent exact-fee settlement. Proposed schema remains unapplied and no live spending caller exists. Independent spend authorization, simulation/signing and chain recovery must precede enabling account tips.
