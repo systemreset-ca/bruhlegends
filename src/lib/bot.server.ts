@@ -258,7 +258,19 @@ async function handleCommand(message: TgMessage, text: string) {
         if (accountWalletsEnabled()) return handleAccountWalletDm(message, args);
         return handleWalletDm(message);
       case "/security":
-        if (accountSpendingEnabled()) return sendAccountAction(from.id);
+        if (accountSpendingEnabled()) {
+          try {
+            const wallet = await accountWalletForTelegram(from.id, true);
+            if (!wallet) throw new Error("Wallet unavailable.");
+          } catch {
+            await sendMessage(
+              message.chat.id,
+              "Your internal BRUH Wallet could not be created or opened. Password setup has not started. Try /start or /wallet show in this private chat; this is a wallet service issue, not a password-format error.",
+            );
+            return;
+          }
+          return sendAccountAction(from.id);
+        }
         await sendMessage(message.chat.id, "Secure spending is not enabled yet.");
         return;
       case "/generate":

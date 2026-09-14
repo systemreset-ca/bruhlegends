@@ -25,9 +25,15 @@ vi.mock("../src/lib/account-wallet.server", () => ({
 vi.mock("../src/lib/account-tip-preparation.server", () => ({ prepareAccountTip: m.prepare }));
 vi.mock("../src/lib/session.server", () => ({ createLoginToken: m.login }));
 import { handleUpdate } from "../src/lib/bot.server";
+import { accountWalletForTelegram } from "../src/lib/account-wallet.server";
 const id = "00000000-0000-4000-8000-000000000001";
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.mocked(accountWalletForTelegram).mockResolvedValue({
+    id: "wallet",
+    address: "synthetic-address",
+    network: "devnet",
+  });
   vi.stubEnv("SOLANA_NETWORK", "devnet");
   vi.stubEnv("BRUH_ACCOUNT_TIPS_DEVNET_ENABLED", "true");
   vi.stubEnv("BRUH_ACCOUNT_SIGNING_DEVNET_ENABLED", "true");
@@ -35,6 +41,35 @@ beforeEach(() => {
   m.prepare.mockResolvedValue({ id, state: "reserved", reused: false });
   m.login.mockResolvedValue("synthetic-private-login");
   m.rpc.mockResolvedValue({ data: { sender_user_id: 123 } });
+});
+it("creates or reuses the verified private account wallet before password setup", async () => {
+  await handleUpdate({
+    update_id: 5,
+    message: {
+      message_id: 5,
+      chat: { id: 123, type: "private" },
+      from: { id: 123 },
+      text: "/security",
+    },
+  });
+  expect(accountWalletForTelegram).toHaveBeenCalledWith(123, true);
+  expect(m.login).toHaveBeenCalledWith(123, null);
+  expect(m.send.mock.calls.at(-1)?.[1]).toContain("Set your separate");
+});
+it("does not issue a setup link when internal wallet provisioning fails", async () => {
+  vi.mocked(accountWalletForTelegram).mockRejectedValueOnce(new Error("private backend detail"));
+  await handleUpdate({
+    update_id: 6,
+    message: {
+      message_id: 6,
+      chat: { id: 123, type: "private" },
+      from: { id: 123 },
+      text: "/security",
+    },
+  });
+  expect(m.login).not.toHaveBeenCalled();
+  expect(m.send.mock.calls.at(-1)?.[1]).toContain("not a password-format error");
+  expect(m.send.mock.calls.at(-1)?.[1]).not.toContain("private backend detail");
 });
 afterEach(() => vi.unstubAllEnvs());
 const tip = (text = "/tip 0.001 SOL", target = 456) =>
