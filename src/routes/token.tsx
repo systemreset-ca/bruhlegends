@@ -163,10 +163,13 @@ function TokenPage() {
         <div className="mx-auto max-w-3xl px-6 py-16">
           <h2 className="font-display text-3xl">Keep the culture. Keep control of your wallet.</h2>
           <p className="mt-4 text-sm text-muted-foreground">
-            Transactions are approved in your wallet. No private keys or seed phrases are required.
-            Future token allocation and market value are not guaranteed. Never treat participation
-            points as a spendable token balance.
+            Transactions are approved in your wallet, and BRUH never asks for its seed phrase. A
+            gated test-network beta can generate one encrypted BRUH wallet per Telegram account,
+            shared across that account's groups while group statistics stay separate; spending,
+            export and retirement are not available. Future token allocation and market value are
+            not guaranteed. Never treat participation points as a spendable token balance.
           </p>
+
           <Link to="/risk" className="mt-5 inline-block text-primary underline">
             Risk disclosure
           </Link>
