@@ -32,7 +32,7 @@ const stages = [
   {
     title: "Build the bot",
     status: "Live product",
-    body: "Record calls, follow group rankings and build a transparent reputation inside Telegram.",
+    body: "Record calls, climb your group leaderboard and build a reputation across the BRUH community on Telegram.",
   },
   {
     title: "Build your record",
@@ -158,10 +158,10 @@ function TokenPage() {
           <h2 className="font-display text-3xl">Keep the culture. Keep control of your wallet.</h2>
           <p className="mt-4 text-sm text-muted-foreground">
             BRUH never asks for the seed phrase of a wallet you already own. Your encrypted BRUH
-            account wallet belongs to your Telegram account and follows you across groups, while
-            every group's calls, rankings and reputation remain separate. Future token allocation
-            and market value are not guaranteed. Never treat participation points as a spendable
-            token balance.
+            account wallet belongs to your Telegram account and follows you across groups. Group
+            leaderboards keep each chat competitive, while the community leaderboard recognizes
+            performance across BRUH on Telegram. Future token allocation and market value are not
+            guaranteed. Never treat participation points as a spendable token balance.
           </p>
 
           <Link to="/risk" className="mt-5 inline-block text-primary underline">

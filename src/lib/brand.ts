@@ -111,13 +111,13 @@ export const COPY_BLOCKS: Array<{ id: string; label: string; note: string; text:
     id: "tg-bio",
     label: "Telegram bot description",
     note: "BotFather /setdescription (max 512 chars)",
-    text: "Call tracking and tipping for crypto group chats. /call <mint> locks price, market cap and liquidity the second a call lands. Milestones fire once. BRUH Score ranks callers inside your group only. /tip sends Solana Pay requests you sign in your own wallet — the bot never holds keys or funds.",
+    text: "Call tracking for crypto communities. /call <mint> locks price, market cap and liquidity the second a call lands. Milestones fire once. BRUH Score powers both group leaderboards and a Telegram-wide BRUH community ranking.",
   },
   {
     id: "x-launch",
     label: "X launch post",
     note: "Under 280 chars",
-    text: "Your group chat has been keeping score with screenshots.\n\nBRUH Legends locks a baseline on every call, tracks it on-chain, and lets the chat tip the caller who earned it.\n\nNon-custodial. Group-isolated. Receipts, not vibes.",
+    text: "Your group chat has been keeping score with screenshots.\n\nBRUH Legends locks a baseline on every call and tracks the callers who deliver — in their group and across the BRUH community on Telegram.\n\nGroup pride. Global reputation. Receipts, not vibes.",
   },
   {
     id: "admin-pitch",
