@@ -27,7 +27,7 @@ function PrivacyRoute() {
     <PolicyPage
       title="Privacy"
       updated="February 2026"
-      intro="BRUH is a non-custodial utility bot. It records the minimum needed to score calls and verify tips, and it keeps every record scoped to the single Telegram group it came from."
+      intro="BRUH is a utility bot with non-custodial tipping. It records the minimum needed to score calls and verify tips, and it keeps every record scoped to the single Telegram group it came from."
       sections={[
         {
           heading: "What is stored",

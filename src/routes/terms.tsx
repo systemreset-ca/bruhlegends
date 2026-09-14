@@ -4,11 +4,11 @@ import { PolicyPage } from "@/components/policy-page";
 export const Route = createFileRoute("/terms")({
   head: () => ({
     meta: [
-      { title: "BRUH Terms of Use — Non-custodial bot, no financial advice" },
+      { title: "BRUH Terms of Use — Non-custodial tipping, no financial advice" },
       {
         name: "description",
         content:
-          "Terms for using the BRUH Telegram bot and Mini App: non-custodial by design, group-administered, provided as-is with no investment advice.",
+          "Terms for using the BRUH Telegram bot and Mini App: non-custodial tipping, group-administered, provided as-is with no investment advice.",
       },
       { property: "og:title", content: "BRUH Terms of Use" },
       {
