@@ -1,6 +1,6 @@
 # Finalized account-tip history and community credit
 
-Status: source work; managed credit migration not yet applied.
+Status: applied as managed migration `drizzle/migrations/0020_bruh_account_tip_credit.sql`; see `docs/operations/2026-09-14-account-tip-credit-migration.md`.
 
 The service-only `bruh_account_tip_finalize_credit` atomically finalizes a server-verified account SOL tip and inserts one exact native-SOL fact into existing `tip_intents` and `verified_transfers`. Attribution resolves the original Telegram chat and both canonical memberships without using external wallet candidates. Lamports remain exact SQL integers/numerics; display division introduces no JavaScript rounding or fabricated USD price. Reference, recipient, signature, slot and fee come from the frozen intent and finalized receipt. An append-only credit audit links source and legacy IDs.
 
