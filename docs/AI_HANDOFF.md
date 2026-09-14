@@ -1,5 +1,9 @@
 # BRUH current handoff
 
+## Community-wide rankings — corrected core scope
+
+Owner clarified that Telegram-wide community rankings are a primary feature alongside local group rankings. [Decision 0011](decisions/0011-community-and-group-rankings.md) supersedes older group-only aggregation restrictions. Source adds account-keyed caller/tipper aggregate RPC, `/community` and `/leaderboard global` plus authenticated community loader; no website files changed. Proposed RPC is not yet applied/published. Source facts remain group-attributed, wallets account-wide, named community tips public/verified/deduplicated by network/signature. Issue #60 tracks application and remaining group/token boards, cross-post controls and overall own-rank pagination.
+
 ## Account-tip reservation and reconciliation — source slice
 
 New proposed account-tip storage freezes account wallets/group/amount/reference/fee, serializes one pending spend per wallet, persists signed bytes, disallows signed cancellation and settles idempotently through exact finalized Helius proof. [Implementation and limits](operations/2026-09-14-account-tip-state-machine.md). Local 9 targeted tests and isolated SQL validation passed. Schema is unapplied, no live caller and spending gate remains disabled. SAP/spending authorization, simulation/signing/broadcast/recovery and existing tip/leaderboard integration remain next. No website files were edited; AGENTS records the owner's explicit presentation boundary.

@@ -10,6 +10,7 @@ import {
   revokeWallets,
 } from "./wallets.server";
 import { getLeaderboard, getMemberStats } from "./scoring.server";
+import { getCommunityLeaderboard, type CommunityBoardKind } from "./community-leaderboard.server";
 import {
   listSeasons,
   listOpenDisputes,
@@ -33,6 +34,18 @@ async function requireSession(session: string) {
   const resolved = await resolveSession(session);
   if (!resolved) throw new Error("Session expired. Re-open the link from the bot.");
   return resolved;
+}
+
+/** Community view is account-wide; no membership ID can narrow or substitute identity. */
+export async function loadCommunityBoard(input: {
+  session: string;
+  window?: "all" | "7d" | "30d";
+  kind?: CommunityBoardKind;
+}) {
+  await requireSession(input.session);
+  return {
+    leaderboard: await getCommunityLeaderboard(input.window ?? "all", input.kind ?? "callers"),
+  };
 }
 
 export async function loadMyParticipation(input: { session: string; membershipId: string }) {

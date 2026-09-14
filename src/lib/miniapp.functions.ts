@@ -1,6 +1,22 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
+export const getCommunityBoardFn = createServerFn({ method: "POST" })
+  .inputValidator((input) =>
+    z
+      .object({
+        session: z.string().min(8).max(200),
+        window: z.enum(["7d", "30d", "all"]).optional(),
+        kind: z.enum(["callers", "tippers"]).optional(),
+      })
+      .strict()
+      .parse(input),
+  )
+  .handler(async ({ data }) => {
+    const { loadCommunityBoard } = await import("./miniapp.server");
+    return loadCommunityBoard({session:data.session,window:data.window??"all",kind:data.kind??"callers"});
+  });
+
 export const getParticipationFn = createServerFn({ method: "POST" })
   .inputValidator((input) =>
     z.object({ session: z.string().min(8).max(200), membershipId: z.string().uuid() }).parse(input),

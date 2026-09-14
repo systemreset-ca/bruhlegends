@@ -59,7 +59,7 @@ export function windowCutoff(window: LeaderboardWindow, now = new Date()): strin
 /** Minimum calls in a window before a member is ranked rather than listed. */
 export const MIN_SAMPLE = 3;
 
-/** Group-scoped by construction: no cross-group aggregation ever happens. */
+/** Local group view. Community aggregation is a separate account-keyed projection. */
 export async function getLeaderboard(
   groupId: string,
   limit = 10,

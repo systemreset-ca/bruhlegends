@@ -2,6 +2,7 @@ import { admin, upsertGroup, upsertMember, migrateChatId, logAudit } from "./db.
 import { sendMessage, answerCallbackQuery, escapeHtml, isChatAdmin } from "./telegram.server";
 import { createCall, extractCandidateMints } from "./calls.server";
 import { getLeaderboard, getMemberStats, type LeaderboardWindow } from "./scoring.server";
+import { getCommunityLeaderboard, type CommunityBoardKind } from "./community-leaderboard.server";
 import { createTipIntent, confirmTip, tipNetworkMetadata } from "./tips.server";
 import { getActiveWallet } from "./wallets.server";
 import { createLoginToken } from "./session.server";
@@ -66,6 +67,8 @@ const HELP = [
   "/call &lt;mint&gt; [note] — record a call with a locked-in baseline",
   "/calls — open calls in this group",
   "/leaderboard — this group's BRUH Score ranking",
+  "/community [callers|tippers] [7d|30d|all] — Telegram-wide ranking",
+  "/leaderboard global — community BRUH Score ranking",
   "/stats — your own record here",
   "/credits — participation season status (earning not started)",
   "",
@@ -116,7 +119,8 @@ function privacyText() {
   return [
     "<b>Privacy — devnet account wallets</b>",
     "BRUH stores your Telegram account ID, public wallet address and authenticated encrypted wallet seed.",
-    "One wallet is shared across your BRUH groups. Calls, statistics and tip attribution remain group-specific.",
+    "One wallet is shared across your BRUH groups. Calls and tips retain group attribution and eligible activity also contributes to your community-wide ranking.",
+    "Named community tip rankings use public verified transfers; private, anonymous and pseudonymous tips are not exposed there.",
     "Account wallet creation events are retained for audit. Group /forgetme does not destroy a funded account wallet.",
     "Never send keys to Telegram chat. Export and retirement are not enabled in this beta.",
   ].join("\n\n");
@@ -191,6 +195,16 @@ async function handleCommand(message: TgMessage, text: string) {
   const { command, args } = parseCommand(text);
   const from = message.from!;
   const isPrivate = message.chat.type === "private";
+  const communityRequested =
+    command === "/community" ||
+    (command === "/leaderboard" &&
+      (isPrivate || ["global", "community"].includes((args[0] ?? "").toLowerCase())));
+
+  if (isPrivate && communityRequested)
+    return handleCommunityLeaderboard(
+      message,
+      ["global", "community"].includes((args[0] ?? "").toLowerCase()) ? args.slice(1) : args,
+    );
 
   if (isPrivate) {
     switch (command) {
@@ -225,6 +239,11 @@ async function handleCommand(message: TgMessage, text: string) {
   const { group, member } = await memberContext(message.chat, from);
   if (group.is_paused && command !== "/resume") return;
   if (member.is_banned) return;
+  if (communityRequested)
+    return handleCommunityLeaderboard(
+      message,
+      ["global", "community"].includes((args[0] ?? "").toLowerCase()) ? args.slice(1) : args,
+    );
 
   switch (command) {
     case "/help":
@@ -600,6 +619,40 @@ async function handleLeaderboard(message: TgMessage, group: any, args: string[] 
     `<b>BRUH Score — ${escapeHtml(group.title)}</b>\n<i>${label}</i>\n\n${lines.join("\n")}\n\n<i>Group-scoped. Peak multiples use locked baselines. Try /leaderboard 7d or 30d.</i>`,
     { replyToMessageId: message.message_id },
   );
+}
+
+async function handleCommunityLeaderboard(message: TgMessage, args: string[]) {
+  let window: LeaderboardWindow = "all";
+  let kind: CommunityBoardKind = "callers";
+  if (
+    args.length > 2 ||
+    args.filter((arg) => ["all", "7d", "30d"].includes(arg.toLowerCase())).length > 1 ||
+    args.filter((arg) => ["callers", "tippers"].includes(arg.toLowerCase())).length > 1 ||
+    args.some((arg) => !["all", "7d", "30d", "callers", "tippers"].includes(arg.toLowerCase()))
+  ) {
+    await sendMessage(message.chat.id, "Usage: /community [callers|tippers] [7d|30d|all]");
+    return;
+  }
+  for (const arg of args.map((a) => a.toLowerCase())) {
+    if (arg === "callers" || arg === "tippers") kind = arg;
+    else window = arg as LeaderboardWindow;
+  }
+  try {
+    const rows = await getCommunityLeaderboard(window, kind);
+    const lines = rows.map(
+      (row, index) =>
+        `${index + 1}. <b>${escapeHtml(row.displayName)}</b> — ${kind === "tippers" ? `${row.tipsSent} confirmed tips sent` : `${row.score} pts · ${row.calls} calls · best ${row.bestMultiple.toFixed(2)}x${row.ranked ? "" : " · low sample"}`} · ${row.groups} groups`,
+    );
+    await sendMessage(
+      message.chat.id,
+      `<b>BRUH Community — ${kind}</b>\n<i>${window === "all" ? "all time" : `last ${window}`} · ${escapeHtml(process.env["SOLANA_NETWORK"] ?? "")} tips</i>\n\n${lines.length ? lines.join("\n") : "No eligible community activity yet."}\n\n<i>Accounts ranked across BRUH groups. Public verified tips only. Group boards remain available with /leaderboard inside a group.</i>`,
+    );
+  } catch {
+    await sendMessage(
+      message.chat.id,
+      "Community ranking is temporarily unavailable. Group rankings remain available in your group with /leaderboard.",
+    );
+  }
 }
 
 async function handleStats(message: TgMessage, group: any, member: any) {
