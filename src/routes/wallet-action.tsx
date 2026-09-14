@@ -176,8 +176,9 @@ function WalletAction() {
             <DialogTitle className="font-sans font-medium">BRUH Mini App</DialogTitle>
             <DialogDescription className="text-muted-foreground">
               This is BRUH’s private wallet interface, opened inside Telegram from @BRUHLegendsBot.
-              Your separate Action Password authorizes wallet menu actions. It is not your Telegram
-              password. Never enter a seed phrase or the private key of an external wallet here.
+              Your separate Action Password authorizes your internal BRUH Wallet menu actions. It is
+              not your Telegram password. Never enter a seed phrase or the private key of an
+              external wallet here.
             </DialogDescription>
             <p className="text-sm text-muted-foreground">
               Review the{" "}
@@ -235,12 +236,6 @@ function WalletAction() {
             {enrolling
               ? secureActionPasswordRules
               : "Enter your existing Action Password. Previously created passwords still work."}
-            {enrolling && (
-              <span className="block mt-1">
-                Maximum 128 characters. Standard keyboard letters, numbers and punctuation only.
-                Confirmation must match exactly.
-              </span>
-            )}
           </p>
         )}
         {tip && (
