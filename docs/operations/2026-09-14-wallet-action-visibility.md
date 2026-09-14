@@ -7,3 +7,5 @@ The owner-supplied bruh_wallet.png is copied unchanged to public/bruh_wallet.png
 Scope: src/routes/wallet-action.tsx plus supplied public asset and this engineering record. No landing-page marketing, bot commands, schema, secrets, fees, network gates or transaction behavior changed. Typecheck and targeted lint passed; public CI validates tests/build and fetched history before merge.
 
 Owner asset correction: the header now uses the supplied bruh_wallet_transparent.webp (768x640), copied unchanged. The original PNG remains in revision history. Display sizing and password controls are unchanged.
+
+Owner usability correction: display the full 15–128 character / 256 UTF-8 byte policy, explicitly state no uppercase/numeric/symbol requirement, and validate exact confirmation locally before submitting. Enrollment returns allowlisted public failure messages separating authentication, setup state and service failures from password format. Unknown errors do not expose internal exception details. Apply byte validation before acquiring an enrollment lease. No signing or authentication protections were removed. Policy boundary tests and public CI validate this change.

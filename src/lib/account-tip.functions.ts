@@ -1,8 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { secureActionPasswordError } from "./secure-action-password";
 
 const context = { session: z.string().min(8).max(200), initData: z.string().min(10).max(4096) };
-const password = z.string().min(15).max(128);
+const password = z
+  .string()
+  .min(15)
+  .max(128)
+  .refine((value) => !secureActionPasswordError(value), "Password exceeds 256 UTF-8 bytes.");
 
 export const enrollSecureActionFn = createServerFn({ method: "POST" })
   .inputValidator((input) =>
@@ -13,7 +18,29 @@ export const enrollSecureActionFn = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const { enrollSecureAction } = await import("./secure-action.server");
-    return enrollSecureAction(data);
+    try {
+      await enrollSecureAction(data);
+      return { enrolled: true as const, message: "Password saved." };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "";
+      const messages: Record<string, string> = {
+        "Authentication unavailable.":
+          "Your private authorization expired or could not be verified. Close this app, run /security in your private bot chat, and open the new button.",
+        "Passwords do not match.": "Passwords do not match exactly.",
+        "Invalid Secure Action Password.":
+          "Password must be 15–128 characters and no more than 256 UTF-8 bytes. No capital, number or special character is required.",
+        "Secure Action Password setup unavailable or already complete.":
+          "Setup could not proceed: a password may already be set, another setup may be in progress, or the setup service is unavailable. Changing the characters will not fix this. If you already set a password, use it to authorize your tip.",
+        "Account tips unavailable.":
+          "Wallet authorization is currently unavailable. This is not a password-format error.",
+      };
+      return {
+        enrolled: false as const,
+        message:
+          messages[message] ??
+          "Password setup could not be completed because of a service error. This does not mean your password needs different characters. Please try a fresh /security link.",
+      };
+    }
   });
 
 export const executeAccountTipFn = createServerFn({ method: "POST" })
