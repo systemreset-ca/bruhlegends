@@ -101,8 +101,13 @@ was applied or re-applied in this task.
 ## Validation
 
 - Strict typecheck: pass.
-- Test suite: pass (full suite at this revision).
 - Managed preview build: pass.
+- Test suite with the gate enabled: 122/126 pass. The 4 failures are all in
+  `tests/wallet-command-links.test.ts`, which asserts the pre-activation `/wallet` reply shape
+  (index 2 carrying the app keyboard). With `BRUH_ACCOUNT_WALLETS_DEVNET_ENABLED=false` the same
+  file passes 4/4, so the cause is the newly enabled gate changing the `/wallet` reply, not the UI
+  changes in this task. Bot and server code are Codex-owned and were not edited; the test needs a
+  gate-aware expectation in a follow-up PR.
 
 ## Remaining limitations
 
