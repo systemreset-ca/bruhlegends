@@ -1,5 +1,9 @@
 # BRUH current handoff
 
+## Account-wallet and reward revisions — current
+
+The original BRUH project's disposable-wallet test completed a finalized 0.001 SOL transfer using its devnet configuration. See [public execution evidence](operations/2026-09-14-devnet-two-wallet-transfer.md). This is a CLI experiment, not persistent Telegram wallets. Decision [0008](decisions/0008-one-wallet-per-telegram-account.md) selects one active wallet per Telegram account shared across groups; calls/stats/attribution stay chat-scoped. Guardian is not a requested product or enabled dependency. Decision [0009](decisions/0009-tip-funded-chad-and-future-campaigns.md) records 99% recipient proceeds and a single 1% CHAD purchase split equally, with future JEETER/lock-bonus/HAKTUAH campaigns inactive. Exact base-unit source calculators do not execute swaps or award rewards. Earlier dated custody-scope/provider sections are historical and must not override these updates.
+
 ## Current published application — 2026-09-13
 
 Published exact `152f5baa16f269871ebbebd521ff2fdf7760b1db` to `bruh.tips` using Lovable Publish. Exact-source main CI and managed preview passed; local/preview 107 tests and 20 isolated SQL tests pass. Public routes returned 200 and unauthenticated webhook 401. See [release evidence](operations/2026-09-13-production-publish-152f5baa.md). GitHub is PUBLIC with preserved history and passing pinned validation. Participation storage/schema is configured but zero seasons/awards; authenticated ledger/mobile journeys, owner-signed two-account devnet tip and multi-session concurrency remain unverified. Issue #41 tracks unapproved economics/anti-farming gates. No new secrets needed. PR #32, funded rewards, mint and mainnet remain separate/gated. Earlier sections are historical.
