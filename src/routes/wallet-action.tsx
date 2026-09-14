@@ -117,10 +117,10 @@ function WalletAction() {
       <header className="flex items-center justify-between gap-4">
         <h1 className="min-w-0 flex-1 text-xl font-semibold">Private Wallet Authorization</h1>
         <img
-          src="/bruh_wallet.png"
+          src="/bruh_wallet_transparent.webp"
           alt="BRUH wallet"
           width={80}
-          height={68}
+          height={67}
           className="h-auto w-16 shrink-0 object-contain sm:w-20"
         />
       </header>
