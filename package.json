@@ -13,7 +13,8 @@
     "format": "prettier --write .",
     "test": "vitest run",
     "test:participation-db": "node --test tools/db-validation/participation.pg.mjs",
-    "test:account-wallet-db": "node --test tools/db-validation/account-wallet.pg.mjs"
+    "test:account-wallet-db": "node --test tools/db-validation/account-wallet.pg.mjs",
+    "test:external-wallet-db": "node --test tools/db-validation/external-wallet.pg.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

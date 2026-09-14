@@ -1,5 +1,9 @@
 # BRUH current handoff
 
+## Account external address commands — source ready
+
+Private `/generate` now creates/reuses the internal wallet. `/wallet add <public-address>` and `/wallet external` register/read a distinct account-wide **unverified candidate**, not an ownership-verified withdrawal destination. Replacement, withdrawals and exports remain blocked. Local 14 command/service/link tests, TypeScript and isolated SQL validation passed. Cloud schema and publication are pending; see [implementation evidence](operations/2026-09-14-external-address-commands.md). Earlier statements that external registration is absent describe the prior revision; ownership verification and SAP remain unimplemented.
+
 ## Wallet security reference — current owner direction
 
 Follow [decision0010](decisions/0010-trojan-wallet-security-reference.md): Trojan's documented generated-wallet, deliberate export and separate Secure Action Password flows are the product/security reference. Adopt standard implementation components; do not claim identical undisclosed backend security. SAP-sensitive actions and the new account-wide external withdrawal destination are not implemented. Preserve one internal wallet, no imported user keys, private protected export, group-scoped statistics and current devnet gates. The reference comparison records actual existing gaps and recovery requirements.

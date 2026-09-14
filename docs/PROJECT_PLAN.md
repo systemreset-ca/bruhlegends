@@ -4,6 +4,8 @@ Created 2026-09-11. Status: proposed operating plan grounded in an initial repos
 
 ## Product direction
 
+Current source slice adds private `/generate` and account-wide external public-address registration through `/wallet add` and `/wallet external`. Candidates remain unverified and immutable; no withdrawal authority is granted. [Validation and rollout checklist](operations/2026-09-14-external-address-commands.md) records passing local checks and pending Cloud application/publication. Next: ownership verification and independent secure-action authentication before export, replacement or funded spending.
+
 Wallet handling now follows the owner-directed [Trojan security reference](decisions/0010-trojan-wallet-security-reference.md): generated account wallet, familiar wallet controls and independent SAP for sensitive actions. Record documented reference behavior separately from undisclosed backend internals. Account-wide external destination registration, SAP, withdrawal/export/retirement and funded tip settlement remain delivery work under issue45.
 
 JEETER precision is now owner-approved at **9 decimals**, with no mint or supply chosen. The next funded-wallet slice has a [strict devnet receipt verification foundation and implementation checklist](operations/2026-09-14-devnet-tip-receipt-foundation.md); signing, durable balance reservations and idempotent settlement remain unimplemented. This source work does not enable spending or earning.
