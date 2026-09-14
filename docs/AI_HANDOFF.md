@@ -1,5 +1,9 @@
 # BRUH current handoff
 
+## Current published private account wallets
+
+Published exact `3565b61b67be82db8e699b485adc18c2655db384` in the original project to `bruh.tips`. The creation gate is enabled on devnet; managed schema and actual privileges are recorded, 126/126 managed tests and exact main CI passed, publication completed and public routes were independently checked. See [publication evidence](operations/2026-09-14-devnet-wallet-publish-3565b61b.md). Private `/start` creates/reuses one encrypted account wallet; `/wallet make` confirms and `/wallet show` reads its balance. Spending/export/retirement remain unavailable and tips are blocked in this mode. Owner's actual two-account private command check remains pending. Platform-role BYPASSRLS and shared-worker trust are explicitly recorded. Earlier source-only/unapplied/unpublished statuses below are historical.
+
 ## Private account-wallet implementation slice
 
 Original-project source now implements gated private `/start` creation, confirmed `/wallet make`, authenticated `/wallet show` and bounded Helius devnet balance reads. Export, retirement and bot-wallet spending remain explicitly unavailable. The proposed SQL is not applied; persistent key/config and Cloud privileges are not yet validated. See [implementation and rollout evidence](operations/2026-09-14-private-account-wallets.md). Do not merge the obsolete per-group custody migration as a shortcut.
