@@ -11,6 +11,7 @@ import { creditsMessage } from "./participation";
 import { accountWalletsEnabled, accountWalletForTelegram } from "./account-wallet.server";
 import { accountWalletBalance } from "./account-wallet-balance.server";
 import { accountExternalWallet } from "./account-external-wallet.server";
+import { prepareAccountTip } from "./account-tip-preparation.server";
 import { loadParticipation } from "./participation.server";
 import {
   startSeason,
@@ -25,6 +26,38 @@ const PROJECT_URL = "https://bruh.tips";
 
 function appUrl(): string {
   return process.env["APP_URL"]?.trim().replace(/\/+$/, "") || PROJECT_URL;
+}
+
+function accountSpendingEnabled(): boolean {
+  return (
+    accountWalletsEnabled() &&
+    process.env["SOLANA_NETWORK"] === "devnet" &&
+    process.env["BRUH_ACCOUNT_TIPS_DEVNET_ENABLED"] === "true" &&
+    process.env["BRUH_ACCOUNT_SIGNING_DEVNET_ENABLED"] === "true"
+  );
+}
+
+async function sendAccountAction(userId: number, intentId?: string) {
+  const token = await createLoginToken(userId, null);
+  const url = new URL("/wallet-action", appUrl());
+  url.searchParams.set("t", token);
+  if (intentId) url.searchParams.set("tip", intentId);
+  await sendMessage(
+    userId,
+    intentId
+      ? "Review the recipient, amount and network fee before authorizing this tip. Never type your Secure Action Password into Telegram chat."
+      : "Set your separate Secure Action Password in the private wallet interface. Never type it into Telegram chat.",
+    {
+      keyboard: [
+        [
+          {
+            text: intentId ? "Review tip" : "Secure Action Password",
+            web_app: { url: url.toString() },
+          },
+        ],
+      ],
+    },
+  );
 }
 
 export type TelegramUpdate = {
@@ -222,6 +255,10 @@ async function handleCommand(message: TgMessage, text: string) {
       case "/wallet":
         if (accountWalletsEnabled()) return handleAccountWalletDm(message, args);
         return handleWalletDm(message);
+      case "/security":
+        if (accountSpendingEnabled()) return sendAccountAction(from.id);
+        await sendMessage(message.chat.id, "Secure spending is not enabled yet.");
+        return;
       case "/generate":
         if (accountWalletsEnabled())
           return handleAccountWalletDm(message, args.length ? ["invalid"] : ["start"]);
@@ -679,6 +716,51 @@ async function handleStats(message: TgMessage, group: any, member: any) {
 
 async function handleTip(message: TgMessage, group: any, member: any, args: string[]) {
   if (accountWalletsEnabled()) {
+    if (accountSpendingEnabled()) {
+      const target = message.reply_to_message?.from;
+      if (
+        !target ||
+        target.is_bot ||
+        target.id === message.from!.id ||
+        args.length < 1 ||
+        args.length > 2 ||
+        (args[1] ?? "SOL").toUpperCase() !== "SOL"
+      ) {
+        await sendMessage(
+          message.chat.id,
+          "Reply to another person with /tip &lt;amount&gt; SOL.",
+          { replyToMessageId: message.message_id },
+        );
+        return;
+      }
+      await upsertMember(group.id, target);
+      let intent: Awaited<ReturnType<typeof prepareAccountTip>>;
+      try {
+        intent = await prepareAccountTip({
+          telegramChatId: message.chat.id,
+          telegramMessageId: message.message_id,
+          senderUserId: message.from!.id,
+          recipientUserId: target.id,
+          amount: args[0]!,
+        });
+      } catch {
+        await sendMessage(
+          message.chat.id,
+          "Tip could not be prepared. Check both accounts have BRUH wallets and sufficient balance, then use an exact positive SOL amount.",
+          { replyToMessageId: message.message_id },
+        );
+        return;
+      }
+      await sendMessage(
+        message.chat.id,
+        "Tip prepared. Open your private BRUH chat to review and authorize it.",
+        {
+          replyToMessageId: message.message_id,
+          keyboard: [[{ text: "Review privately", callback_data: `accounttip:${intent.id}` }]],
+        },
+      );
+      return;
+    }
     await sendMessage(
       message.chat.id,
       "Devnet account-wallet spending is not enabled yet. No funds moved. Your wallet is available in private chat with /wallet show.",
@@ -870,6 +952,25 @@ async function handlePassive(message: TgMessage, text: string) {
 
 async function handleCallback(query: NonNullable<TelegramUpdate["callback_query"]>) {
   const data = query.data ?? "";
+  if (data.startsWith("accounttip:")) {
+    const id = data.slice("accounttip:".length);
+    if (!accountSpendingEnabled() || query.from.is_bot || !/^[0-9a-f-]{36}$/i.test(id)) {
+      await answerCallbackQuery(query.id, "Tip unavailable.", true);
+      return;
+    }
+    const db = await admin();
+    const result = await db.rpc("bruh_account_tip_read", { p_id: id, p_user_id: query.from.id });
+    if (
+      result.error ||
+      !result.data ||
+      String(result.data.sender_user_id) !== String(query.from.id)
+    ) {
+      await answerCallbackQuery(query.id, "Only the sender can review this tip.", true);
+      return;
+    }
+    await answerCallbackQuery(query.id, "Review in your private BRUH chat.");
+    return sendAccountAction(query.from.id, id);
+  }
   if (data === "accountwallet:make") {
     if (
       !accountWalletsEnabled() ||

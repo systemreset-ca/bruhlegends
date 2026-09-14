@@ -4,6 +4,8 @@ Created 2026-09-11. Status: proposed operating plan grounded in an initial repos
 
 ## Product direction
 
+Current source: [account-tip authorization](operations/2026-09-14-account-tip-authorization.md), including one-use password grants, constrained signing and private Telegram approval. Next: managed schema/privilege checks, finalized legacy tip/community credit integration and controlled Telegram pilot. No mainnet or website marketing changes.
+
 Current backend slice: [account-tip preparation](operations/2026-09-14-account-tip-preparation.md), including active membership checks, stored account-wallet resolution, exact SOL message/fee/balance and sender-scoped retries. Managed schema and public bot execution remain gated behind independent spend authorization; then implement simulation/signing, signed-before-broadcast recovery and verified tip credit integration. This is source work, not active Telegram spending.
 
 The [funded twelve-account devnet exercise](operations/2026-09-14-twelve-account-devnet-funded-proof.md) completed: 35 actual finalized transfers (11 funding + 24 tips), exact receipt checks and account-wide community aggregation of 48 synthetic calls. This clears the isolated chain-test funding blocker, not production Telegram spend authorization or Cloud custody integration.
@@ -38,14 +40,14 @@ Improvements to evaluate with Work: show sample sizes and drawdowns beside winne
 
 ## Shared project anchors
 
-| Surface | Authoritative identifier | Responsibility |
-| --- | --- | --- |
-| GitHub | `systemreset-ca/bruhlegends`, integration branch `main` | Code, versioned specs, decisions, PRs and release evidence |
-| Lovable | `e287f314-27c2-40bf-94f4-4685a95781fe` | Website/Mini App UI, presentation, preview and existing hosting integration |
-| Codex | This repository checkout and PRs | Engineering lead, architecture integration, backend, data, tests and release verification |
-| Work | Existing chat `Team Up Chats`, ID `6aa4ac53-4524-83e9-8141-5ba04d968c5a` | Research, requirements, documentation proposals and independent review |
-| Website | `https://bruh.tips` | Public front; live deployment state remains to be verified |
-| Telegram | `@BRUHLegendsBot` linked in preview | User says BotFather registration exists; runtime identity/config still to verify |
+| Surface  | Authoritative identifier                                                 | Responsibility                                                                            |
+| -------- | ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| GitHub   | `systemreset-ca/bruhlegends`, integration branch `main`                  | Code, versioned specs, decisions, PRs and release evidence                                |
+| Lovable  | `e287f314-27c2-40bf-94f4-4685a95781fe`                                   | Website/Mini App UI, presentation, preview and existing hosting integration               |
+| Codex    | This repository checkout and PRs                                         | Engineering lead, architecture integration, backend, data, tests and release verification |
+| Work     | Existing chat `Team Up Chats`, ID `6aa4ac53-4524-83e9-8141-5ba04d968c5a` | Research, requirements, documentation proposals and independent review                    |
+| Website  | `https://bruh.tips`                                                      | Public front; live deployment state remains to be verified                                |
+| Telegram | `@BRUHLegendsBot` linked in preview                                      | User says BotFather registration exists; runtime identity/config still to verify          |
 
 Chat handoffs are convenient transport. Accepted project decisions and evidence must be committed; a chat's claims do not establish that something was implemented or deployed.
 
@@ -62,14 +64,14 @@ When sources conflict, keep both historical records, explain the conflict, and r
 
 ## Delivery sequence
 
-| Slice | Owner | Work | Exit evidence |
-| --- | --- | --- | --- |
-| 0. Baseline and access | Codex, Work | Inventory actual code, migrations, secrets by name, deployment, bot identity, cron and documentation conflicts | Exact commit, requirements matrix, reproducible test/build baseline and runtime inventory |
-| 1. Reliable and authenticated processing | Codex | Private scheduler authentication; durable webhook receipt/processing/retry; callback/session replay controls and group authorization | Adversarial authentication tests, duplicate/concurrent update tests, crash/retry tests; no lost or double-applied work |
-| 2. Trustworthy calls and reputation | Codex, Work | Verify first valid caller, immutable baseline, pool identity, provider disagreement/failover, minimum samples, windows, milestones, disputes and imports | Provider fixtures and database integration tests including concurrency; scoring examples reviewed against spec |
-| 3. Wallet and tipping validation | Codex | Group-specific ownership, nonce consumption, replacement delay, recipient snapshot, network/mint agreement, amount/reference matching and receipt idempotency | Two groups/two wallets tests; wrong/expired/reused payment proofs rejected; devnet end-to-end evidence |
-| 4. Usable pilot | Lovable, Codex | Onboarding, group context, preview/confirm flows, wallet/tip screens, stale/error states, admin tools, truthful marketing and disclosures | Telegram mobile walkthrough, contract-compatible UI, rollback/pause exercise, pilot release record |
-| 5. BRUH token extension | Work, Codex, Lovable | Reconcile token decisions; design and implement quote, acquire/cash-out, fee and swap verification | Approved spec, verified mint/pool/treasury configuration, tests, disclosures and separate release gate |
+| Slice                                    | Owner                | Work                                                                                                                                                          | Exit evidence                                                                                                          |
+| ---------------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| 0. Baseline and access                   | Codex, Work          | Inventory actual code, migrations, secrets by name, deployment, bot identity, cron and documentation conflicts                                                | Exact commit, requirements matrix, reproducible test/build baseline and runtime inventory                              |
+| 1. Reliable and authenticated processing | Codex                | Private scheduler authentication; durable webhook receipt/processing/retry; callback/session replay controls and group authorization                          | Adversarial authentication tests, duplicate/concurrent update tests, crash/retry tests; no lost or double-applied work |
+| 2. Trustworthy calls and reputation      | Codex, Work          | Verify first valid caller, immutable baseline, pool identity, provider disagreement/failover, minimum samples, windows, milestones, disputes and imports      | Provider fixtures and database integration tests including concurrency; scoring examples reviewed against spec         |
+| 3. Wallet and tipping validation         | Codex                | Group-specific ownership, nonce consumption, replacement delay, recipient snapshot, network/mint agreement, amount/reference matching and receipt idempotency | Two groups/two wallets tests; wrong/expired/reused payment proofs rejected; devnet end-to-end evidence                 |
+| 4. Usable pilot                          | Lovable, Codex       | Onboarding, group context, preview/confirm flows, wallet/tip screens, stale/error states, admin tools, truthful marketing and disclosures                     | Telegram mobile walkthrough, contract-compatible UI, rollback/pause exercise, pilot release record                     |
+| 5. BRUH token extension                  | Work, Codex, Lovable | Reconcile token decisions; design and implement quote, acquire/cash-out, fee and swap verification                                                            | Approved spec, verified mint/pool/treasury configuration, tests, disclosures and separate release gate                 |
 
 Slices 1–3 can reveal corrections to existing implementation; do not rebuild working modules just to match phase labels. No target launch date is asserted before the baseline and runtime checks.
 

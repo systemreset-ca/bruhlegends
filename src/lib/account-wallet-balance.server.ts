@@ -7,12 +7,16 @@ import {
 const GENESIS = "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG";
 
 /** Two bounded, read-only requests on explicit Helius devnet. No polling. */
-export async function readDevnetAccount(
-  method: "getBalance" | "getTransaction" | "getLatestBlockhash" | "getFeeForMessage",
+async function requestDevnetAccount(
+  method:
+    | "getBalance"
+    | "getTransaction"
+    | "getLatestBlockhash"
+    | "getFeeForMessage"
+    | "simulateTransaction"
+    | "sendTransaction",
   params: unknown[],
 ): Promise<unknown> {
-  if (!["getBalance", "getTransaction", "getLatestBlockhash", "getFeeForMessage"].includes(method))
-    throw new Error("Devnet balance unavailable.");
   const key = process.env["BRUH_DEVNET_API_KEY"]?.trim();
   const endpoint = key
     ? `https://devnet.helius-rpc.com/?api-key=${encodeURIComponent(key)}`
@@ -69,6 +73,31 @@ export async function readDevnetAccount(
   if ((await read("getGenesisHash", [], 1)) !== GENESIS)
     throw new Error("Devnet balance unavailable.");
   return read(method, params, 2);
+}
+
+export async function readDevnetAccount(
+  method: "getBalance" | "getTransaction" | "getLatestBlockhash" | "getFeeForMessage",
+  params: unknown[],
+): Promise<unknown> {
+  if (!["getBalance", "getTransaction", "getLatestBlockhash", "getFeeForMessage"].includes(method))
+    throw new Error("Devnet read unavailable.");
+  return requestDevnetAccount(method, params);
+}
+
+/** Only the gated execution service calls this; no retry/polling or endpoint input. */
+export async function writeDevnetAccount(
+  method: "simulateTransaction" | "sendTransaction",
+  params: unknown[],
+): Promise<unknown> {
+  if (
+    !["simulateTransaction", "sendTransaction"].includes(method) ||
+    process.env["SOLANA_NETWORK"] !== "devnet" ||
+    process.env["BRUH_ACCOUNT_WALLETS_DEVNET_ENABLED"] !== "true" ||
+    process.env["BRUH_ACCOUNT_TIPS_DEVNET_ENABLED"] !== "true" ||
+    process.env["BRUH_ACCOUNT_SIGNING_DEVNET_ENABLED"] !== "true"
+  )
+    throw new Error("Devnet execution unavailable.");
+  return requestDevnetAccount(method, params);
 }
 
 export async function accountWalletBalance(address: string): Promise<string> {
