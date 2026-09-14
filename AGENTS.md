@@ -11,6 +11,8 @@
 
 ## BRUH coordination
 
+- Owner correction 2026-09-14: BRUH requires Telegram-wide community leaderboards in addition to per-group leaderboards. Canonical Telegram accounts aggregate eligible calls, confirmed tips, stats and group contributions across memberships. Preserve group source attribution/access controls, not a ban on deliberate community projections. Decision 0011 supersedes earlier group-only ranking/stat wording; account wallets remain shared per user/network.
+
 - Owner clarified on 2026-09-14: Codex owns bot/backend code, Helius/Solana transaction engineering and GitHub documentation/revision management. Website design and marketing belong to the owner and Lovable. Do not edit website marketing, layout or copy unless explicitly requested. Keep engineering test-network and operational status in GitHub; necessary transaction safety/authorization belongs in the actual bot workflow.
 
 - GitHub is the durable source for code, specifications and revision history. Read `docs/AI_HANDOFF.md` and `docs/PROJECT_PLAN.md` before work; follow their source links for scope.

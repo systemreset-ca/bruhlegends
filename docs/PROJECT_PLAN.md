@@ -4,6 +4,8 @@ Created 2026-09-11. Status: proposed operating plan grounded in an initial repos
 
 ## Product direction
 
+BRUH is explicitly a Telegram-wide community leaderboard network with additional per-group boards. [Decision 0011](decisions/0011-community-and-group-rankings.md) supersedes earlier restrictions against community aggregation. Canonical accounts combine calls, performance, confirmed tip activity and group contributions; source attribution and scoped administration remain local. Issue #60 tracks community caller/tipper projections and bot commands, then group/token boards, own overall rank and anti-farming policy. Website design/copy stays with the owner/Lovable.
+
 Codex now owns only bot/backend, Helius/Solana and GitHub engineering records; website design/marketing belongs to the owner and Lovable. Next backend slice is [account-tip reservation and finalized reconciliation](operations/2026-09-14-account-tip-state-machine.md): source implements immutable intents, serialized fee-inclusive reservation, signed-before-broadcast persistence and idempotent exact-fee settlement. Proposed schema remains unapplied and no live spending caller exists. Independent spend authorization, simulation/signing and chain recovery must precede enabling account tips.
 
 Owner now reports publication completed in the original project; independent public routes pass (site/app 200, unauthenticated webhook 401). Exact deployed SHA and authenticated wallet command acceptance remain unverified because browser control still times out. [Publication record](operations/2026-09-14-owner-wallet-publication.md) supersedes the prior publication blocker without claiming funded-wallet readiness.
