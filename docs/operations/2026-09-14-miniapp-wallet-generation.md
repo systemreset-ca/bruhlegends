@@ -1,0 +1,11 @@
+# Wallet generation inside the private Mini App
+
+Owner revision moves all wallet onboarding into the existing private wallet-action Mini App. Private /start, /generate, /wallet make and /security offer Open BRUH Wallet Mini App without creating a wallet in chat. Older generation callbacks offer the same app link, preserving private sender checks. /wallet show remains an existing public-address/balance read.
+
+The app verifies its single-use private login link, then server-verifies fresh Telegram initData against the stored session before any account lookup or generation. It reads existing wallet/password setup status, displays a Generate button only when there is no wallet, and creates/reuses the existing encrypted account wallet service only after explicit in-app generation. Return only public address/network and owner-scoped password-set boolean; no IDs, encrypted envelopes, credentials or key material reach the browser. Status lookup reads only telegram_user_id from credentials, not hash/salt. Existing database account/network uniqueness prevents a duplicate wallet on retries.
+
+Address display, Copy Address and Action Password setup remain inside one frame with existing palette, introduction and loader. Copy uses the browser clipboard and falls back to selecting the visible address if unavailable. Existing passwords stay usable and cannot be overwritten here. Any incomplete creation/status read tells the user to reopen and recover the same wallet; no funds move during generation. Existing devnet gates, authentication, encrypted custody, tip signing and audit preservation remain unchanged. No migration, new project, provider or scheduler was added.
+
+Tests cover verified-user scope, read versus generate, authentication failure before wallet access, existing enrollment and fail-closed setup-status reads; bot tests confirm chat commands and old callbacks do not generate wallets. Public CI validates full tests/types/build. Real Telegram Mini App generation and enrollment acceptance remains pending while the owner is away.
+
+Separate owner-requested runtime identity check found original BRUH backend differs from the emailed Main Website project. No unrelated database inspection, billing change or compute upgrade was performed.
