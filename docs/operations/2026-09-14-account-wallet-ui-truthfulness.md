@@ -51,10 +51,10 @@ transaction). Journal history preserved; no migration re-applied in this task.
 
 Tables (`pg_class` / `pg_policies`):
 
-| table | rowsecurity | force rowsecurity | policies | relacl |
-| --- | --- | --- | --- | --- |
-| `public.bruh_account_wallets` | true | true | 0 | `postgres=arwdDxtm/postgres`, `sandbox_exec=ar/postgres` |
-| `public.bruh_account_wallet_audit` | true | true | 0 | `postgres=arwdDxtm/postgres`, `sandbox_exec=ar/postgres` |
+| table                              | rowsecurity | force rowsecurity | policies | relacl                                                   |
+| ---------------------------------- | ----------- | ----------------- | -------- | -------------------------------------------------------- |
+| `public.bruh_account_wallets`      | true        | true              | 0        | `postgres=arwdDxtm/postgres`, `sandbox_exec=ar/postgres` |
+| `public.bruh_account_wallet_audit` | true        | true              | 0        | `postgres=arwdDxtm/postgres`, `sandbox_exec=ar/postgres` |
 
 No grant of any kind exists for `PUBLIC`, `anon`, `authenticated` or `service_role` on
 either table. (`sandbox_exec` is the platform's read-only inspection role, not an
@@ -62,11 +62,11 @@ application role.)
 
 Functions (`pg_proc.proacl`):
 
-| function | EXECUTE |
-| --- | --- |
-| `public.bruh_account_wallet_read` | `postgres`, `service_role` only |
-| `public.bruh_account_wallet_provision` | `postgres`, `service_role` only |
-| `public.bruh_account_wallet_immutable` (trigger) | `postgres` only |
+| function                                         | EXECUTE                         |
+| ------------------------------------------------ | ------------------------------- |
+| `public.bruh_account_wallet_read`                | `postgres`, `service_role` only |
+| `public.bruh_account_wallet_provision`           | `postgres`, `service_role` only |
+| `public.bruh_account_wallet_immutable` (trigger) | `postgres` only                 |
 
 No wallet records were read or created; both tables remain empty.
 
