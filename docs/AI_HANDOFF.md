@@ -1,5 +1,9 @@
 # BRUH current handoff
 
+## Account-tip authorization — current source integration
+
+[Authorization and constrained execution](operations/2026-09-14-account-tip-authorization.md) adds separate password enrollment/attempt controls, one-use intent grants, exact SOL signing, signed-before-broadcast recovery, sender-only private bot links and the functional wallet-action screen. Proposed tip/auth schemas remain unapplied and spending gates remain disabled. Managed deployment, legacy tip/community credit integration and real Telegram acceptance remain required. Landing marketing is untouched.
+
 ## Account-tip preparation — source slice
 
 [Internal preparation](operations/2026-09-14-account-tip-preparation.md) now validates group/membership context, resolves stored account wallets, builds an exact referenced SOL message, reads finalized blockhash/message fee/balance and reserves fee-inclusive funds. Sender-scoped request lookup returns existing intents without another quote and rejects changed requests. Proposed schema remains unapplied; no bot/route/worker caller, signing or broadcast. Independent secure-action authentication and durable execution remain next. No website edits or spending gate activation.
@@ -85,16 +89,16 @@ Scope: operate the verified Telegram fast path and Solana devnet safety gate, th
 
 ## What exists in source
 
-| Area | Evidence | Verification limit |
-| --- | --- | --- |
-| Stack | `package.json`: TanStack Start `1.168.32`, Router `1.170.18`, React `^19.2.0`, Vite `^8.2.0`, Supabase JS `^2.112.2`, Vitest `^4.1.10`; `bun.lock` present | Manifest constraints, not installed/resolved version verification |
-| UI | `src/routes/app.tsx`, marketing/group/token/tiptek routes, policy routes and brand components | Preview observed; complete user journeys not tested |
-| Bot | `src/lib/bot.server.ts`, `telegram.server.ts`, public webhook route | Live `/help` processing and reply verified; broader command journeys remain unverified |
-| Backend | Calls, market, scoring, wallets, tips, Solana, moderation, imports, announcements, data rights, Mini App and session modules under `src/lib/` | Initial selective reading; not a complete audit |
-| Database | Twelve migrations under `supabase/migrations/`; generated types; RLS statements present | The repository Drizzle journal records eleven entries through Lovable's semantically identical managed duplicate `0010` |
-| Market | `market.server.ts` includes DexScreener and Jupiter, cross-check and fallback | Historical Phase 7 missing-provider statement is stale; live API support unverified |
-| Fees | `fees.server.ts` has split/quote/record/confirm/report helpers, plus migration/tests | Search found fee record/confirmation definitions without an integrated application swap caller; do not describe complete buy/sell as shipped |
-| Tests | Twelve files including scheduler authentication, tip-scope, asset allowlisting, network release gates, Telegram `initData` and queue/outbox adversarial cases | 78 tests pass locally; database and live-provider integration coverage remains incomplete |
+| Area     | Evidence                                                                                                                                                      | Verification limit                                                                                                                           |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Stack    | `package.json`: TanStack Start `1.168.32`, Router `1.170.18`, React `^19.2.0`, Vite `^8.2.0`, Supabase JS `^2.112.2`, Vitest `^4.1.10`; `bun.lock` present    | Manifest constraints, not installed/resolved version verification                                                                            |
+| UI       | `src/routes/app.tsx`, marketing/group/token/tiptek routes, policy routes and brand components                                                                 | Preview observed; complete user journeys not tested                                                                                          |
+| Bot      | `src/lib/bot.server.ts`, `telegram.server.ts`, public webhook route                                                                                           | Live `/help` processing and reply verified; broader command journeys remain unverified                                                       |
+| Backend  | Calls, market, scoring, wallets, tips, Solana, moderation, imports, announcements, data rights, Mini App and session modules under `src/lib/`                 | Initial selective reading; not a complete audit                                                                                              |
+| Database | Twelve migrations under `supabase/migrations/`; generated types; RLS statements present                                                                       | The repository Drizzle journal records eleven entries through Lovable's semantically identical managed duplicate `0010`                      |
+| Market   | `market.server.ts` includes DexScreener and Jupiter, cross-check and fallback                                                                                 | Historical Phase 7 missing-provider statement is stale; live API support unverified                                                          |
+| Fees     | `fees.server.ts` has split/quote/record/confirm/report helpers, plus migration/tests                                                                          | Search found fee record/confirmation definitions without an integrated application swap caller; do not describe complete buy/sell as shipped |
+| Tests    | Twelve files including scheduler authentication, tip-scope, asset allowlisting, network release gates, Telegram `initData` and queue/outbox adversarial cases | 78 tests pass locally; database and live-provider integration coverage remains incomplete                                                    |
 
 Scripts: `dev`, `build`, `build:dev`, `preview`, `lint`, `typecheck`, `format`, `test`. No `.github` workflow directory exists yet. CI still needs a reproducible Bun lockfile-based environment.
 

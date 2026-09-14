@@ -155,7 +155,12 @@ export function escapeHtml(value: string | null | undefined): string {
     .replace(/"/g, "&quot;");
 }
 
-export type InlineKeyboard = { text: string; callback_data?: string; url?: string }[][];
+export type InlineKeyboard = {
+  text: string;
+  callback_data?: string;
+  url?: string;
+  web_app?: { url: string };
+}[][];
 
 export async function sendMessage(
   chatId: number | string,

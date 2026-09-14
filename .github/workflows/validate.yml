@@ -43,6 +43,7 @@ jobs:
           bun run test:account-wallet-db
           bun run test:external-wallet-db
           bun run test:account-tip-db
+          bun run test:secure-action-db
           bun run test:community-db
           node --experimental-strip-types tools/db-validation/twelve-account-devnet.mjs --no-report
       - name: Verify secret scanner checksum

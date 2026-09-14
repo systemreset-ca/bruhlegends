@@ -18,6 +18,7 @@ import { Route as RiskRouteImport } from './routes/risk'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TiptekRouteImport } from './routes/tiptek'
 import { Route as TokenRouteImport } from './routes/token'
+import { Route as WalletActionRouteImport } from './routes/wallet-action'
 import { Route as ApiPublicHooksMaintenanceHourlyRouteImport } from './routes/api/public/hooks/maintenance-hourly'
 import { Route as ApiPublicHooksProcessTelegramUpdatesRouteImport } from './routes/api/public/hooks/process-telegram-updates'
 import { Route as ApiPublicHooksPruneRetentionRouteImport } from './routes/api/public/hooks/prune-retention'
@@ -70,6 +71,11 @@ const TokenRoute = TokenRouteImport.update({
   path: '/token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WalletActionRoute = WalletActionRouteImport.update({
+  id: '/wallet-action',
+  path: '/wallet-action',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksMaintenanceHourlyRoute =
   ApiPublicHooksMaintenanceHourlyRouteImport.update({
     id: '/api/public/hooks/maintenance-hourly',
@@ -117,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/tiptek': typeof TiptekRoute
   '/token': typeof TokenRoute
+  '/wallet-action': typeof WalletActionRoute
   '/api/public/hooks/maintenance-hourly': typeof ApiPublicHooksMaintenanceHourlyRoute
   '/api/public/hooks/process-telegram-updates': typeof ApiPublicHooksProcessTelegramUpdatesRoute
   '/api/public/hooks/prune-retention': typeof ApiPublicHooksPruneRetentionRoute
@@ -134,6 +141,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/tiptek': typeof TiptekRoute
   '/token': typeof TokenRoute
+  '/wallet-action': typeof WalletActionRoute
   '/api/public/hooks/maintenance-hourly': typeof ApiPublicHooksMaintenanceHourlyRoute
   '/api/public/hooks/process-telegram-updates': typeof ApiPublicHooksProcessTelegramUpdatesRoute
   '/api/public/hooks/prune-retention': typeof ApiPublicHooksPruneRetentionRoute
@@ -152,6 +160,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/tiptek': typeof TiptekRoute
   '/token': typeof TokenRoute
+  '/wallet-action': typeof WalletActionRoute
   '/api/public/hooks/maintenance-hourly': typeof ApiPublicHooksMaintenanceHourlyRoute
   '/api/public/hooks/process-telegram-updates': typeof ApiPublicHooksProcessTelegramUpdatesRoute
   '/api/public/hooks/prune-retention': typeof ApiPublicHooksPruneRetentionRoute
@@ -171,6 +180,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/tiptek'
     | '/token'
+    | '/wallet-action'
     | '/api/public/hooks/maintenance-hourly'
     | '/api/public/hooks/process-telegram-updates'
     | '/api/public/hooks/prune-retention'
@@ -188,6 +198,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/tiptek'
     | '/token'
+    | '/wallet-action'
     | '/api/public/hooks/maintenance-hourly'
     | '/api/public/hooks/process-telegram-updates'
     | '/api/public/hooks/prune-retention'
@@ -205,6 +216,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/tiptek'
     | '/token'
+    | '/wallet-action'
     | '/api/public/hooks/maintenance-hourly'
     | '/api/public/hooks/process-telegram-updates'
     | '/api/public/hooks/prune-retention'
@@ -223,6 +235,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   TiptekRoute: typeof TiptekRoute
   TokenRoute: typeof TokenRoute
+  WalletActionRoute: typeof WalletActionRoute
   ApiPublicHooksMaintenanceHourlyRoute: typeof ApiPublicHooksMaintenanceHourlyRoute
   ApiPublicHooksProcessTelegramUpdatesRoute: typeof ApiPublicHooksProcessTelegramUpdatesRoute
   ApiPublicHooksPruneRetentionRoute: typeof ApiPublicHooksPruneRetentionRoute
@@ -296,6 +309,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/wallet-action': {
+      id: '/wallet-action'
+      path: '/wallet-action'
+      fullPath: '/wallet-action'
+      preLoaderRoute: typeof WalletActionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/maintenance-hourly': {
       id: '/api/public/hooks/maintenance-hourly'
       path: '/api/public/hooks/maintenance-hourly'
@@ -351,6 +371,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   TiptekRoute: TiptekRoute,
   TokenRoute: TokenRoute,
+  WalletActionRoute: WalletActionRoute,
   ApiPublicHooksMaintenanceHourlyRoute: ApiPublicHooksMaintenanceHourlyRoute,
   ApiPublicHooksProcessTelegramUpdatesRoute:
     ApiPublicHooksProcessTelegramUpdatesRoute,
