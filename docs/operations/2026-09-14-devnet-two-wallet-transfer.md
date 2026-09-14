@@ -27,6 +27,10 @@ Script: `tools/devnet-transfer/devnet-transfer.mjs`. It is a CLI experiment only
 
 Finalized verification (separate read-only query, slot `498017960`): `meta.err = null`; sender present; recipient present; sender delta `-0.001005` SOL (0.001 transfer + 0.000005 fee); recipient delta exactly `+0.001` SOL. **Status: TRANSFER VERIFIED (finalized).**
 
+Codex independently queried `getTransaction` at finalized commitment through the public Solana devnet endpoint after Lovable's report. It returned slot `498017960`, null transaction error and the System Program transfer instruction with the exact public sender/recipient above and `1000000` lamports. This independent read used no Helius credential; the original execution used the original project's devnet configuration. Public chain evidence corroborates the transfer rather than relying only on the chat report.
+
+Subsequent source hardening disables SDK HTTP 429 retries, adds a 15-second per-request timeout, rejects redirects, restricts fallback configuration to Helius devnet and verifies the actual transfer instruction plus sender signature. Node syntax validation passes. These later source changes were not rerun with another airdrop; no additional faucet call is justified just to recheck an already finalized transaction. The initial faucet retry behavior is historical, not the current setting.
+
 Honest limitation of run 1: the script's own in-run verification printed `UNVERIFIED` because `getParsedTransaction` at `finalized` returned null immediately after confirmation. The transfer itself had succeeded; the check was premature. The script was corrected to poll for the finalized record within a bound before judging, so it no longer reports a false negative.
 
 ## Actual outcome — run 2 (corrected script, faucet refused)

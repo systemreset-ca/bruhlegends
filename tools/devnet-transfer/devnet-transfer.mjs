@@ -30,9 +30,15 @@ const AIRDROP_SOL = 1;
 
 function endpoint() {
   const key = process.env.BRUH_DEVNET_API_KEY?.trim();
-  if (key) return `https://devnet.helius-rpc.com/?api-key=${key}`;
+  if (key) return `https://devnet.helius-rpc.com/?api-key=${encodeURIComponent(key)}`;
   const url = process.env.SOLANA_RPC_URL?.trim();
-  if (url) return url;
+  if (url) {
+    const parsed = new URL(url);
+    if (parsed.protocol !== "https:" || parsed.hostname !== "devnet.helius-rpc.com" ||
+        parsed.port || parsed.username || parsed.password || parsed.hash)
+      throw new Error("Invalid devnet configuration");
+    return parsed.href;
+  }
   throw new Error("No devnet RPC configuration present");
 }
 
@@ -48,7 +54,19 @@ function category(error) {
 }
 
 async function main() {
-  const connection = new Connection(endpoint(), "confirmed");
+  const connection = new Connection(endpoint(), {
+    commitment: "confirmed",
+    disableRetryOnRateLimit: true,
+    confirmTransactionInitialTimeout: 60_000,
+    fetch: async (input, init) => {
+      const signal = init?.signal
+        ? AbortSignal.any([init.signal, AbortSignal.timeout(15_000)])
+        : AbortSignal.timeout(15_000);
+      const response = await globalThis.fetch(input, { ...init, signal, redirect: "manual" });
+      if (response.status >= 300 && response.status < 400) throw new Error("Provider rejected");
+      return response;
+    },
+  });
 
   const genesis = await connection.getGenesisHash();
   if (genesis !== DEVNET_GENESIS) {
@@ -148,7 +166,17 @@ async function transfer(connection, walletA, walletB) {
   console.log(`recipient in tx: ${indexB >= 0 ? "verified" : "NOT FOUND"}`);
   console.log(`recipient credited: ${deltaB === null ? "unknown" : deltaB / LAMPORTS_PER_SOL} SOL`);
   console.log(`wallet B balance: ${(afterB - beforeB) / LAMPORTS_PER_SOL} SOL delta, ${afterB / LAMPORTS_PER_SOL} SOL total`);
-  const ok = parsed?.meta?.err === null && deltaB === lamports && indexA >= 0 && indexB >= 0;
+  const senderSigned = parsed?.transaction.message.accountKeys.some(
+    (entry) => entry.signer && entry.pubkey.toBase58() === walletA.publicKey.toBase58(),
+  );
+  const instructions = parsed?.transaction.message.instructions ?? [];
+  const exactTransfer = instructions.length === 1 &&
+    instructions[0].programId.toBase58() === SystemProgram.programId.toBase58() &&
+    instructions[0].parsed?.type === "transfer" &&
+    instructions[0].parsed.info.source === walletA.publicKey.toBase58() &&
+    instructions[0].parsed.info.destination === walletB.publicKey.toBase58() &&
+    instructions[0].parsed.info.lamports === lamports;
+  const ok = parsed?.meta?.err === null && deltaB === lamports && senderSigned && exactTransfer;
   console.log(`STATUS: ${ok ? "TRANSFER VERIFIED (finalized)" : "UNVERIFIED — do not treat as success"}`);
 }
 
