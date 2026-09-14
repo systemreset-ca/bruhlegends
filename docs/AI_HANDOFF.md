@@ -1,5 +1,9 @@
 # BRUH current handoff
 
+## JEETER revision and next devnet receipt slice
+
+Owner accepted JEETER **9 decimals** on 2026-09-14; decision 0009 now supersedes its earlier 16-decimal proposal. Mint/supply/campaign activation remain unresolved. The source-only [devnet receipt foundation](operations/2026-09-14-devnet-tip-receipt-foundation.md) validates exact sender/recipient/amount/reference and fee-aware balance changes through bounded finalized devnet reads. It is not wired to signing, spending or settlement; durable intent/reservation/idempotency work remains next. The published wallet release below is unchanged and the owner's two-account private command check is still pending.
+
 ## Current published private account wallets
 
 Published exact `3565b61b67be82db8e699b485adc18c2655db384` in the original project to `bruh.tips`. The creation gate is enabled on devnet; managed schema and actual privileges are recorded, 126/126 managed tests and exact main CI passed, publication completed and public routes were independently checked. See [publication evidence](operations/2026-09-14-devnet-wallet-publish-3565b61b.md). Private `/start` creates/reuses one encrypted account wallet; `/wallet make` confirms and `/wallet show` reads its balance. Spending/export/retirement remain unavailable and tips are blocked in this mode. Owner's actual two-account private command check remains pending. Platform-role BYPASSRLS and shared-worker trust are explicitly recorded. Earlier source-only/unapplied/unpublished statuses below are historical.

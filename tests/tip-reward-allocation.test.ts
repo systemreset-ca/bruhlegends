@@ -47,7 +47,7 @@ describe("approved reward-funded tip economics", () => {
     }
   });
 
-  it("keeps the 16-decimal supply ceiling exact", () => {
+  it("keeps supply ceilings exact, including JEETER's accepted nine decimals", () => {
     expect(maximumWholeTokenSupply(16)).toBe(1844n);
     expect(maximumWholeTokenSupply(9)).toBe(18_446_744_073n);
     expect(() => maximumWholeTokenSupply(-1)).toThrow();
