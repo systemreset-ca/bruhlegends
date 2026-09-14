@@ -1,5 +1,12 @@
 import { admin, upsertGroup, upsertMember, migrateChatId, logAudit } from "./db.server";
-import { sendMessage, answerCallbackQuery, escapeHtml, isChatAdmin } from "./telegram.server";
+import {
+  sendMessage,
+  editMessageText,
+  answerCallbackQuery,
+  escapeHtml,
+  isChatAdmin,
+  type InlineKeyboard,
+} from "./telegram.server";
 import { createCall, extractCandidateMints } from "./calls.server";
 import { getLeaderboard, getMemberStats, type LeaderboardWindow } from "./scoring.server";
 import { getCommunityLeaderboard, type CommunityBoardKind } from "./community-leaderboard.server";
@@ -260,8 +267,8 @@ async function handleCommand(message: TgMessage, text: string) {
       case "/security":
         if (accountSpendingEnabled()) {
           try {
-            const wallet = await accountWalletForTelegram(from.id, true);
-            if (!wallet) throw new Error("Wallet unavailable.");
+            const wallet = await accountWalletForTelegram(from.id, false);
+            if (!wallet) return accountWalletWelcome(from.id);
           } catch {
             await sendMessage(
               message.chat.id,
@@ -359,7 +366,7 @@ async function handleCommand(message: TgMessage, text: string) {
 }
 
 async function handleStart(message: TgMessage, args: string[]) {
-  if (accountWalletsEnabled()) return handleAccountWalletDm(message, ["start"]);
+  if (accountWalletsEnabled()) return handleAccountWalletDm(message, ["welcome"]);
   const payload = args[0];
   if (payload?.startsWith("wallet_") || payload === "wallet") {
     return handleWalletDm(message);
@@ -376,6 +383,65 @@ async function handleStart(message: TgMessage, args: string[]) {
       "Use /wallet here to link a wallet, or /help for the full command list.",
     ].join("\n"),
   );
+}
+
+async function accountWalletWelcome(userId: number) {
+  await sendMessage(
+    userId,
+    [
+      "<b>Welcome to BRUH Legends.</b>",
+      "Track crypto calls, build your group and community reputation, and tip other members.",
+      "",
+      "<b>1. Generate your internal BRUH Wallet</b>",
+      "This creates a separate Solana wallet for your Telegram account. One BRUH wallet follows you across every BRUH group. It does not link or import your existing wallet.",
+      "BRUH stores its signing key encrypted. Never send us an external private key or seed phrase.",
+      "",
+      "<b>2. Set your Action Password</b>",
+      "After generation, your address and Copy Address button appear here. Open the BRUH Mini App button to set the separate password used to authorize wallet menu actions.",
+      "",
+      "Currently Solana devnet only: use test SOL, never real SOL or mainnet tokens. Generation does not send funds. Key export and withdrawals are not available yet.",
+    ].join("\n"),
+    { keyboard: [[{ text: "Generate BRUH Wallet", callback_data: "accountwallet:make" }]] },
+  );
+}
+
+async function showAccountWalletReady(message: TgMessage, edit = false) {
+  const userId = message.from!.id;
+  const wallet = await accountWalletForTelegram(userId, true);
+  if (!wallet) throw new Error("Wallet unavailable.");
+  const keyboard: InlineKeyboard = [
+    [{ text: "Copy Address", copy_text: { text: wallet.address } }],
+  ];
+  if (accountSpendingEnabled()) {
+    const token = await createLoginToken(userId, null);
+    const url = new URL("/wallet-action", appUrl());
+    url.searchParams.set("t", token);
+    keyboard.push([
+      {
+        text: "Set Password for the BRUH Wallet Auth Actions via BRUH Mini App",
+        web_app: { url: url.toString() },
+      },
+    ]);
+  }
+  keyboard.push([
+    {
+      text: "View wallet on Solana Explorer",
+      url: `https://explorer.solana.com/address/${wallet.address}?cluster=devnet`,
+    },
+  ]);
+  const text = [
+    "<b>Your internal BRUH Wallet is ready.</b>",
+    `<code>${escapeHtml(wallet.address)}</code>`,
+    "One wallet for your Telegram account across all BRUH groups. Repeated generation reuses this same wallet.",
+    "",
+    accountSpendingEnabled()
+      ? "Next: open the Mini App below to set your separate Action Password. If already set, keep your existing password. For a fresh setup link, run /security."
+      : "Action Password setup is not enabled yet.",
+    "BRUH keeps this wallet's signing key encrypted. Never enter an external wallet key or seed phrase.",
+    "DEVNET ONLY — test SOL. Do not send real SOL or mainnet tokens. Key export and withdrawals are not available yet.",
+  ].join("\n");
+  if (edit) await editMessageText(userId, message.message_id, text, keyboard);
+  else await sendMessage(userId, text, { keyboard });
 }
 
 async function handleAccountWalletDm(message: TgMessage, args: string[]) {
@@ -412,6 +478,19 @@ async function handleAccountWalletDm(message: TgMessage, args: string[]) {
     }
     return;
   }
+  if (action === "welcome") {
+    try {
+      const wallet = await accountWalletForTelegram(userId, false);
+      if (wallet) await showAccountWalletReady(message);
+      else await accountWalletWelcome(userId);
+    } catch {
+      await sendMessage(
+        userId,
+        "Your BRUH Wallet could not be checked. No new wallet was created. Please try /start again.",
+      );
+    }
+    return;
+  }
   if (args.length > 1 || !["start", "make", "show", "keys", "destroy"].includes(action)) {
     await sendMessage(
       message.chat.id,
@@ -429,13 +508,7 @@ async function handleAccountWalletDm(message: TgMessage, args: string[]) {
     return;
   }
   if (action === "make") {
-    await sendMessage(
-      message.chat.id,
-      "Create your devnet BRUH wallet? If one exists, it will be reused. This is fake-SOL testing only.",
-      {
-        keyboard: [[{ text: "Confirm devnet wallet", callback_data: "accountwallet:make" }]],
-      },
-    );
+    await accountWalletWelcome(userId);
     return;
   }
   try {
@@ -444,6 +517,7 @@ async function handleAccountWalletDm(message: TgMessage, args: string[]) {
       await sendMessage(
         message.chat.id,
         "No BRUH account wallet yet. Use /wallet make to create one.",
+        { keyboard: [[{ text: "Generate BRUH Wallet", callback_data: "accountwallet:make" }]] },
       );
       return;
     }
@@ -468,6 +542,7 @@ async function handleAccountWalletDm(message: TgMessage, args: string[]) {
       ].join("\n"),
       {
         keyboard: [
+          [{ text: "Copy Address", copy_text: { text: wallet.address } }],
           [
             {
               text: "View devnet wallet",
@@ -999,7 +1074,15 @@ async function handleCallback(query: NonNullable<TelegramUpdate["callback_query"
       return;
     }
     await answerCallbackQuery(query.id, "Creating or reusing your devnet wallet.");
-    return handleAccountWalletDm({ ...query.message, from: query.from }, ["start"]);
+    try {
+      await showAccountWalletReady({ ...query.message, from: query.from }, true);
+    } catch {
+      await sendMessage(
+        query.from.id,
+        "Your BRUH Wallet could not be created or its message updated. No funds moved. Run /start to recover the same wallet and continue setup.",
+      );
+    }
+    return;
   }
   if (data.startsWith("tipcheck:")) {
     const intentId = data.slice("tipcheck:".length);
