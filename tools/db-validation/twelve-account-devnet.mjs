@@ -35,6 +35,10 @@ const output = new URL(
     : "../../docs/operations/twelve-account-devnet-local-results.json",
   import.meta.url,
 );
+async function saveReport() {
+  if (!process.argv.includes("--no-report"))
+    await writeFile(output, JSON.stringify(report, null, 2) + "\n");
+}
 const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const key = await importAccountWrappingKey(
   Buffer.from(crypto.getRandomValues(new Uint8Array(32))).toString("hex"),
@@ -133,7 +137,7 @@ if (!live) {
   report.checks.syntheticTwentyFourTipAggregationOnly = true;
   report.status = "local_wallet_call_and_synthetic_tip_aggregation_verified";
 }
-await writeFile(output, JSON.stringify(report, null, 2) + "\n");
+await saveReport();
 console.log(
   "LOCAL PASS: 12 encrypted internal wallets, 12 external public candidates, 48 calls across 3 groups; community aggregation verified.",
 );
@@ -223,7 +227,7 @@ async function transfer(sender, recipient, lamports, kind) {
     finalized: false,
   };
   report.transactions.push(entry);
-  await writeFile(output, JSON.stringify(report, null, 2) + "\n");
+  await saveReport();
   let receipt;
   for (let attempt = 0; attempt < 40; attempt++) {
     receipt = await rpc("getTransaction", [
@@ -305,7 +309,7 @@ try {
         [`t${t}`, entry.signature, entry.lamports, entry.recipient],
       );
       report.boards = await boards();
-      await writeFile(output, JSON.stringify(report, null, 2) + "\n");
+      await saveReport();
     }
     assert.ok(
       report.boards.communityTippers.every((row) => row.tipsSent === 2 && row.tipsReceived === 2),
@@ -325,6 +329,6 @@ try {
   console.log(`LIVE INCOMPLETE: ${report.failure}`);
   process.exitCode = 1;
 } finally {
-  await writeFile(output, JSON.stringify(report, null, 2) + "\n");
+  await saveReport();
   await db.close();
 }

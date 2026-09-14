@@ -44,6 +44,7 @@ jobs:
           bun run test:external-wallet-db
           bun run test:account-tip-db
           bun run test:community-db
+          node --experimental-strip-types tools/db-validation/twelve-account-devnet.mjs --no-report
       - name: Verify secret scanner checksum
         run: |
           curl -fsSL https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz -o /tmp/gitleaks.tar.gz
