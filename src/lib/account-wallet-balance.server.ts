@@ -1,7 +1,16 @@
+import bs58 from "bs58";
+import {
+  matchAccountSolTipReceipt,
+  type AccountSolTipExpectation,
+} from "./account-sol-tip-receipt";
+
 const GENESIS = "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG";
 
 /** Two bounded, read-only requests on explicit Helius devnet. No polling. */
-export async function accountWalletBalance(address: string): Promise<string> {
+async function readDevnetAccount(
+  method: "getBalance" | "getTransaction",
+  params: unknown[],
+): Promise<unknown> {
   const key = process.env["BRUH_DEVNET_API_KEY"]?.trim();
   const endpoint = key
     ? `https://devnet.helius-rpc.com/?api-key=${encodeURIComponent(key)}`
@@ -57,7 +66,14 @@ export async function accountWalletBalance(address: string): Promise<string> {
   }
   if ((await read("getGenesisHash", [], 1)) !== GENESIS)
     throw new Error("Devnet balance unavailable.");
-  const response = (await read("getBalance", [address, { commitment: "finalized" }], 2)) as {
+  return read(method, params, 2);
+}
+
+export async function accountWalletBalance(address: string): Promise<string> {
+  const response = (await readDevnetAccount("getBalance", [
+    address,
+    { commitment: "finalized" },
+  ])) as {
     value?: unknown;
   } | null;
   if (
@@ -70,4 +86,24 @@ export async function accountWalletBalance(address: string): Promise<string> {
   const amount = BigInt(response.value);
   const fraction = (amount % 1_000_000_000n).toString().padStart(9, "0").replace(/0+$/, "");
   return `${amount / 1_000_000_000n}${fraction ? `.${fraction}` : ""}`;
+}
+
+/** Read-only foundation: does not award tips or consume signatures/references. */
+export async function verifyFinalizedAccountSolTip(
+  expected: AccountSolTipExpectation,
+): Promise<{ matched: boolean; slot?: number }> {
+  try {
+    if (bs58.decode(expected.signature).length !== 64) return { matched: false };
+  } catch {
+    return { matched: false };
+  }
+  const receipt = await readDevnetAccount("getTransaction", [
+    expected.signature,
+    {
+      encoding: "jsonParsed",
+      commitment: "finalized",
+      maxSupportedTransactionVersion: 0,
+    },
+  ]);
+  return matchAccountSolTipReceipt(receipt, expected);
 }
