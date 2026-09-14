@@ -99,6 +99,155 @@ export type Database = {
           },
         ]
       }
+      bruh_account_tip_audit: {
+        Row: {
+          created_at: string
+          event_type: string
+          intent_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          intent_id: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          intent_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bruh_account_tip_audit_intent_id_fkey"
+            columns: ["intent_id"]
+            isOneToOne: false
+            referencedRelation: "bruh_account_tip_intents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bruh_account_tip_execution: {
+        Row: {
+          actual_fee_lamports: number | null
+          finalized_slot: number | null
+          intent_id: string
+          last_valid_block_height: number | null
+          sender_wallet_id: string
+          signature: string | null
+          signed_transaction: string | null
+          state: string
+        }
+        Insert: {
+          actual_fee_lamports?: number | null
+          finalized_slot?: number | null
+          intent_id: string
+          last_valid_block_height?: number | null
+          sender_wallet_id: string
+          signature?: string | null
+          signed_transaction?: string | null
+          state: string
+        }
+        Update: {
+          actual_fee_lamports?: number | null
+          finalized_slot?: number | null
+          intent_id?: string
+          last_valid_block_height?: number | null
+          sender_wallet_id?: string
+          signature?: string | null
+          signed_transaction?: string | null
+          state?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bruh_account_tip_execution_intent_id_fkey"
+            columns: ["intent_id"]
+            isOneToOne: true
+            referencedRelation: "bruh_account_tip_intents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bruh_account_tip_execution_sender_wallet_id_fkey"
+            columns: ["sender_wallet_id"]
+            isOneToOne: false
+            referencedRelation: "bruh_account_wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bruh_account_tip_intents: {
+        Row: {
+          created_at: string
+          expires_at: string
+          fee_lamports: number
+          id: string
+          lamports: number
+          network: string
+          observed_balance: number
+          observed_slot: number
+          recipient_address: string
+          recipient_user_id: number
+          recipient_wallet_id: string
+          reference: string
+          request_key: string
+          sender_address: string
+          sender_user_id: number
+          sender_wallet_id: string
+          telegram_chat_id: number
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          fee_lamports: number
+          id: string
+          lamports: number
+          network: string
+          observed_balance: number
+          observed_slot: number
+          recipient_address: string
+          recipient_user_id: number
+          recipient_wallet_id: string
+          reference: string
+          request_key: string
+          sender_address: string
+          sender_user_id: number
+          sender_wallet_id: string
+          telegram_chat_id: number
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          fee_lamports?: number
+          id?: string
+          lamports?: number
+          network?: string
+          observed_balance?: number
+          observed_slot?: number
+          recipient_address?: string
+          recipient_user_id?: number
+          recipient_wallet_id?: string
+          reference?: string
+          request_key?: string
+          sender_address?: string
+          sender_user_id?: number
+          sender_wallet_id?: string
+          telegram_chat_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bruh_account_tip_intents_recipient_wallet_id_fkey"
+            columns: ["recipient_wallet_id"]
+            isOneToOne: false
+            referencedRelation: "bruh_account_wallets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bruh_account_tip_intents_sender_wallet_id_fkey"
+            columns: ["sender_wallet_id"]
+            isOneToOne: false
+            referencedRelation: "bruh_account_wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bruh_account_wallet_audit: {
         Row: {
           created_at: string
@@ -1619,6 +1768,39 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      bruh_account_tip_cancel: {
+        Args: { p_id: string; p_user_id: number }
+        Returns: Json
+      }
+      bruh_account_tip_finalize: {
+        Args: {
+          p_fee: number
+          p_id: string
+          p_signature: string
+          p_slot: number
+          p_user_id: number
+        }
+        Returns: Json
+      }
+      bruh_account_tip_find_request: {
+        Args: { p_request_key: string; p_user_id: number }
+        Returns: Json
+      }
+      bruh_account_tip_read: {
+        Args: { p_id: string; p_user_id: number }
+        Returns: Json
+      }
+      bruh_account_tip_reserve: { Args: { p_record: Json }; Returns: Json }
+      bruh_account_tip_signed: {
+        Args: {
+          p_id: string
+          p_last_height: number
+          p_signature: string
+          p_transaction: string
+          p_user_id: number
+        }
+        Returns: Json
       }
       bruh_account_wallet_provision: { Args: { p_record: Json }; Returns: Json }
       bruh_account_wallet_read: { Args: { p_user_id: string }; Returns: Json }
