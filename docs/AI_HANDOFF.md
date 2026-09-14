@@ -1,5 +1,9 @@
 # BRUH current handoff
 
+## Wallet security reference — current owner direction
+
+Follow [decision0010](decisions/0010-trojan-wallet-security-reference.md): Trojan's documented generated-wallet, deliberate export and separate Secure Action Password flows are the product/security reference. Adopt standard implementation components; do not claim identical undisclosed backend security. SAP-sensitive actions and the new account-wide external withdrawal destination are not implemented. Preserve one internal wallet, no imported user keys, private protected export, group-scoped statistics and current devnet gates. The reference comparison records actual existing gaps and recovery requirements.
+
 ## JEETER revision and next devnet receipt slice
 
 Owner accepted JEETER **9 decimals** on 2026-09-14; decision 0009 now supersedes its earlier 16-decimal proposal. Mint/supply/campaign activation remain unresolved. The source-only [devnet receipt foundation](operations/2026-09-14-devnet-tip-receipt-foundation.md) validates exact sender/recipient/amount/reference and fee-aware balance changes through bounded finalized devnet reads. It is not wired to signing, spending or settlement; durable intent/reservation/idempotency work remains next. The published wallet release below is unchanged and the owner's two-account private command check is still pending.
