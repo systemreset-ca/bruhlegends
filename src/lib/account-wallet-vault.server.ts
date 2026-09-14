@@ -4,7 +4,7 @@ import {
   buildAccountSolTipMessage,
   accountMessageBase64,
   type AccountSolTipMessageInput,
-} from "./account-sol-tip-message";
+} from "./account-sol-tip-message.ts";
 
 export type AccountWalletEnvelope = {
   id: string;
