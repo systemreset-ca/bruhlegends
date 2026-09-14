@@ -2,6 +2,8 @@
 
 ## Twelve-account isolated exercise
 
+Fresh owner-funded execution now completed: 12 encrypted wallets, 48 synthetic calls, 11 finalized devnet funding transfers and 24 finalized verified tips; community caller/tipper rows each contain 12 accounts with two sent/two received tips. [Funded proof and all transaction links](operations/2026-09-14-twelve-account-devnet-funded-proof.md) supersede the earlier funding blocker below. Total network fees 0.000175 devnet SOL. Actual Telegram authentication and production spending are still outside this test; no Cloud seeds, website edits or gate changes.
+
 Owner-authorized [exercise](operations/2026-09-14-twelve-account-devnet-exercise.md) generated 12 encrypted internal wallets plus external public candidates, verified 48 synthetic calls across three groups and 24 explicitly synthetic tip proofs in actual community SQL. Fourteen wallet/routing/group-scoring tests passed; local aggregate checks are included in public CI without network/report writes. Live harness plans 11 funding transfers and 24 referenced tips, but single public/Helius faucet attempts refused funding. No live transaction success is claimed. Original Cloud data, website and spending gates are untouched; Telegram identities/authentication and production spending are not exercised by this harness.
 
 ## Community-wide rankings — corrected core scope

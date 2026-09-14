@@ -4,6 +4,8 @@ Created 2026-09-11. Status: proposed operating plan grounded in an initial repos
 
 ## Product direction
 
+The [funded twelve-account devnet exercise](operations/2026-09-14-twelve-account-devnet-funded-proof.md) completed: 35 actual finalized transfers (11 funding + 24 tips), exact receipt checks and account-wide community aggregation of 48 synthetic calls. This clears the isolated chain-test funding blocker, not production Telegram spend authorization or Cloud custody integration.
+
 Community caller/tipper backend and bot selectors are now applied and published from reviewed main `7fdbb0712e677ffc0212b8e654f3ba50aac200d2`. [Release evidence](operations/2026-09-14-community-leaderboard-publication.md) supersedes earlier pending Cloud/publication statements for this slice. Next: real Telegram command acceptance, community group/token boards and own overall rank, followed by explicit anti-farming policy. Wallet spending remains disabled and its proposed storage unapplied.
 
 BRUH is explicitly a Telegram-wide community leaderboard network with additional per-group boards. [Decision 0011](decisions/0011-community-and-group-rankings.md) supersedes earlier restrictions against community aggregation. Canonical accounts combine calls, performance, confirmed tip activity and group contributions; source attribution and scoped administration remain local. Issue #60 tracks community caller/tipper projections and bot commands, then group/token boards, own overall rank and anti-farming policy. Website design/copy stays with the owner/Lovable.
