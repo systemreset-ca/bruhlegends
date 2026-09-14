@@ -4,6 +4,8 @@ Created 2026-09-11. Status: proposed operating plan grounded in an initial repos
 
 ## Product direction
 
+Current owner updates: [one active wallet per Telegram account](decisions/0008-one-wallet-per-telegram-account.md) shared across groups, with private `/start` and `/wallet make/show/keys/destroy`; [tip-funded CHAD and future campaigns](decisions/0009-tip-funded-chad-and-future-campaigns.md), allocating 99% to the recipient and 1% to a CHAD purchase split equally between both wallets. These supersede older wallet-scope and illustrative fee economics for new implementation. Private account-wallet onboarding remains the next product priority. The [two-wallet devnet transfer](operations/2026-09-14-devnet-two-wallet-transfer.md) is finalized; persistent bot-wallet onboarding and rewards are not deployed.
+
 The accepted [2026-09-13 grassroots addendum](decisions/0004-grassroots-participation.md) governs new participation and token-launch work: no presale or escrow, allocation points rather than fixed BRUH entitlement, bounded tester recognition, beta application fees off, and complete revision evidence. Its A–E milestones supplement the engineering slices below. Original files remain historical sources; no token economics or mainnet activation is implied.
 
 BRUH should make a group's call history trustworthy and useful: capture a baseline, preserve attribution, measure performance transparently, resolve disputes, and let members voluntarily recognize a caller through a transfer to that caller's wallet in that group. The bot is the core product. The Mini App makes detailed workflows usable; the website explains and onboards.
