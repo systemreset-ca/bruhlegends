@@ -60,7 +60,6 @@ export function SiteFooter() {
             your keys or seed phrase, and it never promises returns. A separate, switched-off test
             feature can generate an encrypted practice wallet on a test network only.
           </p>
-
         </div>
 
         <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 font-mono text-xs uppercase tracking-widest text-muted-foreground">
