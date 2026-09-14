@@ -24,7 +24,7 @@ function encoded(value: unknown, size: number): string {
   return value;
 }
 
-/** Internal reconciliation only. No route or bot caller; no signing or broadcast. */
+/** Sender-bound finalized receipt verification and atomic history credit; no signing. */
 export async function reconcileAccountTip(intentId: string, authenticatedSenderId: number) {
   userIdentity(authenticatedSenderId);
   if (
@@ -63,7 +63,7 @@ export async function reconcileAccountTip(intentId: string, authenticatedSenderI
   });
   // Missing, ambiguous or unmatched receipt never releases a reservation.
   if (!proof.matched || proof.slot === undefined) return { settled: false };
-  const settled = await db.rpc("bruh_account_tip_finalize", {
+  const settled = await db.rpc("bruh_account_tip_finalize_credit", {
     p_id: intentId,
     p_user_id: authenticatedSenderId,
     p_signature: signature,
@@ -74,6 +74,7 @@ export async function reconcileAccountTip(intentId: string, authenticatedSenderI
     settled.error ||
     !settled.data ||
     settled.data.state !== "finalized" ||
+    settled.data.credited !== true ||
     settled.data.id !== intentId ||
     settled.data.signature !== signature
   )
