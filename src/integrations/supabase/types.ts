@@ -167,6 +167,59 @@ export type Database = {
         }
         Relationships: []
       }
+      bruh_external_wallet_audit: {
+        Row: {
+          candidate_id: string
+          created_at: string
+          event_type: string
+        }
+        Insert: {
+          candidate_id: string
+          created_at?: string
+          event_type: string
+        }
+        Update: {
+          candidate_id?: string
+          created_at?: string
+          event_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bruh_external_wallet_audit_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: true
+            referencedRelation: "bruh_external_wallet_candidates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bruh_external_wallet_candidates: {
+        Row: {
+          address: string
+          created_at: string
+          id: string
+          network: string
+          status: string
+          telegram_user_id: number
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          id: string
+          network: string
+          status: string
+          telegram_user_id: number
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          id?: string
+          network?: string
+          status?: string
+          telegram_user_id?: number
+        }
+        Relationships: []
+      }
       bruh_price_quotes: {
         Row: {
           asset_symbol: string
@@ -1569,6 +1622,11 @@ export type Database = {
       }
       bruh_account_wallet_provision: { Args: { p_record: Json }; Returns: Json }
       bruh_account_wallet_read: { Args: { p_user_id: string }; Returns: Json }
+      bruh_external_wallet_read: { Args: { p_user_id: string }; Returns: Json }
+      bruh_external_wallet_register: {
+        Args: { p_address: string; p_id: string; p_user_id: string }
+        Returns: Json
+      }
       claim_telegram_outbox: {
         Args: { p_lease_seconds?: number; p_limit?: number }
         Returns: {

@@ -113,6 +113,13 @@
       "when": 1789356100021,
       "tag": "0015_bruh_account_wallets_devnet",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1789379753717,
+      "tag": "0016_bruh_external_wallet_candidates",
+      "breakpoints": true
     }
   ]
 }
