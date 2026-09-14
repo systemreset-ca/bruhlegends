@@ -148,6 +148,13 @@
       "when": 1789395235550,
       "tag": "0020_bruh_account_tip_credit",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1789395717593,
+      "tag": "0021_bruh_account_tip_pilot_controls",
+      "breakpoints": true
     }
   ]
 }

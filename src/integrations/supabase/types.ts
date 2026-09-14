@@ -209,6 +209,7 @@ export type Database = {
           finalized_slot: number | null
           intent_id: string
           last_valid_block_height: number | null
+          next_reconcile_at: string | null
           sender_wallet_id: string
           signature: string | null
           signed_transaction: string | null
@@ -219,6 +220,7 @@ export type Database = {
           finalized_slot?: number | null
           intent_id: string
           last_valid_block_height?: number | null
+          next_reconcile_at?: string | null
           sender_wallet_id: string
           signature?: string | null
           signed_transaction?: string | null
@@ -229,6 +231,7 @@ export type Database = {
           finalized_slot?: number | null
           intent_id?: string
           last_valid_block_height?: number | null
+          next_reconcile_at?: string | null
           sender_wallet_id?: string
           signature?: string | null
           signed_transaction?: string | null
@@ -325,6 +328,21 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      bruh_account_tip_rpc_budget: {
+        Row: {
+          checks: number
+          day: string
+        }
+        Insert: {
+          checks: number
+          day: string
+        }
+        Update: {
+          checks?: number
+          day?: string
+        }
+        Relationships: []
       }
       bruh_account_wallet_audit: {
         Row: {
@@ -1978,6 +1996,10 @@ export type Database = {
         Returns: Json
       }
       bruh_account_tip_read: {
+        Args: { p_id: string; p_user_id: number }
+        Returns: Json
+      }
+      bruh_account_tip_reconcile_claim: {
         Args: { p_id: string; p_user_id: number }
         Returns: Json
       }
