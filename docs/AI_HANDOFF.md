@@ -1,5 +1,9 @@
 # BRUH current handoff
 
+## Published account-tip backend — current status
+
+[Publication evidence](operations/2026-09-14-account-tip-backend-publication.md): original project published reviewed `5d5f171e34beca103ba852e7d234cc7a27ec98f6` after 173 tests/types/build, exact managed migrations 0018–0021, role checks and configured Helius devnet read. Tip/signing gates are enabled on devnet; new private-action route is HTTP 200 and unauthenticated webhook POST 401. Real-user private /security setup and funded-tip/finalized-history/community acceptance remain pending. Keep mainnet and unfinished export/withdrawal/retirement/token features disabled.
+
 ## Current account-tip integration
 
 [Backend deployment and pilot controls](operations/2026-09-14-account-tip-pilot-controls.md): PR66 authorization/signing and PR67 atomic history/community credit passed public CI; original Cloud applied 0018–0020 with managed tests/types/build and role evidence. Devnet spending gates remain off. The next source adds bounded receipt checks and accurate bot instructions, then managed controls/activation/publication and real private Telegram password/funded-tip acceptance. No landing marketing edits.
