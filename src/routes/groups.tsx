@@ -96,9 +96,12 @@ function GroupsPage() {
             Two minutes to install, then the bot handles attribution, tracking, announcements and
             moderation while you get on with running the community.
           </p>
-          <span className="mt-8 inline-block rounded-md bg-primary px-8 py-4 font-mono text-sm font-bold uppercase tracking-widest text-primary-foreground glow-lime">
-            Coming soon
-          </span>
+          <a
+            href="#"
+            className="mt-8 inline-block rounded-md bg-primary px-8 py-4 font-mono text-sm font-bold uppercase tracking-widest text-primary-foreground glow-lime transition-colors hover:brightness-110"
+          >
+            Add BRUH to your group
+          </a>
         </div>
       </section>
 

@@ -34,9 +34,12 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <span className="ml-auto rounded-md bg-primary px-4 py-2 font-mono text-xs font-bold uppercase tracking-widest text-primary-foreground sm:ml-0">
-          Coming soon
-        </span>
+        <a
+          href="#"
+          className="ml-auto rounded-md bg-primary px-4 py-2 font-mono text-xs font-bold uppercase tracking-widest text-primary-foreground glow-lime transition-colors hover:brightness-110 sm:ml-0"
+        >
+          Open BRUH in Telegram
+        </a>
       </div>
     </header>
   );
