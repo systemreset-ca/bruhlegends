@@ -139,7 +139,9 @@ export async function handleUpdate(update: TelegramUpdate): Promise<void> {
         [
           "<b>BRUH is online.</b>",
           "",
-          "Record calls, track how they perform, and tip the people who called them — non-custodially.",
+          accountWalletsEnabled()
+            ? "Record calls and track how they perform. Private /start creates your encrypted devnet wallet; bot-wallet spending is not enabled yet."
+            : "Record calls, track how they perform, and tip the people who called them — non-custodially.",
           "",
           "Start with /call &lt;mint&gt;. Type /help for everything else.",
         ].join("\n"),
