@@ -5,17 +5,17 @@ import banner from "@/assets/bruh-banner.png.asset.json";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "BRUH Legends — Call tracking & Solana tipping for Telegram groups" },
+      { title: "BRUH Legends — Call tracking for Telegram, in Solana devnet beta" },
       {
         name: "description",
         content:
-          "The Telegram bot that locks a baseline on every call, ranks your callers honestly, and lets the group tip them on Solana. Non-custodial. Group-isolated.",
+          "The Telegram bot that locks a baseline on every call and ranks your callers honestly. Now in a Solana devnet wallet beta: creation and balance only, no real funds.",
       },
       { property: "og:title", content: "BRUH Legends — Call it. Track it. Reward the legends." },
       {
         property: "og:description",
         content:
-          "Locked call baselines, per-group leaderboards and non-custodial Solana tipping, inside Telegram.",
+          "Locked call baselines, per-group leaderboards and a Solana devnet wallet beta, inside Telegram.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "/" },
