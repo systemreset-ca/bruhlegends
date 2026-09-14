@@ -29,16 +29,16 @@ export const Route = createFileRoute("/app")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "BRUH App — Wallets, calls and leaderboards" },
+      { title: "BRUH App — Wallet, calls and leaderboards" },
       {
         name: "description",
         content:
-          "Link a Solana wallet per Telegram group, review open calls and see your group's BRUH Score ranking.",
+          "Review open calls and your group's BRUH Score ranking. Your BRUH devnet wallet is created with private bot commands, not here.",
       },
       { property: "og:title", content: "BRUH App" },
       {
         property: "og:description",
-        content: "Per-group wallet linking and call tracking for BRUH communities.",
+        content: "Call tracking and group leaderboards for BRUH communities, in Solana devnet beta.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -681,7 +681,8 @@ function MiniApp() {
             </p>
           )}
           <p className="mt-1 text-sm text-muted-foreground">
-            BRUH builds the request. You approve it in your own wallet — nothing is ever held here.
+            Tipping is switched off in the current devnet wallet beta. BRUH builds the request and
+            you approve it in your own wallet — nothing is ever held here.
           </p>
           <div className="mt-4 space-y-3">
             <select
