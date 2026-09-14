@@ -247,8 +247,9 @@ function Landing() {
           <SectionLabel>BRUH Score</SectionLabel>
           <h2 className="mt-4 font-display text-4xl leading-tight">Weighted, capped, honest</h2>
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-            One number per member, per group, per season. Self-tips are excluded and tip influence
-            is capped, so nobody buys their way up the board.
+            Your verified calls power both your group ranking and your standing across the BRUH
+            community. Self-tips are excluded and tip influence is capped, so nobody buys their way
+            up the board.
           </p>
           <div className="mt-8 space-y-3">
             {score.map(([pct, label]) => (
