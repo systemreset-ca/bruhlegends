@@ -4,6 +4,8 @@ Created 2026-09-11. Status: proposed operating plan grounded in an initial repos
 
 ## Product direction
 
+Wallet handling now follows the owner-directed [Trojan security reference](decisions/0010-trojan-wallet-security-reference.md): generated account wallet, familiar wallet controls and independent SAP for sensitive actions. Record documented reference behavior separately from undisclosed backend internals. Account-wide external destination registration, SAP, withdrawal/export/retirement and funded tip settlement remain delivery work under issue45.
+
 JEETER precision is now owner-approved at **9 decimals**, with no mint or supply chosen. The next funded-wallet slice has a [strict devnet receipt verification foundation and implementation checklist](operations/2026-09-14-devnet-tip-receipt-foundation.md); signing, durable balance reservations and idempotent settlement remain unimplemented. This source work does not enable spending or earning.
 
 Current delivery: private devnet account-wallet creation/show is now [published](operations/2026-09-14-devnet-wallet-publish-3565b61b.md) in the original project at `3565b61b67be82db8e699b485adc18c2655db384`. Next checkpoint is the owner's two-account address-persistence check, followed by controlled devnet spending and confirmed on-chain reconciliation. Protected export and balance-safe retirement remain unfinished. No mainnet/rewards/mint/liquidity activation is implied. Older statements about account onboarding being undeployed describe earlier revisions.
