@@ -1,5 +1,9 @@
 # BRUH current handoff
 
+## Account-tip preparation — source slice
+
+[Internal preparation](operations/2026-09-14-account-tip-preparation.md) now validates group/membership context, resolves stored account wallets, builds an exact referenced SOL message, reads finalized blockhash/message fee/balance and reserves fee-inclusive funds. Sender-scoped request lookup returns existing intents without another quote and rejects changed requests. Proposed schema remains unapplied; no bot/route/worker caller, signing or broadcast. Independent secure-action authentication and durable execution remain next. No website edits or spending gate activation.
+
 ## Twelve-account isolated exercise
 
 Fresh owner-funded execution now completed: 12 encrypted wallets, 48 synthetic calls, 11 finalized devnet funding transfers and 24 finalized verified tips; community caller/tipper rows each contain 12 accounts with two sent/two received tips. [Funded proof and all transaction links](operations/2026-09-14-twelve-account-devnet-funded-proof.md) supersede the earlier funding blocker below. Total network fees 0.000175 devnet SOL. Actual Telegram authentication and production spending are still outside this test; no Cloud seeds, website edits or gate changes.

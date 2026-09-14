@@ -4,6 +4,8 @@ Created 2026-09-11. Status: proposed operating plan grounded in an initial repos
 
 ## Product direction
 
+Current backend slice: [account-tip preparation](operations/2026-09-14-account-tip-preparation.md), including active membership checks, stored account-wallet resolution, exact SOL message/fee/balance and sender-scoped retries. Managed schema and public bot execution remain gated behind independent spend authorization; then implement simulation/signing, signed-before-broadcast recovery and verified tip credit integration. This is source work, not active Telegram spending.
+
 The [funded twelve-account devnet exercise](operations/2026-09-14-twelve-account-devnet-funded-proof.md) completed: 35 actual finalized transfers (11 funding + 24 tips), exact receipt checks and account-wide community aggregation of 48 synthetic calls. This clears the isolated chain-test funding blocker, not production Telegram spend authorization or Cloud custody integration.
 
 Community caller/tipper backend and bot selectors are now applied and published from reviewed main `7fdbb0712e677ffc0212b8e654f3ba50aac200d2`. [Release evidence](operations/2026-09-14-community-leaderboard-publication.md) supersedes earlier pending Cloud/publication statements for this slice. Next: real Telegram command acceptance, community group/token boards and own overall rank, followed by explicit anti-farming policy. Wallet spending remains disabled and its proposed storage unapplied.

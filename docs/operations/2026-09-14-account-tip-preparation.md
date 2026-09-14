@@ -1,0 +1,19 @@
+# Account-wallet tip preparation backend
+
+Advances the Telegram tip execution work after the [funded twelve-wallet proof](2026-09-14-twelve-account-devnet-funded-proof.md). Original project/repository only; no website edits, new accounts/secrets, Cloud data writes or chain actions.
+
+`prepareAccountTip` is an internal server function for a future verified Telegram webhook caller. It validates chat/message/sender/recipient context, requires active group and unbanned/non-forgotten membership for both accounts, resolves existing encrypted account-wallet addresses through the production service, and prepares a native SOL intent. It never creates a wallet as a fallback or accepts an external recipient address.
+
+SOL amounts are parsed exactly into lamports with at most nine fractional digits. Zero/negative, scientific notation, excess precision and amounts above the supported safe integer range are rejected. The pure builder emits one direct System transfer with a distinct readonly reference and one signer; the format matches the previously finalized harness wire layout. No swap, service/reward fee, priority-fee instruction or additional authority is introduced.
+
+Preparation obtains a finalized blockhash, exact live message fee and finalized balance through the existing allowlisted Helius devnet transport. Slot minimums prevent older observations from being used; the complete tip plus network fee must fit. The controlled reserve RPC freezes amount/reference/fee/balance/group/account fields and retains the existing wallet-wide pending-spend lock. The quoted blockhash is not stored or authorized for later signing; execution must refresh and validate its blockhash, fee, simulation and authorization before persisting signed bytes.
+
+Retry lookup uses the verified chat/message/sender request key. Same request returns a minimal intent ID/state without another provider quote, reservation or signed-byte exposure. Changed recipient/chat/amount conflicts. A simultaneous first lookup may race; SQL rejects conflicting duplicate requests and later retries resolve the winning intent. This is fail-closed behavior, not a claim of independent-session concurrency validation.
+
+Proposed SQL adds only service-executable `bruh_account_tip_find_request(text,bigint)`, scoped to the stored sender. It denies PUBLIC/anon/authenticated execution. Existing reservation/execution/audit behavior and RLS remain unchanged. The complete account-tip schema remains **unapplied**; no bot, route or worker calls preparation. Gates require explicit account-wallet mode, devnet and `BRUH_ACCOUNT_TIPS_DEVNET_ENABLED=true`, which this change does not configure.
+
+Validation: eight targeted preparation/balance tests passed, including exact wire fields, decimal boundaries, sender-bound retry projection, membership restrictions, null fee, stale balance and insufficient fee-inclusive funds. Isolated SQL validates correct/wrong-owner and missing retry lookup plus actual EXECUTE grants, alongside existing immutable reservation/settlement tests. Final TypeScript, lint and public CI outcomes belong in the PR.
+
+Each new preparation performs three bounded provider reads, each paired with a genesis check: six HTTPS requests total, five-second request deadlines, 16KB response caps, no polling, automatic retry, AI call or scheduler. A cached intent retry makes no provider calls. Per-account command rate limits remain required at the future public entry point.
+
+Next execution work: independent secure-action authentication, managed schema review/application, verified webhook command and private confirmation flow, constrained wallet signing, simulation, durable signed-before-broadcast persistence and bounded recovery. Finalized account executions still need controlled integration with legacy verified tip/leaderboard records. None of these capabilities is claimed by this preparation-only slice.
