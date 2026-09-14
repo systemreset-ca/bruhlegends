@@ -31,8 +31,8 @@ export const Route = createFileRoute("/token")({
 const stages = [
   {
     title: "Build the bot",
-    status: "Devnet validation",
-    body: "Record calls, follow group rankings and test wallet-authorized SOL tips. Mainnet financial activation remains gated.",
+    status: "Live product",
+    body: "Record calls, follow group rankings and build a transparent reputation inside Telegram.",
   },
   {
     title: "Build your record",
@@ -140,7 +140,7 @@ function TokenPage() {
             funding and depth decisions. Planned locks are not completed locks.
           </p>
           <p className="mt-4 text-sm text-muted-foreground">
-            Beta application fees remain off. Any future routing fee must be approved and disclosed
+            Application fees remain off. Any future routing fee must be approved and disclosed
             before wallet authorization. CHAD and sponsored campaigns remain configurable proposals,
             with no automatic rewards enabled.
           </p>
@@ -163,12 +163,11 @@ function TokenPage() {
         <div className="mx-auto max-w-3xl px-6 py-16">
           <h2 className="font-display text-3xl">Keep the culture. Keep control of your wallet.</h2>
           <p className="mt-4 text-sm text-muted-foreground">
-            BRUH never asks for the seed phrase of a wallet you already own. The active Solana
-            devnet beta generates one encrypted BRUH wallet per Telegram account, shared across that
-            account's groups while group statistics stay separate; it is creation and balance only —
-            spending, key export and retirement are not available, and it holds no real funds.
-            Tipping is switched off while the beta runs. Future token allocation and market value
-            are not guaranteed. Never treat participation points as a spendable token balance.
+            BRUH never asks for the seed phrase of a wallet you already own. Your encrypted BRUH
+            account wallet belongs to your Telegram account and follows you across groups, while
+            every group's calls, rankings and reputation remain separate. Future token allocation
+            and market value are not guaranteed. Never treat participation points as a spendable
+            token balance.
           </p>
 
           <Link to="/risk" className="mt-5 inline-block text-primary underline">

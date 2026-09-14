@@ -5,17 +5,17 @@ import banner from "@/assets/bruh-banner.png.asset.json";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "BRUH Legends — Call tracking for Telegram, in Solana devnet beta" },
+      { title: "BRUH Legends — Telegram call tracking" },
       {
         name: "description",
         content:
-          "The Telegram bot that locks a baseline on every call and ranks your callers honestly. Now in a Solana devnet wallet beta: creation and balance only, no real funds.",
+          "The Telegram bot that locks a baseline on every call, tracks performance, and ranks your community's callers honestly.",
       },
       { property: "og:title", content: "BRUH Legends — Call it. Track it. Reward the legends." },
       {
         property: "og:description",
         content:
-          "Locked call baselines, per-group leaderboards and a Solana devnet wallet beta, inside Telegram.",
+          "Locked call baselines, per-group leaderboards, community reputation, and wallet tools inside Telegram.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "/" },
@@ -38,8 +38,8 @@ const features = [
     body: "BRUH Score ranks callers inside their own chat. Nothing leaks across groups — not stats, not wallets, not identities.",
   },
   {
-    title: "Test-network wallet beta",
-    body: "BRUH is running a Solana devnet beta: a private chat with the bot creates one encrypted BRUH wallet for your Telegram account, shared across your groups. Creation and balance only — no spending, no key export, no retirement, and no real SOL. Tipping is switched off while this beta runs.",
+    title: "One wallet. Every group.",
+    body: "Create your encrypted BRUH account wallet in a private chat with the bot. The wallet follows your Telegram account while calls, rankings and reputation remain separate in every group.",
   },
 
   {
@@ -74,8 +74,8 @@ const steps = [
   },
   {
     n: "04",
-    title: "The legend gets paid",
-    body: "Tipping is turned off during the devnet wallet beta. When it returns, a tip is a request you approve in your own wallet and the bot verifies it on-chain.",
+    title: "The legend gets recognized",
+    body: "Every milestone, leaderboard move and community action builds a transparent record around the callers who deliver.",
   },
 ];
 
@@ -84,9 +84,9 @@ const commands = [
   ["/leaderboard 7d", "Group ranking — 7d, 30d or all time"],
   ["/stats", "Your own record in this group"],
   ["/calls", "Recent calls and where they stand"],
-  ["/start", "Private chat — creates or reuses your devnet wallet"],
+  ["/start", "Private chat — creates or reuses your BRUH wallet"],
   ["/wallet make", "Private chat — confirm wallet creation"],
-  ["/wallet show", "Private chat — address and live devnet balance"],
+  ["/wallet show", "Private chat — address and live wallet balance"],
   ["/dispute", "Flag a call for moderator review"],
   ["/privacy", "What's stored, and how to be forgotten"],
 ];
@@ -102,11 +102,11 @@ const score = [
 const faq = [
   {
     q: "Does BRUH ever hold my funds?",
-    a: "BRUH never asks for or stores the seed phrase of a wallet you already own. In the current Solana devnet beta, BRUH does generate one wallet for your Telegram account and keeps its key encrypted — so that specific wallet is not non-custodial. It exists on a test network only, holds no real value, and spending, key export and retirement are unavailable.",
+    a: "BRUH never asks for the seed phrase of a wallet you already own. Your BRUH account wallet is generated separately in a private bot chat and its key is stored encrypted.",
   },
   {
     q: "Can someone see my stats in another group?",
-    a: "No. Profiles, leaderboards and call records are keyed to a single chat. The generated devnet wallet is the one shared thing: it belongs to your Telegram account and is the same across every group you are in, while statistics stay separate per group.",
+    a: "No. Profiles, leaderboards and call records are keyed to a single chat. Your BRUH account wallet is shared across your groups, but each group's statistics remain completely separate.",
   },
   {
     q: "What stops a caller from spamming garbage tokens?",
@@ -125,7 +125,7 @@ function Landing() {
       <section className="arena-bg overflow-hidden border-b border-border/70">
         <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-20 lg:grid-cols-[1.05fr_1fr] lg:py-28">
           <div className="relative z-10">
-            <SectionLabel>Telegram · Solana devnet beta · No real funds</SectionLabel>
+            <SectionLabel>Built for Telegram communities</SectionLabel>
             <h1 className="mt-6 font-display text-6xl leading-[0.92] sm:text-7xl">
               <span className="text-gold-plate">Call it.</span>{" "}
               <span className="text-lime-plate">Track it.</span>
@@ -133,9 +133,8 @@ function Landing() {
             </h1>
             <p className="mt-6 max-w-xl text-lg text-muted-foreground">
               BRUH Legends is the utility bot your group chat has been faking with screenshots. It
-              locks a baseline on every call and keeps score for real. Right now it is in a Solana
-              devnet beta: message the bot privately and it creates one encrypted test wallet for
-              your Telegram account. Tipping is switched off until the beta ends.
+              locks a baseline on every call, tracks every move and keeps score for real. Build a
+              reputation, settle the group chat debates and see who consistently finds the winners.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <a
@@ -154,7 +153,7 @@ function Landing() {
               </Link>
             </div>
             <p className="mt-6 font-mono text-xs uppercase tracking-widest text-muted-foreground">
-              Devnet only · Creation and balance only · No promises of profit
+              Locked baselines · Group rankings · Receipts, not vibes
             </p>
           </div>
 
