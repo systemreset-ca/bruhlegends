@@ -9,6 +9,7 @@ import { getBruhConfig } from "./bruh-config.server";
 import { creditsMessage } from "./participation";
 import { accountWalletsEnabled, accountWalletForTelegram } from "./account-wallet.server";
 import { accountWalletBalance } from "./account-wallet-balance.server";
+import { accountExternalWallet } from "./account-external-wallet.server";
 import { loadParticipation } from "./participation.server";
 import {
   startSeason,
@@ -104,7 +105,7 @@ function helpText() {
   if (!accountWalletsEnabled()) return HELP;
   return HELP.replace(
     "/wallet — link or review your wallet (DM only)",
-    "/wallet make · /wallet show · /wallet keys · /wallet destroy — private account wallet (devnet beta)",
+    "/generate · /wallet make · /wallet show — internal devnet wallet\n/wallet add &lt;address&gt; · /wallet external — unverified external address\n/wallet keys · /wallet destroy — unavailable until protected lifecycle flows are ready",
   ).replace(
     "<i>BRUH is non-custodial. It never holds keys or funds — every transfer is approved in your own wallet.</i>",
     "<i>Account wallets are devnet-only beta. BRUH stores encrypted keys; spending, export and retirement are not enabled yet.</i>",
@@ -207,6 +208,11 @@ async function handleCommand(message: TgMessage, text: string) {
       case "/wallet":
         if (accountWalletsEnabled()) return handleAccountWalletDm(message, args);
         return handleWalletDm(message);
+      case "/generate":
+        if (accountWalletsEnabled())
+          return handleAccountWalletDm(message, args.length ? ["invalid"] : ["start"]);
+        await sendMessage(message.chat.id, "Generated account wallets are not enabled.");
+        return;
       default:
         await sendMessage(
           message.chat.id,
@@ -312,6 +318,30 @@ async function handleAccountWalletDm(message: TgMessage, args: string[]) {
   )
     return;
   const action = args[0]?.toLowerCase() ?? "show";
+  if (action === "add" || action === "external") {
+    if ((action === "add" && args.length !== 2) || (action === "external" && args.length !== 1)) {
+      await sendMessage(
+        message.chat.id,
+        "Use /wallet add <public Solana address> or /wallet external in private chat.",
+      );
+      return;
+    }
+    try {
+      const candidate = await accountExternalWallet(userId, action === "add" ? args[1] : undefined);
+      await sendMessage(
+        message.chat.id,
+        candidate
+          ? `<b>External address — unverified</b>\n<code>${escapeHtml(candidate.address)}</code>\nThis public address is registered for your account across groups. Ownership is not proven and withdrawals to it are not enabled. Your internal BRUH wallet is unchanged.`
+          : "No external public address registered. Use /wallet add <public Solana address>. Your internal BRUH wallet is separate.",
+      );
+    } catch {
+      await sendMessage(
+        message.chat.id,
+        "External address registration unavailable or rejected. Only a public Solana address is accepted; replacing an existing address is not enabled. No withdrawal is authorized.",
+      );
+    }
+    return;
+  }
   if (args.length > 1 || !["start", "make", "show", "keys", "destroy"].includes(action)) {
     await sendMessage(
       message.chat.id,

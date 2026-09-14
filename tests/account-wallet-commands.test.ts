@@ -19,6 +19,8 @@ vi.mock("../src/lib/account-wallet-balance.server", () => ({
   accountWalletBalance: mocks.balance,
 }));
 import { handleUpdate } from "../src/lib/bot.server";
+vi.mock("../src/lib/account-external-wallet.server", () => ({ accountExternalWallet: vi.fn() }));
+import { accountExternalWallet } from "../src/lib/account-external-wallet.server";
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.wallet.mockResolvedValue({ id: "wallet", address: "public-address", network: "devnet" });
@@ -31,6 +33,30 @@ function command(text: string, chatId = 123) {
   });
 }
 describe("private account-wallet commands", () => {
+  it("generates through the same account wallet and rejects extra arguments", async () => {
+    await command("/generate");
+    expect(mocks.wallet).toHaveBeenLastCalledWith(123, true);
+    mocks.wallet.mockClear();
+    await command("/generate another-wallet");
+    expect(mocks.wallet).not.toHaveBeenCalled();
+  });
+  it("registers only a private external candidate without creating or authorizing internal spending", async () => {
+    vi.mocked(accountExternalWallet).mockResolvedValue({
+      telegramUserId: "123",
+      address: "public-external-address",
+      network: "devnet",
+      status: "unverified",
+    });
+    await command("/wallet add public-external-address");
+    expect(accountExternalWallet).toHaveBeenCalledWith(123, "public-external-address");
+    expect(mocks.wallet).not.toHaveBeenCalled();
+    expect(mocks.send.mock.calls.at(-1)?.[1]).toContain("unverified");
+    expect(mocks.send.mock.calls.at(-1)?.[1]).toContain("withdrawals to it are not enabled");
+    vi.mocked(accountExternalWallet).mockClear();
+    await command("/wallet add address extra");
+    await command("/wallet add address", 456);
+    expect(accountExternalWallet).not.toHaveBeenCalled();
+  });
   it("creates on private start and only reads on wallet show", async () => {
     await command("/start");
     expect(mocks.wallet).toHaveBeenLastCalledWith(123, true);
