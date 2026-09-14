@@ -56,9 +56,11 @@ export function SiteFooter() {
         <div className="flex flex-wrap items-center gap-4">
           <img src={emblem.url} alt="" aria-hidden className="h-10 w-10 rounded-md opacity-90" />
           <p className="max-w-md text-sm text-muted-foreground">
-            BRUH Legends is a utility bot. It never holds your keys, never holds your funds, and
-            never promises returns.
+            BRUH Legends is a utility bot. Tips are approved in your own wallet, BRUH never asks for
+            your keys or seed phrase, and it never promises returns. A separate, switched-off test
+            feature can generate an encrypted practice wallet on a test network only.
           </p>
+
         </div>
 
         <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 font-mono text-xs uppercase tracking-widest text-muted-foreground">

@@ -38,9 +38,10 @@ const features = [
     body: "BRUH Score ranks callers inside their own chat. Nothing leaks across groups — not stats, not wallets, not identities.",
   },
   {
-    title: "Non-custodial tipping",
-    body: "Tips are Solana Pay requests you approve in your own wallet. BRUH never touches keys or funds and verifies every transfer on-chain.",
+    title: "Tips you approve yourself",
+    body: "Tips are Solana Pay requests you approve in your own wallet. BRUH never asks for its keys and verifies every transfer on-chain.",
   },
+
   {
     title: "Milestones that fire once",
     body: "2x, 5x, 10x, 100x announced exactly once per call, with quarantine rules so thin liquidity can't fake a run.",

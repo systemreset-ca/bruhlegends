@@ -27,7 +27,7 @@ function PrivacyRoute() {
     <PolicyPage
       title="Privacy"
       updated="February 2026"
-      intro="BRUH is a non-custodial utility bot. It records the minimum needed to score calls and verify tips, and it keeps every record scoped to the single Telegram group it came from."
+      intro="BRUH is a utility bot with non-custodial tipping. It records the minimum needed to score calls and verify tips, and it keeps every record scoped to the single Telegram group it came from."
       sections={[
         {
           heading: "What is stored",
@@ -39,10 +39,12 @@ function PrivacyRoute() {
         {
           heading: "What is never stored",
           body: [
-            "Private keys, seed phrases, or any credential that could move funds. BRUH cannot sign a transaction on your behalf — every transfer is approved in your own wallet.",
+            "The private key or seed phrase of a wallet you already own. BRUH cannot sign a transaction on behalf of your own wallet — every transfer is approved by you.",
+            "A switched-off test-network feature can generate one BRUH wallet per verified Telegram account. Only that generated key is kept, always encrypted, and it is never shown in chat; spending, export and retirement are unavailable while the feature is gated.",
             "General chat history. Passive detection only reads messages for token mints, only when a group has enabled it, and only for members who have not used /optout.",
           ],
         },
+
         {
           heading: "Group isolation",
           body: [

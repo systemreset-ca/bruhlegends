@@ -99,6 +99,74 @@ export type Database = {
           },
         ]
       }
+      bruh_account_wallet_audit: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: number
+          telegram_user_id: number
+          wallet_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: never
+          telegram_user_id: number
+          wallet_id: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: never
+          telegram_user_id?: number
+          wallet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bruh_account_wallet_audit_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "bruh_account_wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bruh_account_wallets: {
+        Row: {
+          address: string
+          ciphertext_hex: string
+          created_at: string
+          id: string
+          iv_hex: string
+          key_version: string
+          network: string
+          status: string
+          telegram_user_id: number
+        }
+        Insert: {
+          address: string
+          ciphertext_hex: string
+          created_at?: string
+          id: string
+          iv_hex: string
+          key_version: string
+          network: string
+          status?: string
+          telegram_user_id: number
+        }
+        Update: {
+          address?: string
+          ciphertext_hex?: string
+          created_at?: string
+          id?: string
+          iv_hex?: string
+          key_version?: string
+          network?: string
+          status?: string
+          telegram_user_id?: number
+        }
+        Relationships: []
+      }
       bruh_price_quotes: {
         Row: {
           asset_symbol: string
@@ -1499,6 +1567,8 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      bruh_account_wallet_provision: { Args: { p_record: Json }; Returns: Json }
+      bruh_account_wallet_read: { Args: { p_user_id: string }; Returns: Json }
       claim_telegram_outbox: {
         Args: { p_lease_seconds?: number; p_limit?: number }
         Returns: {
