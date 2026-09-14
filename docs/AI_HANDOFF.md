@@ -2,7 +2,7 @@
 
 ## Community-wide rankings — corrected core scope
 
-Owner clarified that Telegram-wide community rankings are a primary feature alongside local group rankings. [Decision 0011](decisions/0011-community-and-group-rankings.md) supersedes older group-only aggregation restrictions. Source adds account-keyed caller/tipper aggregate RPC, `/community` and `/leaderboard global` plus authenticated community loader; no website files changed. Proposed RPC is not yet applied/published. Source facts remain group-attributed, wallets account-wide, named community tips public/verified/deduplicated by network/signature. Issue #60 tracks application and remaining group/token boards, cross-post controls and overall own-rank pagination.
+Owner clarified that Telegram-wide community rankings are a primary feature alongside local group rankings. [Decision 0011](decisions/0011-community-and-group-rankings.md) supersedes older group-only aggregation restrictions. Account-keyed caller/tipper RPC, `/community`, `/leaderboard global` and authenticated community loader are now applied in Cloud and published from reviewed main `7fdbb0712e677ffc0212b8e654f3ba50aac200d2`; [publication evidence](operations/2026-09-14-community-leaderboard-publication.md) records completed Publish, passing managed tests/types/build/CI, live service counts and public route checks. Actual Telegram reply acceptance remains pending. Source facts remain group-attributed, wallets account-wide, named community tips public/verified/deduplicated by network/signature. Issue #60 tracks remaining group/token boards, cross-post controls and overall own-rank pagination. No Codex website edits or spending activation.
 
 ## Account-tip reservation and reconciliation — source slice
 

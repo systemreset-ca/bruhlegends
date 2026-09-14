@@ -18,7 +18,9 @@ Local community-reader and existing scoring tests: 10 passed. Bot-routing tests:
 
 One database read per ranking command; no AI, Helius calls, scheduler, retry polling or broadcast is added. Top results are limited to 100 (bot uses 10), but SQL computes against the full eligible source set rather than silently truncating records to a client page. Scale-driven aggregate indexes/caching remain future work.
 
-## Cloud rollout — pending
+## Cloud rollout — completed
+
+Migration 0017 is applied and publication completed from reviewed main `7fdbb0712e677ffc0212b8e654f3ba50aac200d2`. See [publication evidence](2026-09-14-community-leaderboard-publication.md) for actual privileges, live service counts, tests and route checks. The following initial rollout instructions/blocker are historical; actual Telegram reply acceptance remains pending.
 
 `docs/proposed-community-leaderboard.sql` must be applied as a new managed migration, preserving journals/history and omitting outer transaction delimiters only when the runner wraps the migration. No new tables/direct grants or RLS changes are required. Verify EXECUTE is service-only and no source table access is exposed to anon/authenticated. Record platform-role limits honestly. Original project only; no secrets/accounts or website changes.
 
