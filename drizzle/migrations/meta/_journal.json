@@ -120,6 +120,13 @@
       "when": 1789379753717,
       "tag": "0016_bruh_external_wallet_candidates",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1789383005191,
+      "tag": "0017_bruh_community_leaderboard",
+      "breakpoints": true
     }
   ]
 }

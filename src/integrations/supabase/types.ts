@@ -1622,6 +1622,15 @@ export type Database = {
       }
       bruh_account_wallet_provision: { Args: { p_record: Json }; Returns: Json }
       bruh_account_wallet_read: { Args: { p_user_id: string }; Returns: Json }
+      bruh_community_leaderboard: {
+        Args: {
+          p_limit: number
+          p_network: string
+          p_order: string
+          p_window: string
+        }
+        Returns: Json
+      }
       bruh_external_wallet_read: { Args: { p_user_id: string }; Returns: Json }
       bruh_external_wallet_register: {
         Args: { p_address: string; p_id: string; p_user_id: string }
