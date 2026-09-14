@@ -463,6 +463,20 @@ function MiniApp() {
       {tab === "wallet" && current && (
         <section className="rounded-lg border border-border bg-card p-5">
           <h2 className="text-lg font-semibold">Wallet</h2>
+          <div className="mt-3 rounded-md border border-border bg-background p-3 text-xs text-muted-foreground">
+            <p className="font-medium text-foreground">BRUH account wallet (test-network beta)</p>
+            <p className="mt-1">
+              A separate beta can generate one BRUH wallet for your Telegram account, shared across
+              your groups while statistics stay separate per group. It is currently switched off and
+              is not set up here. When it opens, you will create and view it with private bot
+              commands in a one-to-one chat with BRUH — never in a group.
+            </p>
+            <p className="mt-1">
+              Spending, key export and retirement are not available in this beta, and the wallet
+              holds no real value. The wallet you link below is your own external wallet, used only
+              to receive tips.
+            </p>
+          </div>
           {current.wallet ? (
             <div className="mt-3">
               <p className="break-all font-mono text-sm text-primary">{current.wallet}</p>

@@ -8,12 +8,13 @@ export const Route = createFileRoute("/privacy")({
       {
         name: "description",
         content:
-          "BRUH stores your Telegram id, calls, verified wallet address and confirmed tips, isolated per group. No keys, no seed phrases. Export or erase your record any time.",
+          "BRUH stores your Telegram id, calls, verified wallet address and confirmed tips, isolated per group. Never your own wallet's seed phrase. Export or erase your record any time.",
       },
       { property: "og:title", content: "BRUH Privacy Policy" },
       {
         property: "og:description",
-        content: "Group-isolated data, no custody of keys, and one-command data export or erasure.",
+        content:
+          "Group-isolated data, no access to your own wallet's keys, and one-command data export or erasure.",
       },
       { property: "og:type", content: "article" },
       { name: "twitter:card", content: "summary" },
@@ -48,7 +49,7 @@ function PrivacyRoute() {
         {
           heading: "Group isolation",
           body: [
-            "Your wallet, stats and reputation are attached to a membership, not to a global profile. Being in three BRUH groups means three separate records that never aggregate.",
+            "Your linked wallet, stats and reputation are attached to a membership, not to a global profile. Being in three BRUH groups means three separate records that never aggregate. The one exception is the switched-off test-network wallet feature: a generated wallet belongs to a Telegram account and is shared across that account's groups, while call records and statistics stay separate per group.",
           ],
         },
         {

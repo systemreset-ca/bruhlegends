@@ -39,7 +39,7 @@ const features = [
   },
   {
     title: "Tips you approve yourself",
-    body: "Tips are Solana Pay requests you approve in your own wallet. BRUH never asks for its keys and verifies every transfer on-chain.",
+    body: "Tips are Solana Pay requests you approve in your own wallet. BRUH never asks for your seed phrase and verifies every transfer on-chain. A separate test-network beta, currently switched off, can generate one encrypted BRUH wallet per Telegram account.",
   },
 
   {
@@ -85,7 +85,7 @@ const commands = [
   ["/stats", "Your own record in this group"],
   ["/calls", "Recent calls and where they stand"],
   ["/tip 0.5 SOL", "Reply to someone to tip them"],
-  ["/wallet", "Link a wallet privately, per group"],
+  ["/wallet", "Private chat only — link your own wallet"],
   ["/tips", "Pending and confirmed tip receipts"],
   ["/dispute", "Flag a call for moderator review"],
   ["/privacy", "What's stored, and how to be forgotten"],
@@ -102,11 +102,11 @@ const score = [
 const faq = [
   {
     q: "Does BRUH ever hold my funds?",
-    a: "No. There are no seed phrases, no custodial balances and no server-side signing. Every transfer is signed in your own wallet and verified on-chain afterwards.",
+    a: "Tipping is non-custodial: no seed phrases are collected and every transfer is signed in your own wallet and verified on-chain afterwards. One exception is disclosed openly — a test-network beta, currently switched off, can generate one BRUH wallet per Telegram account whose key BRUH stores encrypted. That wallet has no spending, key export or retirement, holds no real value, and no funds are held today.",
   },
   {
     q: "Can someone see my stats in another group?",
-    a: "No. Profiles, wallets and leaderboards are keyed to a single chat. Registering a wallet always names the destination group explicitly.",
+    a: "No. Profiles, leaderboards and call records are keyed to a single chat. A wallet you link is used for tips, and the generated test-network wallet in the switched-off beta is one per Telegram account shared across that account's groups — statistics stay separate per group either way.",
   },
   {
     q: "What stops a caller from spamming garbage tokens?",
@@ -125,7 +125,7 @@ function Landing() {
       <section className="arena-bg overflow-hidden border-b border-border/70">
         <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-20 lg:grid-cols-[1.05fr_1fr] lg:py-28">
           <div className="relative z-10">
-            <SectionLabel>Telegram · Solana · Non-custodial</SectionLabel>
+            <SectionLabel>Telegram · Solana · Non-custodial tipping</SectionLabel>
             <h1 className="mt-6 font-display text-6xl leading-[0.92] sm:text-7xl">
               <span className="text-gold-plate">Call it.</span>{" "}
               <span className="text-lime-plate">Track it.</span>
@@ -153,7 +153,7 @@ function Landing() {
               </Link>
             </div>
             <p className="mt-6 font-mono text-xs uppercase tracking-widest text-muted-foreground">
-              No keys · No custody · No promises of profit
+              No seed phrases · Tips you sign yourself · No promises of profit
             </p>
           </div>
 
