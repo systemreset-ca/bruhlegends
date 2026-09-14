@@ -227,6 +227,6 @@ export async function provisionMyDevnetCustodyWallet(input: Input) {
         telegramUserId: String(data.telegram_user_id),
       };
     },
-    transport: fetch,
+    transport: (input, init) => globalThis.fetch(input, init),
   });
 }
