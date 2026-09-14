@@ -98,7 +98,7 @@ export function SiteFooter() {
         </div>
 
         <p className="mt-8 font-mono text-[11px] uppercase tracking-widest text-muted-foreground/70">
-          bruh.tips · bruh-legends.xyz · Solana · Non-custodial
+          bruh.tips · bruh-legends.xyz · Solana · Non-custodial tipping
         </p>
       </div>
     </footer>
