@@ -17,6 +17,8 @@ vi.mock("../src/lib/telegram.server", () => ({
 import { handleUpdate } from "../src/lib/bot.server";
 beforeEach(() => {
   vi.clearAllMocks();
+  // These assertions cover the legacy external-wallet mode, independently of Cloud config.
+  vi.stubEnv("BRUH_ACCOUNT_WALLETS_DEVNET_ENABLED", "false");
   mocks.login.mockResolvedValue("synthetic-login-token");
   const query = {
     select: vi.fn().mockReturnThis(),
