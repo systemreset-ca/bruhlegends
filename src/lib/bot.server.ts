@@ -7,6 +7,8 @@ import { getActiveWallet } from "./wallets.server";
 import { createLoginToken } from "./session.server";
 import { getBruhConfig } from "./bruh-config.server";
 import { creditsMessage } from "./participation";
+import { accountWalletsEnabled, accountWalletForTelegram } from "./account-wallet.server";
+import { accountWalletBalance } from "./account-wallet-balance.server";
 import { loadParticipation } from "./participation.server";
 import {
   startSeason,
@@ -98,6 +100,27 @@ const PRIVACY = [
   "• /optout stops passive call detection for you. /forgetme removes your wallet link and pseudonymises your record.",
 ].join("\n");
 
+function helpText() {
+  if (!accountWalletsEnabled()) return HELP;
+  return HELP.replace(
+    "/wallet — link or review your wallet (DM only)",
+    "/wallet make · /wallet show · /wallet keys · /wallet destroy — private account wallet (devnet beta)",
+  ).replace(
+    "<i>BRUH is non-custodial. It never holds keys or funds — every transfer is approved in your own wallet.</i>",
+    "<i>Account wallets are devnet-only beta. BRUH stores encrypted keys; spending, export and retirement are not enabled yet.</i>",
+  );
+}
+function privacyText() {
+  if (!accountWalletsEnabled()) return PRIVACY;
+  return [
+    "<b>Privacy — devnet account wallets</b>",
+    "BRUH stores your Telegram account ID, public wallet address and authenticated encrypted wallet seed.",
+    "One wallet is shared across your BRUH groups. Calls, statistics and tip attribution remain group-specific.",
+    "Account wallet creation events are retained for audit. Group /forgetme does not destroy a funded account wallet.",
+    "Never send keys to Telegram chat. Export and retirement are not enabled in this beta.",
+  ].join("\n\n");
+}
+
 async function memberContext(chat: TgChat, from: TgUser) {
   const group = await upsertGroup(chat);
   const member = await upsertMember(group.id, from);
@@ -171,15 +194,16 @@ async function handleCommand(message: TgMessage, text: string) {
       case "/start":
         return handleStart(message, args);
       case "/help":
-        await sendMessage(message.chat.id, HELP);
+        await sendMessage(message.chat.id, helpText());
         return;
       case "/privacy":
-        await sendMessage(message.chat.id, PRIVACY);
+        await sendMessage(message.chat.id, privacyText());
         return;
       case "/credits":
         await sendMessage(message.chat.id, escapeHtml(creditsMessage()));
         return;
       case "/wallet":
+        if (accountWalletsEnabled()) return handleAccountWalletDm(message, args);
         return handleWalletDm(message);
       default:
         await sendMessage(
@@ -196,10 +220,10 @@ async function handleCommand(message: TgMessage, text: string) {
 
   switch (command) {
     case "/help":
-      await sendMessage(message.chat.id, HELP, { replyToMessageId: message.message_id });
+      await sendMessage(message.chat.id, helpText(), { replyToMessageId: message.message_id });
       return;
     case "/privacy":
-      await sendMessage(message.chat.id, PRIVACY, { replyToMessageId: message.message_id });
+      await sendMessage(message.chat.id, privacyText(), { replyToMessageId: message.message_id });
       return;
     case "/call":
       return handleCall(message, group, member, args);
@@ -257,6 +281,7 @@ async function handleCommand(message: TgMessage, text: string) {
 }
 
 async function handleStart(message: TgMessage, args: string[]) {
+  if (accountWalletsEnabled()) return handleAccountWalletDm(message, ["start"]);
   const payload = args[0];
   if (payload?.startsWith("wallet_") || payload === "wallet") {
     return handleWalletDm(message);
@@ -273,6 +298,87 @@ async function handleStart(message: TgMessage, args: string[]) {
       "Use /wallet here to link a wallet, or /help for the full command list.",
     ].join("\n"),
   );
+}
+
+async function handleAccountWalletDm(message: TgMessage, args: string[]) {
+  const userId = message.from?.id;
+  if (
+    message.chat.type !== "private" ||
+    !userId ||
+    message.chat.id !== userId ||
+    message.from?.is_bot
+  )
+    return;
+  const action = args[0]?.toLowerCase() ?? "show";
+  if (args.length > 1 || !["start", "make", "show", "keys", "destroy"].includes(action)) {
+    await sendMessage(
+      message.chat.id,
+      "Use /wallet make, /wallet show, /wallet keys or /wallet destroy in private chat.",
+    );
+    return;
+  }
+  if (action === "keys" || action === "destroy") {
+    await sendMessage(
+      message.chat.id,
+      action === "keys"
+        ? "Private key export is not enabled yet. Your wallet is unchanged. Keys will only be exported through an authenticated private app flow."
+        : "Wallet retirement is not enabled yet: pending transfers and all token balances must be checked first. Your wallet and history are unchanged.",
+    );
+    return;
+  }
+  if (action === "make") {
+    await sendMessage(
+      message.chat.id,
+      "Create your devnet BRUH wallet? If one exists, it will be reused. This is fake-SOL testing only.",
+      {
+        keyboard: [[{ text: "Confirm devnet wallet", callback_data: "accountwallet:make" }]],
+      },
+    );
+    return;
+  }
+  try {
+    const wallet = await accountWalletForTelegram(userId, action === "start");
+    if (!wallet) {
+      await sendMessage(
+        message.chat.id,
+        "No BRUH account wallet yet. Use /wallet make to create one.",
+      );
+      return;
+    }
+    let balance = "Balance unavailable — chain read did not complete.";
+    try {
+      balance = `Finalized balance: ${await accountWalletBalance(wallet.address)} devnet SOL`;
+    } catch {
+      // Preserve the explicit unavailable message; provider details stay private.
+    }
+    await sendMessage(
+      message.chat.id,
+      [
+        "<b>Your BRUH devnet wallet</b>",
+        `<code>${escapeHtml(wallet.address)}</code>`,
+        balance,
+        "",
+        "One wallet for your Telegram account across BRUH groups.",
+        "DEVNET ONLY — do not send real SOL or mainnet tokens.",
+        "BRUH stores the encrypted signing key. Bot-wallet spending and export are not enabled yet.",
+      ].join("\n"),
+      {
+        keyboard: [
+          [
+            {
+              text: "View devnet wallet",
+              url: `https://explorer.solana.com/address/${wallet.address}?cluster=devnet`,
+            },
+          ],
+        ],
+      },
+    );
+  } catch {
+    await sendMessage(
+      message.chat.id,
+      "BRUH devnet wallet storage or encryption is unavailable. No wallet address can be shown safely. Try again later.",
+    );
+  }
 }
 
 async function handleWalletDm(message: TgMessage) {
@@ -309,6 +415,24 @@ async function handleWalletDm(message: TgMessage) {
 }
 
 async function handleWalletPointer(message: TgMessage, group: any, member: any) {
+  if (accountWalletsEnabled()) {
+    await sendMessage(
+      message.chat.id,
+      "Manage your BRUH account wallet privately. The same wallet is used across your BRUH groups.",
+      {
+        replyToMessageId: message.message_id,
+        keyboard: [
+          [
+            {
+              text: "Wallet in private chat",
+              url: `https://t.me/${await botUsername()}?start=wallet`,
+            },
+          ],
+        ],
+      },
+    );
+    return;
+  }
   const address = await getActiveWallet(member.id);
   const summary = address
     ? `Your payout wallet here: <code>${escapeHtml(address)}</code>`
@@ -469,6 +593,14 @@ async function handleStats(message: TgMessage, group: any, member: any) {
 }
 
 async function handleTip(message: TgMessage, group: any, member: any, args: string[]) {
+  if (accountWalletsEnabled()) {
+    await sendMessage(
+      message.chat.id,
+      "Devnet account-wallet spending is not enabled yet. No funds moved. Your wallet is available in private chat with /wallet show.",
+      { replyToMessageId: message.message_id },
+    );
+    return;
+  }
   const target = message.reply_to_message?.from;
   if (!target || target.is_bot) {
     await sendMessage(message.chat.id, "Reply to the person you want to tip, then use /tip.", {
@@ -653,6 +785,20 @@ async function handlePassive(message: TgMessage, text: string) {
 
 async function handleCallback(query: NonNullable<TelegramUpdate["callback_query"]>) {
   const data = query.data ?? "";
+  if (data === "accountwallet:make") {
+    if (
+      !accountWalletsEnabled() ||
+      !query.message ||
+      query.message.chat.type !== "private" ||
+      query.message.chat.id !== query.from.id ||
+      query.from.is_bot
+    ) {
+      await answerCallbackQuery(query.id, "Open your own private BRUH chat.", true);
+      return;
+    }
+    await answerCallbackQuery(query.id, "Creating or reusing your devnet wallet.");
+    return handleAccountWalletDm({ ...query.message, from: query.from }, ["start"]);
+  }
   if (data.startsWith("tipcheck:")) {
     const intentId = data.slice("tipcheck:".length);
     const result = await confirmTip(intentId);

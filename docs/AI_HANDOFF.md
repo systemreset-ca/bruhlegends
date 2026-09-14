@@ -1,5 +1,9 @@
 # BRUH current handoff
 
+## Private account-wallet implementation slice
+
+Original-project source now implements gated private `/start` creation, confirmed `/wallet make`, authenticated `/wallet show` and bounded Helius devnet balance reads. Export, retirement and bot-wallet spending remain explicitly unavailable. The proposed SQL is not applied; persistent key/config and Cloud privileges are not yet validated. See [implementation and rollout evidence](operations/2026-09-14-private-account-wallets.md). Do not merge the obsolete per-group custody migration as a shortcut.
+
 ## Account-wallet and reward revisions — current
 
 The original BRUH project's disposable-wallet test completed a finalized 0.001 SOL transfer using its devnet configuration. See [public execution evidence](operations/2026-09-14-devnet-two-wallet-transfer.md). This is a CLI experiment, not persistent Telegram wallets. Decision [0008](decisions/0008-one-wallet-per-telegram-account.md) selects one active wallet per Telegram account shared across groups; calls/stats/attribution stay chat-scoped. Guardian is not a requested product or enabled dependency. Decision [0009](decisions/0009-tip-funded-chad-and-future-campaigns.md) records 99% recipient proceeds and a single 1% CHAD purchase split equally, with future JEETER/lock-bonus/HAKTUAH campaigns inactive. Exact base-unit source calculators do not execute swaps or award rewards. Earlier dated custody-scope/provider sections are historical and must not override these updates.
