@@ -114,3 +114,16 @@ it("delivers the web_app button only to its authenticated sender, never the sour
   expect(m.login).not.toHaveBeenCalled();
   expect(m.send).not.toHaveBeenCalled();
 });
+
+it("shows private Secure Action Password instructions when devnet spending is enabled", async () => {
+  await handleUpdate({
+    update_id: 4,
+    message: {
+      message_id: 4,
+      chat: { id: 123, type: "private" },
+      from: { id: 123 },
+      text: "/help",
+    },
+  });
+  expect(m.send.mock.calls.at(-1)?.[1]).toContain("Secure Action Password approval");
+});

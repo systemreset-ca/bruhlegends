@@ -1,0 +1,11 @@
+# Devnet pilot controls and current backend record
+
+Authorization source PR66 merge: `c009807e116c2febaf16f80e4540c59d4adfb0c3`; passing public CI 34852905788. Original Cloud applied migrations 0018/0019 at main `36b9595`; reviewed source matches exactly except runner-supplied outer transaction. Cloud 170 tests/types/build and PostgreSQL authorization checks passed. Gates remained absent/false.
+
+Atomic tip-history/community credit source PR67 merge: `24f1d0fb994daf6578abf66b0160e62c993c3fa8`; passing public CI 34853895534. Original Cloud applied 0020 at `f8ef0a1`; underlying UUID/bigint/numeric/enum columns checked before apply; service-only credit RPC and revoked foundation finalizer documented in the managed migration record. Cloud 171 tests/types/build and actual PostgreSQL credit/community checks passed. Not published or activated at this stage.
+
+The pilot-control proposal adds service-only receipt-check claims: one uncredited intent check every 15 seconds, serialized across workers, and at most 500 checks per UTC day globally on devnet. This limits receipt verification to at most 1,000 Helius HTTP requests daily with the current genesis-plus-transaction transport. Quote, fee, balance, simulation and submission requests are separate from that budget; this is not a universal billing cap or claim about the owner's provider plan. Already credited immutable facts return their stored signature/slot without another provider request. No automatic polling, transaction replacement, message loop or scheduler job is added.
+
+Private bot wallet/help instructions reflect the gates. The landing website remains untouched. The owner needs to set a separate Secure Action Password through `/security` privately once the original deployment is activated, and fund actual bot wallets with devnet SOL for a real Telegram pilot. Do not send passwords in Telegram or chat. Previously disposed test-wallet keys cannot be recovered or reused.
+
+Validation uses actual production SQL in disposable PostgreSQL, covering account ownership, cooldown, exhausted global budget, denied direct grants, immutable credit caching, atomic rollback and community deduplication/filtering. Source tests verify zero provider calls for throttled/cached checks. This is source evidence, not a completed real Telegram-funded acceptance run.

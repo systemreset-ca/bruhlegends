@@ -1,5 +1,9 @@
 # BRUH current handoff
 
+## Current account-tip integration
+
+[Backend deployment and pilot controls](operations/2026-09-14-account-tip-pilot-controls.md): PR66 authorization/signing and PR67 atomic history/community credit passed public CI; original Cloud applied 0018–0020 with managed tests/types/build and role evidence. Devnet spending gates remain off. The next source adds bounded receipt checks and accurate bot instructions, then managed controls/activation/publication and real private Telegram password/funded-tip acceptance. No landing marketing edits.
+
 ## Account-tip authorization — current source integration
 
 [Authorization and constrained execution](operations/2026-09-14-account-tip-authorization.md) adds separate password enrollment/attempt controls, one-use intent grants, exact SOL signing, signed-before-broadcast recovery, sender-only private bot links and the functional wallet-action screen. Proposed tip/auth schemas remain unapplied and spending gates remain disabled. Managed deployment, legacy tip/community credit integration and real Telegram acceptance remain required. Landing marketing is untouched.
