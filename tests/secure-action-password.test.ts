@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { secureActionPasswordError } from "../src/lib/secure-action-password";
+import {
+  secureActionPasswordError,
+  newSecureActionPasswordError,
+} from "../src/lib/secure-action-password";
 
 describe("secure action password policy", () => {
   it("accepts lowercase passphrases and spaces without composition requirements", () => {
@@ -15,4 +18,22 @@ describe("secure action password policy", () => {
       "match exactly",
     );
   });
+});
+
+it("enforces the owner composition policy only on new passwords", () => {
+  expect(newSecureActionPasswordError("CapitalizedWords!")).toBeNull();
+  expect(newSecureActionPasswordError("Capitalized1234!")).toBeNull();
+  expect(newSecureActionPasswordError("lowercasewords!")).toContain("capitalized");
+  expect(newSecureActionPasswordError("CapitalizedWords")).toContain("special");
+  for (const value of [
+    "Capitalized Words!",
+    "CapitalizedWords!😀",
+    "CapitalizedWords!界",
+    "CapitalizedWords!\n",
+  ])
+    expect(newSecureActionPasswordError(value)).toContain("No spaces");
+  expect(newSecureActionPasswordError("CapitalizedWords!", "CapitalizedWords?")).toContain(
+    "match exactly",
+  );
+  expect(secureActionPasswordError("previous password with spaces")).toBeNull();
 });

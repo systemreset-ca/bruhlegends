@@ -10,7 +10,7 @@ import {
   secureActionUser,
 } from "../src/lib/secure-action.server";
 const id = "00000000-0000-4000-8000-000000000001";
-const password = "synthetic horse battery phrase";
+const password = "SyntheticHorseBattery!";
 const salt = "01".repeat(16);
 const rpc = vi.fn();
 let expectedHash: string;
