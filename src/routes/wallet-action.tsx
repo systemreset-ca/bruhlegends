@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { exchangeLoginTokenFn } from "@/lib/miniapp.functions";
+import { secureActionPasswordError, secureActionPasswordRules } from "@/lib/secure-action-password";
 import {
   enrollSecureActionFn,
   executeAccountTipFn,
@@ -58,7 +59,7 @@ function WalletAction() {
       setStatus(
         record
           ? `Tip state: ${record.state}`
-          : "Choose a separate Secure Action Password of at least 15 characters.",
+          : "Choose a separate Secure Action Password. Read the rules below before submitting.",
       );
     })()
       .catch((error) => {
@@ -74,6 +75,16 @@ function WalletAction() {
   }, []);
   async function act(action: "enroll" | "send" | "check") {
     if (!session || busy) return;
+    if (action !== "check") {
+      const error = secureActionPasswordError(
+        password,
+        action === "enroll" ? confirmation : undefined,
+      );
+      if (error) {
+        setStatus(error);
+        return;
+      }
+    }
     setBusy(true);
     const supplied = password;
     setShowPassword(false);
@@ -83,7 +94,13 @@ function WalletAction() {
     try {
       const context = { session, initData: rawInitData() };
       if (action === "enroll") {
-        await enrollSecureActionFn({ data: { ...context, password: supplied, confirmation } });
+        const result = await enrollSecureActionFn({
+          data: { ...context, password: supplied, confirmation },
+        });
+        if (!result.enrolled) {
+          setStatus(result.message);
+          return;
+        }
         setEnrolling(false);
         setStatus("Password saved. Existing passwords cannot be overwritten here.");
       } else if (intentId && action === "send") {
@@ -106,7 +123,9 @@ function WalletAction() {
       }
     } catch {
       setStatus(
-        "Action unavailable or password rejected. Request a fresh private link if it expired.",
+        action === "enroll"
+          ? "Password setup could not reach the service. Close this app, run /security in your private bot chat, and open the new button. No capital, number or special character is required."
+          : "Tip authorization or confirmation could not complete. The cause may be an expired private session, an incorrect password, a temporary lockout, or a transaction/service issue. This is not a request to add special characters.",
       );
     } finally {
       setBusy(false);
@@ -125,6 +144,11 @@ function WalletAction() {
         />
       </header>
       <p role="status">{status}</p>
+      {(enrolling || intentId) && (
+        <p id="password-rules" className="text-sm">
+          {secureActionPasswordRules}
+        </p>
+      )}
       {tip && (
         <dl className="space-y-2 break-all">
           <dt>Network</dt>
@@ -153,6 +177,7 @@ function WalletAction() {
               <div className="relative">
                 <input
                   id="secure-action-password"
+                  aria-describedby="password-rules"
                   type={showPassword ? "text" : "password"}
                   autoComplete={enrolling ? "new-password" : "current-password"}
                   minLength={15}

@@ -3,6 +3,7 @@ import { promisify } from "node:util";
 import { admin } from "./db.server";
 import { resolveSession, verifyInitData } from "./session.server";
 import { accountWalletsEnabled } from "./account-wallet.server";
+import { secureActionPasswordError } from "./secure-action-password";
 
 const derive = promisify(pbkdf2);
 export function accountTipGate(): void {
@@ -63,6 +64,7 @@ export async function enrollSecureAction(input: {
   confirmation: string;
 }) {
   const userId = await secureActionUser(input.session, input.initData);
+  if (secureActionPasswordError(input.password)) throw new Error("Invalid Secure Action Password.");
   if (input.password !== input.confirmation) throw new Error("Passwords do not match.");
   const db = await admin();
   const lease = await db.rpc("bruh_secure_action_setup_begin", { p_user_id: userId });
