@@ -123,10 +123,16 @@ async function transfer(connection, walletA, walletB) {
     return;
   }
 
-  const parsed = await connection.getParsedTransaction(signature, {
-    commitment: "finalized",
-    maxSupportedTransactionVersion: 0,
-  });
+  // A freshly confirmed signature may not be queryable at finalized commitment
+  // immediately; poll within a bound rather than reporting a false negative.
+  let parsed = null;
+  for (let attempt = 0; attempt < 20 && !parsed; attempt += 1) {
+    parsed = await connection.getParsedTransaction(signature, {
+      commitment: "finalized",
+      maxSupportedTransactionVersion: 0,
+    });
+    if (!parsed) await new Promise((r) => setTimeout(r, 3_000));
+  }
   const keys = parsed?.transaction.message.accountKeys.map((k) => new PublicKey(k.pubkey).toBase58()) ?? [];
   const indexA = keys.indexOf(walletA.publicKey.toBase58());
   const indexB = keys.indexOf(walletB.publicKey.toBase58());
