@@ -1,8 +1,14 @@
 # BRUH Legends
 
-Telegram calls, group-specific reputation and wallet-authorized Solana tipping. Product first; BRUH later. No presale. Participation earning and token launch remain gated.
+Telegram-wide and group leaderboards, crypto calls and encrypted account-wallet Solana tipping. Product first; BRUH later. No presale. Participation earning and token launch remain gated.
 
 ## Inspect the evidence
+
+- [Current devnet bot backend publication and acceptance status](docs/operations/2026-09-14-account-tip-backend-publication.md)
+- [Twelve-account proof: 35 finalized devnet transactions and all explorer links](docs/operations/2026-09-14-twelve-account-devnet-funded-proof.md)
+- [Private authorization, constrained signing and recovery](docs/operations/2026-09-14-account-tip-authorization.md)
+- [Atomic tip history and community leaderboard credit](docs/operations/2026-09-14-account-tip-credit.md)
+- [Global community and local group architecture](docs/decisions/0011-community-and-group-rankings.md)
 
 - [Finalized two-wallet devnet transfer and transaction link](docs/operations/2026-09-14-devnet-two-wallet-transfer.md)
 - [Current one-wallet-per-Telegram-account design](docs/decisions/0008-one-wallet-per-telegram-account.md)
@@ -16,11 +22,11 @@ Telegram calls, group-specific reputation and wallet-authorized Solana tipping. 
 
 Follow issues → pull requests → exact commits → tests → deployment records → verified on-chain receipts when available. Planned, implemented, tested and live are different states. A public repository or green build is not a guarantee of security or token value.
 
-The live external-wallet flow does not sign user transactions server-side. The revised planned flow generates an encrypted BRUH wallet per Telegram account, with protected server signing; it is not deployed. Never send private keys or seed phrases to bot chat. The finalized disposable-wallet experiment proves a devnet transfer, not persistent bot-wallet custody. Do not infer a mint, allocation, liquidity lock or deployed feature from an old draft or an unreleased branch.
+The published devnet backend generates one encrypted wallet per Telegram account and supports private Secure Action Password approval for constrained SOL tipping. Real-user funded Telegram acceptance remains pending; mainnet, swaps, token rewards and protected export/withdrawal/retirement are not active. Never send private keys or seed phrases to bot chat. Synthetic chain proofs and managed checks are labeled separately from real-user acceptance. Do not infer a mint, allocation, liquidity lock or deployed feature from an old draft or an unreleased branch.
 
 ## Project coordination
 
-BRUH Legends is a Telegram bot and Mini App for group-specific call tracking, reputation and non-custodial Solana tipping. The public domain is https://bruh.tips.
+BRUH Legends is a Telegram bot and Mini App for group-attributed call tracking, community-wide reputation and gated account-wallet Solana tipping. The public domain is https://bruh.tips.
 
 - [Current handoff and inspection findings](docs/AI_HANDOFF.md)
 - [Delivery plan and revision workflow](docs/PROJECT_PLAN.md)
@@ -32,7 +38,7 @@ New Project "BRUH" - you have 2 .md files I created with ChatGPT, enable cloud e
 
 This project was built with [Lovable](https://lovable.dev).
 
-**Live app**: https://bruhlegends.lovable.app
+**Live app**: https://bruh.tips
 
 ## Build with Lovable
 
