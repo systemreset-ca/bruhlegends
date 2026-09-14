@@ -125,7 +125,7 @@ function Landing() {
       <section className="arena-bg overflow-hidden border-b border-border/70">
         <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-20 lg:grid-cols-[1.05fr_1fr] lg:py-28">
           <div className="relative z-10">
-            <SectionLabel>Telegram · Solana · Non-custodial tipping</SectionLabel>
+            <SectionLabel>Telegram · Solana devnet beta · No real funds</SectionLabel>
             <h1 className="mt-6 font-display text-6xl leading-[0.92] sm:text-7xl">
               <span className="text-gold-plate">Call it.</span>{" "}
               <span className="text-lime-plate">Track it.</span>
@@ -133,8 +133,9 @@ function Landing() {
             </h1>
             <p className="mt-6 max-w-xl text-lg text-muted-foreground">
               BRUH Legends is the utility bot your group chat has been faking with screenshots. It
-              locks a baseline on every call, keeps score for real, and lets the chat tip the
-              callers who earned it — straight to their own wallet.
+              locks a baseline on every call and keeps score for real. Right now it is in a Solana
+              devnet beta: message the bot privately and it creates one encrypted test wallet for
+              your Telegram account. Tipping is switched off until the beta ends.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <a
@@ -153,7 +154,7 @@ function Landing() {
               </Link>
             </div>
             <p className="mt-6 font-mono text-xs uppercase tracking-widest text-muted-foreground">
-              No seed phrases · Tips you sign yourself · No promises of profit
+              Devnet only · Creation and balance only · No promises of profit
             </p>
           </div>
 
