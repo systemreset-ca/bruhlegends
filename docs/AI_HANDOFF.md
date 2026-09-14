@@ -1,5 +1,9 @@
 # BRUH current handoff
 
+## External wallet Cloud rollout — applied, publication blocked
+
+PR #56 merged as `73a12d3283127c919c238bdcad5ca2b289957764`; Lovable applied managed migration 0016 and regenerated types at `e84c185c88b1ce8ff381d9de5be70965fbf54d09`. Codex reviewed the diff against the proposed SQL; only outer transaction delimiters were omitted. [Cloud evidence](operations/2026-09-14-external-wallet-migration.md) reports RLS/FORCE RLS, service-only RPC access, 137/137 tests, types and production build passing. Exact revision CI [34830646065](https://github.com/systemreset-ca/bruhlegends/actions/runs/34830646065) passed. No new projects/secrets or user rows. Publication is pending: browser control timed out on both original and fresh original-project tabs, including reload. Last verified published code remains `3565b61b67be82db8e699b485adc18c2655db384`. No additional authorization is needed; restore browser connectivity, confirm exact build and publish. External candidates remain unverified; SAP, ownership verification and spending remain unimplemented.
+
 ## Account external address commands — source ready
 
 Private `/generate` now creates/reuses the internal wallet. `/wallet add <public-address>` and `/wallet external` register/read a distinct account-wide **unverified candidate**, not an ownership-verified withdrawal destination. Replacement, withdrawals and exports remain blocked. Local 14 command/service/link tests, TypeScript and isolated SQL validation passed. Cloud schema and publication are pending; see [implementation evidence](operations/2026-09-14-external-address-commands.md). Earlier statements that external registration is absent describe the prior revision; ownership verification and SAP remain unimplemented.
