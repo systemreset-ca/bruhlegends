@@ -18,17 +18,17 @@ Executed once in a server-side process with injected configuration, using the ex
 wrapping key and key version. No database write, no Telegram identity persisted, and no key,
 envelope, seed or address printed. Booleans only:
 
-| check | result |
-| --- | --- |
-| `wrapping_key_present` | true |
-| `wrapping_key_import_ok` | true |
-| `key_non_extractable` | true |
-| `generate_ok` | true |
-| `address_valid` | true |
-| `envelope_shape_ok` (12-byte IV, 48-byte ciphertext+tag) | true |
-| `network_devnet` | true |
-| `verify_roundtrip_ok` | true |
-| `tamper_rejected` (scope/AAD mismatch rejected) | true |
+| check                                                    | result |
+| -------------------------------------------------------- | ------ |
+| `wrapping_key_present`                                   | true   |
+| `wrapping_key_import_ok`                                 | true   |
+| `key_non_extractable`                                    | true   |
+| `generate_ok`                                            | true   |
+| `address_valid`                                          | true   |
+| `envelope_shape_ok` (12-byte IV, 48-byte ciphertext+tag) | true   |
+| `network_devnet`                                         | true   |
+| `verify_roundtrip_ok`                                    | true   |
+| `tamper_rejected` (scope/AAD mismatch rejected)          | true   |
 
 The stored key and `BRUH_ACCOUNT_WALLET_KEY_VERSION` were not changed, rotated or re-generated.
 
@@ -69,10 +69,10 @@ Working external tipping is no longer advertised anywhere.
 
 ## ACL evidence (read-only, re-verified)
 
-| table | rowsecurity | force rowsecurity | policies | relacl |
-| --- | --- | --- | --- | --- |
-| `public.bruh_account_wallets` | true | true | 0 | `postgres=arwdDxtm/postgres`, `sandbox_exec=ar/postgres` |
-| `public.bruh_account_wallet_audit` | true | true | 0 | `postgres=arwdDxtm/postgres`, `sandbox_exec=ar/postgres` |
+| table                              | rowsecurity | force rowsecurity | policies | relacl                                                   |
+| ---------------------------------- | ----------- | ----------------- | -------- | -------------------------------------------------------- |
+| `public.bruh_account_wallets`      | true        | true              | 0        | `postgres=arwdDxtm/postgres`, `sandbox_exec=ar/postgres` |
+| `public.bruh_account_wallet_audit` | true        | true              | 0        | `postgres=arwdDxtm/postgres`, `sandbox_exec=ar/postgres` |
 
 No grant of any kind for `PUBLIC`, `anon`, `authenticated` or `service_role` on either table.
 
@@ -80,13 +80,13 @@ Documentation correction: the previous record described `sandbox_exec` as a read
 role. That is inaccurate. Its actual effective privileges on both tables are `a` (INSERT) and `r`
 (SELECT) — read **and** insert. Role attributes observed:
 
-| role | rolsuper | rolbypassrls | rolcanlogin | rolcreaterole |
-| --- | --- | --- | --- | --- |
-| `sandbox_exec` | false | **true** | true | false |
-| `postgres` | false | true | true | true |
-| `service_role` | false | true | false | false |
-| `authenticated` | false | false | false | false |
-| `anon` | false | false | false | false |
+| role            | rolsuper | rolbypassrls | rolcanlogin | rolcreaterole |
+| --------------- | -------- | ------------ | ----------- | ------------- |
+| `sandbox_exec`  | false    | **true**     | true        | false         |
+| `postgres`      | false    | true         | true        | true          |
+| `service_role`  | false    | true         | false       | false         |
+| `authenticated` | false    | false        | false       | false         |
+| `anon`          | false    | false        | false       | false         |
 
 Because `sandbox_exec` carries `BYPASSRLS`, forced row-level security does not constrain it; its
 INSERT and SELECT on these tables are effective. It is a platform-managed role and no platform

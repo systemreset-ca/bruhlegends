@@ -38,7 +38,8 @@ export const Route = createFileRoute("/app")({
       { property: "og:title", content: "BRUH App" },
       {
         property: "og:description",
-        content: "Call tracking and group leaderboards for BRUH communities, in Solana devnet beta.",
+        content:
+          "Call tracking and group leaderboards for BRUH communities, in Solana devnet beta.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
