@@ -4,6 +4,8 @@ Created 2026-09-11. Status: proposed operating plan grounded in an initial repos
 
 ## Product direction
 
+Owner now reports publication completed in the original project; independent public routes pass (site/app 200, unauthenticated webhook 401). Exact deployed SHA and authenticated wallet command acceptance remain unverified because browser control still times out. [Publication record](operations/2026-09-14-owner-wallet-publication.md) supersedes the prior publication blocker without claiming funded-wallet readiness.
+
 Cloud migration 0016 for external candidates is applied and documented at source `e84c185c88b1ce8ff381d9de5be70965fbf54d09`: 137 managed tests, types/build and exact-source CI passed. Codex reviewed the migration diff. Publication awaits restored browser control; last verified published release remains `3565b61b67be82db8e699b485adc18c2655db384`. See [Cloud evidence](operations/2026-09-14-external-wallet-migration.md). This supersedes the pending-schema status of the source slice below; unverified registration grants no withdrawal authority.
 
 Current source slice adds private `/generate` and account-wide external public-address registration through `/wallet add` and `/wallet external`. Candidates remain unverified and immutable; no withdrawal authority is granted. [Validation and rollout checklist](operations/2026-09-14-external-address-commands.md) records passing local checks and pending Cloud application/publication. Next: ownership verification and independent secure-action authentication before export, replacement or funded spending.
