@@ -399,7 +399,6 @@ async function accountWalletWelcome(userId: number) {
       "<b>2. Set your Action Password</b>",
       "After generation, your address and Copy Address button appear here. Open the BRUH Mini App button to set the separate password used to authorize wallet menu actions.",
       "",
-      "Currently Solana devnet only: use test SOL, never real SOL or mainnet tokens. Generation does not send funds. Key export and withdrawals are not available yet.",
     ].join("\n"),
     { keyboard: [[{ text: "Generate BRUH Wallet", callback_data: "accountwallet:make" }]] },
   );
