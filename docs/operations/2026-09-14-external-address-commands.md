@@ -2,6 +2,8 @@
 
 Original project only: `systemreset-ca/bruhlegends`, Lovable `e287f314-27c2-40bf-94f4-4685a95781fe`. This implements the owner's two-wallet-role clarification alongside decision 0010. Source implementation is complete; Cloud schema application and publication are pending.
 
+Update: PR #56 merged at `73a12d3283127c919c238bdcad5ca2b289957764`. Cloud migration 0016 was subsequently applied, with generated types and [privilege/build evidence](2026-09-14-external-wallet-migration.md) committed at `e84c185c88b1ce8ff381d9de5be70965fbf54d09`. Codex reviewed the exact diff and main CI passed. Publication remains pending because browser control/reconnection/reload timed out. Earlier unapplied-schema statements below describe the initial source review. No new publication or live owner command verification is claimed.
+
 ## Behavior
 
 - Private `/generate` creates or reuses the same internal account wallet as `/start`. Extra arguments are rejected.

@@ -4,6 +4,8 @@ Created 2026-09-11. Status: proposed operating plan grounded in an initial repos
 
 ## Product direction
 
+Cloud migration 0016 for external candidates is applied and documented at source `e84c185c88b1ce8ff381d9de5be70965fbf54d09`: 137 managed tests, types/build and exact-source CI passed. Codex reviewed the migration diff. Publication awaits restored browser control; last verified published release remains `3565b61b67be82db8e699b485adc18c2655db384`. See [Cloud evidence](operations/2026-09-14-external-wallet-migration.md). This supersedes the pending-schema status of the source slice below; unverified registration grants no withdrawal authority.
+
 Current source slice adds private `/generate` and account-wide external public-address registration through `/wallet add` and `/wallet external`. Candidates remain unverified and immutable; no withdrawal authority is granted. [Validation and rollout checklist](operations/2026-09-14-external-address-commands.md) records passing local checks and pending Cloud application/publication. Next: ownership verification and independent secure-action authentication before export, replacement or funded spending.
 
 Wallet handling now follows the owner-directed [Trojan security reference](decisions/0010-trojan-wallet-security-reference.md): generated account wallet, familiar wallet controls and independent SAP for sensitive actions. Record documented reference behavior separately from undisclosed backend internals. Account-wide external destination registration, SAP, withdrawal/export/retirement and funded tip settlement remain delivery work under issue45.
