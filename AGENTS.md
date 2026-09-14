@@ -21,4 +21,6 @@
 
 ## Owner-authorized funded wallets — 2026-09-13
 
+Later owner revision: decision 0008 selects one active wallet per verified Telegram account per network, shared across installed groups. This replaces group-specific wallet identity for new custody; calls, statistics, leaderboards and tip attribution remain group-isolated. Implement private `/start` creation and `/wallet make/show/keys/destroy` with confirmations, protected export and balance-safe retirement. Use the original BRUH project; do not merge earlier group-scoped custody prototypes unchanged.
+
 The owner has revised the future wallet architecture to BRUH-generated, self-managed funded wallets, with user-authorized server signing. This supersedes the no-server-signing rule only for the separately gated custody implementation. The existing external-wallet flow remains unchanged until that implementation is ready. Preserve Telegram verification, group isolation, transaction proof and auditability. Telegram two-step verification is recommended, not claimed as verified. Never import user private keys or expose generated keys in chat/logs; require isolated encrypted custody, spending controls, stronger withdrawal/export authentication and devnet validation before real-funds activation. See decision 0006.
