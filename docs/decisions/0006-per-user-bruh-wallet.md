@@ -1,7 +1,7 @@
 # One BRUH-generated wallet per Telegram user
 
 Date: 2026-09-14.
-Status: owner-accepted architecture revision. **Documented only — not implemented.** No schema, source or command changes were made alongside this record.
+Status: historical architecture record. The later [decision 0008](0008-one-wallet-per-telegram-account.md) and [private-wallet rollout record](../operations/2026-09-14-private-account-wallets.md) govern current behavior. Gated creation/show source is now merged; export, retirement and spending remain unavailable. The original statements below describe the state when this document was written.
 Owner: Codex engineering owns implementation; this document records the accepted direction.
 
 ## Revision
