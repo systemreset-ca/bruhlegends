@@ -4,6 +4,8 @@ Created 2026-09-11. Status: proposed operating plan grounded in an initial repos
 
 ## Product direction
 
+Codex now owns only bot/backend, Helius/Solana and GitHub engineering records; website design/marketing belongs to the owner and Lovable. Next backend slice is [account-tip reservation and finalized reconciliation](operations/2026-09-14-account-tip-state-machine.md): source implements immutable intents, serialized fee-inclusive reservation, signed-before-broadcast persistence and idempotent exact-fee settlement. Proposed schema remains unapplied and no live spending caller exists. Independent spend authorization, simulation/signing and chain recovery must precede enabling account tips.
+
 Owner now reports publication completed in the original project; independent public routes pass (site/app 200, unauthenticated webhook 401). Exact deployed SHA and authenticated wallet command acceptance remain unverified because browser control still times out. [Publication record](operations/2026-09-14-owner-wallet-publication.md) supersedes the prior publication blocker without claiming funded-wallet readiness.
 
 Cloud migration 0016 for external candidates is applied and documented at source `e84c185c88b1ce8ff381d9de5be70965fbf54d09`: 137 managed tests, types/build and exact-source CI passed. Codex reviewed the migration diff. Publication awaits restored browser control; last verified published release remains `3565b61b67be82db8e699b485adc18c2655db384`. See [Cloud evidence](operations/2026-09-14-external-wallet-migration.md). This supersedes the pending-schema status of the source slice below; unverified registration grants no withdrawal authority.

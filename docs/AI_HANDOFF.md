@@ -1,5 +1,9 @@
 # BRUH current handoff
 
+## Account-tip reservation and reconciliation — source slice
+
+New proposed account-tip storage freezes account wallets/group/amount/reference/fee, serializes one pending spend per wallet, persists signed bytes, disallows signed cancellation and settles idempotently through exact finalized Helius proof. [Implementation and limits](operations/2026-09-14-account-tip-state-machine.md). Local 9 targeted tests and isolated SQL validation passed. Schema is unapplied, no live caller and spending gate remains disabled. SAP/spending authorization, simulation/signing/broadcast/recovery and existing tip/leaderboard integration remain next. No website files were edited; AGENTS records the owner's explicit presentation boundary.
+
 ## Owner publication confirmation — current
 
 Owner reported published on 2026-09-14 in the original project. Independent GET `/` and `/app` returned 200; unauthenticated POST `/api/public/telegram/webhook` returned 401. GitHub main at confirmation was `fdae123f781867dddfe33b0881da09a813395c77`; exact deployed SHA could not be independently inspected because Lovable browser control still timed out. See [publication evidence and limits](operations/2026-09-14-owner-wallet-publication.md). Earlier publication-blocked statements below describe the prior state. Authenticated wallet command acceptance and SAP/spending/export remain pending.
