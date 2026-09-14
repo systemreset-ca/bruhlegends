@@ -25,6 +25,8 @@ function WalletAction() {
   const [tip, setTip] = useState<Awaited<ReturnType<typeof readAccountTipFn>> | null>(null);
   const [password, setPassword] = useState("");
   const [confirmation, setConfirmation] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const [enrolling, setEnrolling] = useState(false);
   const [busy, setBusy] = useState(true);
   const [status, setStatus] = useState("Opening private wallet action…");
@@ -74,6 +76,8 @@ function WalletAction() {
     if (!session || busy) return;
     setBusy(true);
     const supplied = password;
+    setShowPassword(false);
+    setShowConfirmation(false);
     setPassword("");
     setConfirmation("");
     try {
@@ -110,7 +114,16 @@ function WalletAction() {
   }
   return (
     <main className="mx-auto max-w-lg p-6 space-y-4">
-      <h1 className="text-xl font-semibold">Private wallet authorization</h1>
+      <header className="flex items-center justify-between gap-4">
+        <h1 className="min-w-0 flex-1 text-xl font-semibold">Private Wallet Authorization</h1>
+        <img
+          src="/bruh_wallet.png"
+          alt="BRUH wallet"
+          width={80}
+          height={68}
+          className="h-auto w-16 shrink-0 object-contain sm:w-20"
+        />
+      </header>
       <p role="status">{status}</p>
       {tip && (
         <dl className="space-y-2 break-all">
@@ -137,31 +150,59 @@ function WalletAction() {
           {(enrolling || intentId) && (
             <label className="block">
               Secure Action Password
-              <input
-                type="password"
-                autoComplete={enrolling ? "new-password" : "current-password"}
-                minLength={15}
-                maxLength={128}
-                required
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                className="block w-full border rounded p-2"
-              />
+              <div className="relative">
+                <input
+                  id="secure-action-password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete={enrolling ? "new-password" : "current-password"}
+                  minLength={15}
+                  maxLength={128}
+                  required
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  className="block w-full border rounded p-2 pr-20"
+                />
+                <button
+                  type="button"
+                  aria-controls="secure-action-password"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-pressed={showPassword}
+                  onClick={() => setShowPassword((current) => !current)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded px-2 py-1 text-sm"
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
+              </div>
             </label>
           )}
           {enrolling && (
             <label className="block">
               Confirm password
-              <input
-                type="password"
-                autoComplete="new-password"
-                minLength={15}
-                maxLength={128}
-                required
-                value={confirmation}
-                onChange={(event) => setConfirmation(event.target.value)}
-                className="block w-full border rounded p-2"
-              />
+              <div className="relative">
+                <input
+                  id="secure-action-confirmation"
+                  type={showConfirmation ? "text" : "password"}
+                  autoComplete="new-password"
+                  minLength={15}
+                  maxLength={128}
+                  required
+                  value={confirmation}
+                  onChange={(event) => setConfirmation(event.target.value)}
+                  className="block w-full border rounded p-2 pr-20"
+                />
+                <button
+                  type="button"
+                  aria-controls="secure-action-confirmation"
+                  aria-label={
+                    showConfirmation ? "Hide confirmation password" : "Show confirmation password"
+                  }
+                  aria-pressed={showConfirmation}
+                  onClick={() => setShowConfirmation((current) => !current)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded px-2 py-1 text-sm"
+                >
+                  {showConfirmation ? "Hide" : "Show"}
+                </button>
+              </div>
             </label>
           )}
           {(enrolling || intentId) && (
