@@ -44,6 +44,7 @@ jobs:
           bun run test:external-wallet-db
           bun run test:account-tip-db
           bun run test:secure-action-db
+          bun run test:account-tip-credit-db
           bun run test:community-db
           node --experimental-strip-types tools/db-validation/twelve-account-devnet.mjs --no-report
       - name: Verify secret scanner checksum
@@ -54,3 +55,4 @@ jobs:
           tar -xzf /tmp/gitleaks.tar.gz -C /tmp/bruh-gitleaks
       - name: Full fetched history secret scan
         run: /tmp/bruh-gitleaks/gitleaks git . --log-opts=--all --redact=100 --no-banner --ignore-gitleaks-allow --timeout=120
+

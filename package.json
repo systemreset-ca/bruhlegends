@@ -17,7 +17,8 @@
     "test:external-wallet-db": "node --test tools/db-validation/external-wallet.pg.mjs",
     "test:account-tip-db": "node --test tools/db-validation/account-tip.pg.mjs",
     "test:community-db": "node --test tools/db-validation/community-leaderboard.pg.mjs",
-    "test:secure-action-db": "node --test tools/db-validation/secure-action.pg.mjs"
+    "test:secure-action-db": "node --test tools/db-validation/secure-action.pg.mjs",
+    "test:account-tip-credit-db": "node --test tools/db-validation/account-tip-credit.pg.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

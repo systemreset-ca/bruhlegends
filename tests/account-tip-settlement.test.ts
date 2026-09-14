@@ -34,7 +34,7 @@ afterEach(() => vi.unstubAllEnvs());
 it("uses frozen account-bound fields and exact fee proof before atomic settlement", async () => {
   rpc
     .mockResolvedValueOnce({ data: record })
-    .mockResolvedValueOnce({ data: { ...record, state: "finalized" } });
+    .mockResolvedValueOnce({ data: { ...record, state: "finalized", credited: true } });
   vi.mocked(verifyFinalizedAccountSolTip).mockResolvedValue({ matched: true, slot: 101 });
   expect(await reconcileAccountTip(id, 123)).toEqual({
     settled: true,
@@ -50,7 +50,7 @@ it("uses frozen account-bound fields and exact fee proof before atomic settlemen
     feeLamports: 5000n,
   });
   expect(rpc.mock.calls[1]).toEqual([
-    "bruh_account_tip_finalize",
+    "bruh_account_tip_finalize_credit",
     { p_id: id, p_user_id: 123, p_signature: record.signature, p_slot: 101, p_fee: "5000" },
   ]);
 });
@@ -76,4 +76,12 @@ it("rejects wrong identity, unsafe amounts, disabled gate and mainnet without se
   vi.stubEnv("BRUH_ACCOUNT_TIPS_DEVNET_ENABLED", "false");
   await expect(reconcileAccountTip(id, 123)).rejects.toThrow();
   expect(rpc).not.toHaveBeenCalled();
+});
+
+it("does not report a tip settled when its history credit fails", async () => {
+  rpc
+    .mockResolvedValueOnce({ data: record })
+    .mockResolvedValueOnce({ data: { ...record, state: "finalized", credited: false } });
+  vi.mocked(verifyFinalizedAccountSolTip).mockResolvedValue({ matched: true, slot: 101 });
+  await expect(reconcileAccountTip(id, 123)).rejects.toThrow("settlement unavailable");
 });
