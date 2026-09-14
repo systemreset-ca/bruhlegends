@@ -53,6 +53,16 @@ export async function reconcileAccountTip(intentId: string, authenticatedSenderI
   const fee = decimal(record["fee_lamports"]);
   if (lamports === 0n) throw new Error("Invalid settlement record.");
   const signature = encoded(record["signature"], 64);
+  const claimed = await db.rpc("bruh_account_tip_reconcile_claim", {
+    p_id: intentId,
+    p_user_id: authenticatedSenderId,
+  });
+  if (claimed.error || !claimed.data) throw new Error("Verification claim unavailable.");
+  if (claimed.data.credited === true) {
+    if (claimed.data.signature !== signature) throw new Error("Invalid verified credit.");
+    return { settled: true, signature, slot: Number(decimal(claimed.data.slot)) };
+  }
+  if (claimed.data.allowed !== true) return { settled: false };
   const proof = await verifyFinalizedAccountSolTip({
     signature,
     sender: encoded(record["sender_address"], 32),

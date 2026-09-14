@@ -28,6 +28,7 @@ test("finalized account tips credit history atomically once with exact group att
       "proposed-account-wallet-schema.sql",
       "proposed-account-tip-schema.sql",
       "proposed-account-tip-credit.sql",
+      "proposed-account-tip-pilot-controls.sql",
     ])
       await db.exec(await readFile(new URL(`../../docs/${file}`, import.meta.url), "utf8"));
     await db.exec("SET ROLE service_role");
@@ -76,6 +77,40 @@ test("finalized account tips credit history atomically once with exact group att
       sig,
       Buffer.alloc(248).toString("base64"),
     ]);
+    assert.equal(
+      (await db.query("SELECT bruh_account_tip_reconcile_claim($1,456) AS result", [id])).rows[0]
+        .result.allowed,
+      false,
+    );
+    assert.equal(
+      (await db.query("SELECT bruh_account_tip_reconcile_claim($1,123) AS result", [id])).rows[0]
+        .result.allowed,
+      true,
+    );
+    assert.equal(
+      (await db.query("SELECT bruh_account_tip_reconcile_claim($1,123) AS result", [id])).rows[0]
+        .result.allowed,
+      false,
+    );
+    await db.exec("RESET ROLE");
+    assert.equal(
+      (await db.query("SELECT checks FROM bruh_account_tip_rpc_budget")).rows[0].checks,
+      1,
+    );
+    await db.query(
+      "UPDATE bruh_account_tip_execution SET next_reconcile_at=now()-interval '1 second' WHERE intent_id=$1",
+      [id],
+    );
+    await db.exec("UPDATE bruh_account_tip_rpc_budget SET checks=500; SET ROLE service_role;");
+    assert.equal(
+      (await db.query("SELECT bruh_account_tip_reconcile_claim($1,123) AS result", [id])).rows[0]
+        .result.allowed,
+      false,
+    );
+    await assert.rejects(db.query("SELECT * FROM bruh_account_tip_rpc_budget"));
+    await db.exec(
+      "RESET ROLE; UPDATE bruh_account_tip_rpc_budget SET checks=1; SET ROLE service_role;",
+    );
     await assert.rejects(credit(456));
     await assert.rejects(credit(123, sig, 99));
     await assert.rejects(credit(123, sig, 101, 5001));
@@ -98,6 +133,11 @@ test("finalized account tips credit history atomically once with exact group att
     );
     assert.equal((await credit()).rows[0].result.credited, true);
     assert.equal((await credit()).rows[0].result.credited, true);
+    assert.equal(
+      (await db.query("SELECT bruh_account_tip_reconcile_claim($1,123) AS result", [id])).rows[0]
+        .result.credited,
+      true,
+    );
     const acl = (
       await db.query(
         "SELECT has_function_privilege('service_role','bruh_account_tip_finalize(uuid,bigint,text,bigint,bigint)','EXECUTE') AS old,has_function_privilege('anon','bruh_account_tip_finalize_credit(uuid,bigint,text,bigint,bigint)','EXECUTE') AS anon,has_function_privilege('authenticated','bruh_account_tip_finalize_credit(uuid,bigint,text,bigint,bigint)','EXECUTE') AS auth",

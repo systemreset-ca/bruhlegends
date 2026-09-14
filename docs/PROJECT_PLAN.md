@@ -4,6 +4,8 @@ Created 2026-09-11. Status: proposed operating plan grounded in an initial repos
 
 ## Product direction
 
+Current backend: [authorization, atomic credit and pilot controls](operations/2026-09-14-account-tip-pilot-controls.md). Original Cloud has managed account-tip/auth/credit migrations 0018–0020; gates remain disabled. Finish bounded receipt-check deployment and the real private Telegram devnet pilot. Follow with automatic bounded reconciliation, protected withdrawal/export/retirement and separately reviewed mainnet readiness.
+
 Current source: [account-tip authorization](operations/2026-09-14-account-tip-authorization.md), including one-use password grants, constrained signing and private Telegram approval. Next: managed schema/privilege checks, finalized legacy tip/community credit integration and controlled Telegram pilot. No mainnet or website marketing changes.
 
 Current backend slice: [account-tip preparation](operations/2026-09-14-account-tip-preparation.md), including active membership checks, stored account-wallet resolution, exact SOL message/fee/balance and sender-scoped retries. Managed schema and public bot execution remain gated behind independent spend authorization; then implement simulation/signing, signed-before-broadcast recovery and verified tip credit integration. This is source work, not active Telegram spending.

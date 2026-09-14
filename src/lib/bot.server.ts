@@ -144,7 +144,9 @@ function helpText() {
     "/generate · /wallet make · /wallet show — internal devnet wallet\n/wallet add &lt;address&gt; · /wallet external — unverified external address\n/wallet keys · /wallet destroy — unavailable until protected lifecycle flows are ready",
   ).replace(
     "<i>BRUH is non-custodial. It never holds keys or funds — every transfer is approved in your own wallet.</i>",
-    "<i>Account wallets are devnet-only beta. BRUH stores encrypted keys; spending, export and retirement are not enabled yet.</i>",
+    accountSpendingEnabled()
+      ? "<i>Devnet SOL tips require your private Secure Action Password approval. Export and retirement remain unavailable.</i>"
+      : "<i>Account wallets are devnet-only beta. BRUH stores encrypted keys; spending, export and retirement are not enabled yet.</i>",
   );
 }
 function privacyText() {
@@ -448,7 +450,9 @@ async function handleAccountWalletDm(message: TgMessage, args: string[]) {
         "",
         "One wallet for your Telegram account across BRUH groups.",
         "DEVNET ONLY — do not send real SOL or mainnet tokens.",
-        "BRUH stores the encrypted signing key. Bot-wallet spending and export are not enabled yet.",
+        accountSpendingEnabled()
+          ? "BRUH stores the encrypted signing key. Set /security privately, then reply to a group member with /tip &lt;amount&gt; SOL and authorize the exact transfer. Export remains unavailable."
+          : "BRUH stores the encrypted signing key. Bot-wallet spending and export are not enabled yet.",
       ].join("\n"),
       {
         keyboard: [

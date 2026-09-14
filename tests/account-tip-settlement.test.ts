@@ -34,6 +34,7 @@ afterEach(() => vi.unstubAllEnvs());
 it("uses frozen account-bound fields and exact fee proof before atomic settlement", async () => {
   rpc
     .mockResolvedValueOnce({ data: record })
+    .mockResolvedValueOnce({ data: { allowed: true } })
     .mockResolvedValueOnce({ data: { ...record, state: "finalized", credited: true } });
   vi.mocked(verifyFinalizedAccountSolTip).mockResolvedValue({ matched: true, slot: 101 });
   expect(await reconcileAccountTip(id, 123)).toEqual({
@@ -49,16 +50,16 @@ it("uses frozen account-bound fields and exact fee proof before atomic settlemen
     lamports: 1000000n,
     feeLamports: 5000n,
   });
-  expect(rpc.mock.calls[1]).toEqual([
+  expect(rpc.mock.calls[2]).toEqual([
     "bruh_account_tip_finalize_credit",
     { p_id: id, p_user_id: 123, p_signature: record.signature, p_slot: 101, p_fee: "5000" },
   ]);
 });
 it("keeps missing or unmatched receipts reserved", async () => {
-  rpc.mockResolvedValue({ data: record });
+  rpc.mockResolvedValueOnce({ data: record }).mockResolvedValueOnce({ data: { allowed: true } });
   vi.mocked(verifyFinalizedAccountSolTip).mockResolvedValue({ matched: false });
   expect(await reconcileAccountTip(id, 123)).toEqual({ settled: false });
-  expect(rpc).toHaveBeenCalledTimes(1);
+  expect(rpc).toHaveBeenCalledTimes(2);
 });
 it("rejects wrong identity, unsafe amounts, disabled gate and mainnet without settlement", async () => {
   for (const changed of [
@@ -81,7 +82,23 @@ it("rejects wrong identity, unsafe amounts, disabled gate and mainnet without se
 it("does not report a tip settled when its history credit fails", async () => {
   rpc
     .mockResolvedValueOnce({ data: record })
+    .mockResolvedValueOnce({ data: { allowed: true } })
     .mockResolvedValueOnce({ data: { ...record, state: "finalized", credited: false } });
   vi.mocked(verifyFinalizedAccountSolTip).mockResolvedValue({ matched: true, slot: 101 });
   await expect(reconcileAccountTip(id, 123)).rejects.toThrow("settlement unavailable");
+});
+
+it("avoids provider calls when checks are throttled or immutable credit already exists", async () => {
+  rpc.mockResolvedValueOnce({ data: record }).mockResolvedValueOnce({ data: { allowed: false } });
+  expect(await reconcileAccountTip(id, 123)).toEqual({ settled: false });
+  expect(verifyFinalizedAccountSolTip).not.toHaveBeenCalled();
+  rpc
+    .mockResolvedValueOnce({ data: record })
+    .mockResolvedValueOnce({ data: { credited: true, signature: record.signature, slot: 101 } });
+  expect(await reconcileAccountTip(id, 123)).toEqual({
+    settled: true,
+    signature: record.signature,
+    slot: 101,
+  });
+  expect(verifyFinalizedAccountSolTip).not.toHaveBeenCalled();
 });
