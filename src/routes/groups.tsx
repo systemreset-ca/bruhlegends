@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { SiteShell, SectionLabel, TELEGRAM_BOT_URL } from "@/components/site-chrome";
+import { SiteShell, SectionLabel } from "@/components/site-chrome";
 
 export const Route = createFileRoute("/groups")({
   head: () => ({
@@ -28,7 +28,7 @@ const setup = [
   {
     n: "01",
     title: "Add the bot",
-    body: "Invite @BRUHLegendsBot to your group and give it permission to read messages and reply.",
+    body: "Invite the BRUH bot to your group and give it permission to read messages and reply.",
   },
   {
     n: "02",
@@ -96,14 +96,9 @@ function GroupsPage() {
             Two minutes to install, then the bot handles attribution, tracking, announcements and
             moderation while you get on with running the community.
           </p>
-          <a
-            href={TELEGRAM_BOT_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-8 inline-block rounded-md bg-primary px-8 py-4 font-mono text-sm font-bold uppercase tracking-widest text-primary-foreground glow-lime"
-          >
-            Add BRUH to your group
-          </a>
+          <span className="mt-8 inline-block rounded-md bg-primary px-8 py-4 font-mono text-sm font-bold uppercase tracking-widest text-primary-foreground glow-lime">
+            Coming soon
+          </span>
         </div>
       </section>
 

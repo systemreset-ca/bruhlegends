@@ -78,12 +78,6 @@ function TokenPage() {
               </p>
             </div>
             <div className="mt-6 flex flex-wrap gap-4">
-              <a
-                href="https://t.me/BRUHLegendsBot"
-                className="rounded-md bg-primary px-5 py-3 font-mono text-sm text-primary-foreground"
-              >
-                Open the bot
-              </a>
               <Link
                 to="/app"
                 className="rounded-md border border-border px-5 py-3 font-mono text-sm"

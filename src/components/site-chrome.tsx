@@ -2,8 +2,6 @@ import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import emblem from "@/assets/bruh-emblem.png.asset.json";
 
-export const TELEGRAM_BOT_URL = "https://t.me/BRUHLegendsBot";
-
 const nav = [
   { to: "/", label: "The Bot" },
   { to: "/groups", label: "For Admins" },
@@ -36,14 +34,9 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <a
-          href={TELEGRAM_BOT_URL}
-          target="_blank"
-          rel="noreferrer"
-          className="ml-auto rounded-md bg-primary px-4 py-2 font-mono text-xs font-bold uppercase tracking-widest text-primary-foreground transition-shadow hover:glow-lime sm:ml-0"
-        >
-          Add to group
-        </a>
+        <span className="ml-auto rounded-md bg-primary px-4 py-2 font-mono text-xs font-bold uppercase tracking-widest text-primary-foreground sm:ml-0">
+          Coming soon
+        </span>
       </div>
     </header>
   );
@@ -86,14 +79,6 @@ export function SiteFooter() {
           <Link to="/risk" className="hover:text-primary">
             Risk
           </Link>
-          <a
-            href={TELEGRAM_BOT_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="hover:text-primary"
-          >
-            Telegram
-          </a>
         </div>
 
         <p className="mt-8 font-mono text-[11px] uppercase tracking-widest text-muted-foreground/70">
