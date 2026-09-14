@@ -4,6 +4,8 @@ Owner direction, 2026-09-13. This revises the earlier illustrative extra-fee and
 
 Tracked delivery: [issue #47](https://github.com/systemreset-ca/bruhlegends/issues/47). Source validation: four monetary conservation/range/rounding tests passed; TypeScript and changed-file lint passed. The calculators have no chain calls, credential access or live command integration.
 
+Public CI initially passed tests/types/build/database checks but flagged one unrelated historical false positive: `fdabfb2acae4c586f503744a0afd7feac66b76fa:services/custody-signer/devnet-smoke.ts:generic-api-key:20`. Review shows a runtime-generated non-extractable AES key passed to the vault with the literal version label `ephemeral-smoke-v1`, not a stored credential. Only that exact fingerprint is exempted; full-history scanning remains enabled.
+
 ## Accepted tip allocation
 
 Before BRUH exists, deduct 1% from the SOL tip to purchase CHAD. The recipient receives 99% of the SOL; sender and recipient each receive half of the actual CHAD purchased. For 1 SOL: 0.99 SOL recipient proceeds, 0.01 SOL CHAD purchase budget. Network fees, swap fees, account rent and slippage must be quoted separately; they cannot silently reduce a promised output.
