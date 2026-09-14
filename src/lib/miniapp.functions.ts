@@ -1,6 +1,23 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
+/** Dormant custody entry: default server flag denies; no UI calls this yet. */
+export const provisionDevnetCustodyWalletFn = createServerFn({ method: "POST" })
+  .inputValidator((input) =>
+    z
+      .object({
+        session: z.string().min(8).max(200),
+        membershipId: z.string().uuid(),
+        initData: z.string().min(1).max(4096),
+      })
+      .strict()
+      .parse(input),
+  )
+  .handler(async ({ data }) => {
+    const { provisionMyDevnetCustodyWallet } = await import("./custody-gateway.server");
+    return provisionMyDevnetCustodyWallet(data);
+  });
+
 export const getParticipationFn = createServerFn({ method: "POST" })
   .inputValidator((input) =>
     z.object({ session: z.string().min(8).max(200), membershipId: z.string().uuid() }).parse(input),

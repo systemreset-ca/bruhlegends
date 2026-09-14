@@ -4,3 +4,6 @@
 b87f8676f1fd35c54d7e423b3d7c324f6e3e2b09:tests/scheduler-auth.test.ts:generic-api-key:7
 c088f3799e29149fa0a93f2cfc8635844da6f3fb:.env:generic-api-key:2
 c088f3799e29149fa0a93f2cfc8635844da6f3fb:.env:generic-api-key:5
+# Reviewed: literal key-version label "ephemeral-smoke-v1", not key material.
+# The actual non-extractable wrapping key is generated in memory at runtime.
+fdabfb2acae4c586f503744a0afd7feac66b76fa:services/custody-signer/devnet-smoke.ts:generic-api-key:20
