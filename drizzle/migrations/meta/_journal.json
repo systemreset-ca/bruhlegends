@@ -127,6 +127,20 @@
       "when": 1789383005191,
       "tag": "0017_bruh_community_leaderboard",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1789394728323,
+      "tag": "0018_bruh_account_tip_schema",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1789394776043,
+      "tag": "0019_bruh_account_tip_authorization",
+      "breakpoints": true
     }
   ]
 }
