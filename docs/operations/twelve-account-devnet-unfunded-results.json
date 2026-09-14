@@ -1,0 +1,270 @@
+{
+  "syntheticIdentities": true,
+  "liveTelegramAuthenticationTested": false,
+  "productionSigningTested": false,
+  "generatedAt": "2026-09-14T11:10:36.022Z",
+  "network": "devnet",
+  "accounts": [
+    {
+      "syntheticTelegramUserId": "9000000000000",
+      "internalAddress": "63fHxpd6cAoHGDqdCK3EZLfjv9Lgut9NHyuqv3CeSxa3",
+      "externalPublicAddress": "4LzjgQXmNWudESAMSWW4grv93sYXvGiu8yYDXEkqrmty"
+    },
+    {
+      "syntheticTelegramUserId": "9000000000001",
+      "internalAddress": "AppxVhVJDhycyy124qbMizHLehCeAw6fVJM5DTqQKd6o",
+      "externalPublicAddress": "81rZKdq3ownk8bAdQBd3pFKwYiCSDafeemwqsxvJZmdk"
+    },
+    {
+      "syntheticTelegramUserId": "9000000000002",
+      "internalAddress": "3Z2Tttmpmo7zvR3XqUWPbFTQa5zYb94ecPZiT2CxuxNs",
+      "externalPublicAddress": "EAtwXLQD6tH6DZxifALvzBAPhJriSpNmewcpw9DYfw2c"
+    },
+    {
+      "syntheticTelegramUserId": "9000000000003",
+      "internalAddress": "EEj71iYBc6PJhvJrxMx5DrGMGLym38UgEBj5fBxsK97t",
+      "externalPublicAddress": "37eL3LRqoSScxpW2ChMV4NnsotHVDnqzMfphJXVwk7N3"
+    },
+    {
+      "syntheticTelegramUserId": "9000000000004",
+      "internalAddress": "7bXTJzJQ2xfnT7x9Ej7Rq5kgUQCJD7KemqM1GQv8R6XC",
+      "externalPublicAddress": "56yEUx5nG6R63SF7CtSu6U2WJWcpJ5TNqV9kHGe5rydf"
+    },
+    {
+      "syntheticTelegramUserId": "9000000000005",
+      "internalAddress": "5X5yBcMQP8smGWhyUULxaNZUXkxVFggyYFVmJTz6XxMB",
+      "externalPublicAddress": "G4P1yfy3ztgXZ5PSMJHk1x1nD4DWbTrUjZYR1A3VJ38A"
+    },
+    {
+      "syntheticTelegramUserId": "9000000000006",
+      "internalAddress": "A52yta3JWSyHVxqTX1yZo3HC7KwvxznsEMevCSv3WDPp",
+      "externalPublicAddress": "39xCKUGdGjWE9WSo4ma3q2eQyndSqXvBZMEN9qC9Wtnd"
+    },
+    {
+      "syntheticTelegramUserId": "9000000000007",
+      "internalAddress": "5B6MvtM2Z9cauVZTBmKpz885ogWnXDJYmcGA1eTS9g5L",
+      "externalPublicAddress": "3gfVy773h7cSNAcBqUBvsMxPDmJy7sA7gYUS13geHQjR"
+    },
+    {
+      "syntheticTelegramUserId": "9000000000008",
+      "internalAddress": "4gWur8Zv23gjgNuEX8rcvXufxQnc1P52NwBPX9e3NBi3",
+      "externalPublicAddress": "5zXE1zwnkj3KY5xhqQCAgg5po7HwBaHsJbXbZVXKqdpN"
+    },
+    {
+      "syntheticTelegramUserId": "9000000000009",
+      "internalAddress": "8jSo476SePMwT1pLXaEZm6Mq7P1ewFcu5xcJuDZPZCEC",
+      "externalPublicAddress": "5f5HagGuc6knRvcF5U8c7Dw9Z8AHYyFagVMkjTW89n7d"
+    },
+    {
+      "syntheticTelegramUserId": "9000000000010",
+      "internalAddress": "Gt4iYp7EyUNQsEMZEEi647YZFkjAtE27om2NuFAq5NoU",
+      "externalPublicAddress": "9qrW1Byh2QxKYzhVFESKPhB1FY1zbo5SRpRSnZU7Xftv"
+    },
+    {
+      "syntheticTelegramUserId": "9000000000011",
+      "internalAddress": "5Hz1XDajV7PoUoNybNFeppL8LuGBbv46xz93esMmuswN",
+      "externalPublicAddress": "3Btxg7f86mQvjRfzkTwxCJqbnGWrFETuMywbTxv3vX3P"
+    }
+  ],
+  "calls": 48,
+  "transactions": [],
+  "checks": {
+    "encryptedWalletGenerationAndOwnershipBinding": true,
+    "twelveAccountsAcrossThreeGroups": true
+  },
+  "status": "live_incomplete",
+  "boards": {
+    "communityCallers": [
+      {
+        "calls": 4,
+        "score": 43.37,
+        "groups": 3,
+        "ranked": true,
+        "tipsSent": 0,
+        "milestones": 0,
+        "displayName": "synthetic_12",
+        "bestMultiple": 4.5,
+        "tipsReceived": 0,
+        "uniqueTokens": 4,
+        "medianMultiple": 4.125,
+        "telegramUserId": "9000000000011"
+      },
+      {
+        "calls": 4,
+        "score": 42.54,
+        "groups": 3,
+        "ranked": true,
+        "tipsSent": 0,
+        "milestones": 0,
+        "displayName": "synthetic_11",
+        "bestMultiple": 4.25,
+        "tipsReceived": 0,
+        "uniqueTokens": 4,
+        "medianMultiple": 3.875,
+        "telegramUserId": "9000000000010"
+      },
+      {
+        "calls": 4,
+        "score": 41.66,
+        "groups": 3,
+        "ranked": true,
+        "tipsSent": 0,
+        "milestones": 0,
+        "displayName": "synthetic_10",
+        "bestMultiple": 4,
+        "tipsReceived": 0,
+        "uniqueTokens": 4,
+        "medianMultiple": 3.625,
+        "telegramUserId": "9000000000009"
+      },
+      {
+        "calls": 4,
+        "score": 40.74,
+        "groups": 3,
+        "ranked": true,
+        "tipsSent": 0,
+        "milestones": 0,
+        "displayName": "synthetic_9",
+        "bestMultiple": 3.75,
+        "tipsReceived": 0,
+        "uniqueTokens": 4,
+        "medianMultiple": 3.375,
+        "telegramUserId": "9000000000008"
+      },
+      {
+        "calls": 4,
+        "score": 39.77,
+        "groups": 3,
+        "ranked": true,
+        "tipsSent": 0,
+        "milestones": 0,
+        "displayName": "synthetic_8",
+        "bestMultiple": 3.5,
+        "tipsReceived": 0,
+        "uniqueTokens": 4,
+        "medianMultiple": 3.125,
+        "telegramUserId": "9000000000007"
+      },
+      {
+        "calls": 4,
+        "score": 38.73,
+        "groups": 3,
+        "ranked": true,
+        "tipsSent": 0,
+        "milestones": 0,
+        "displayName": "synthetic_7",
+        "bestMultiple": 3.25,
+        "tipsReceived": 0,
+        "uniqueTokens": 4,
+        "medianMultiple": 2.875,
+        "telegramUserId": "9000000000006"
+      },
+      {
+        "calls": 4,
+        "score": 37.64,
+        "groups": 3,
+        "ranked": true,
+        "tipsSent": 0,
+        "milestones": 0,
+        "displayName": "synthetic_6",
+        "bestMultiple": 3,
+        "tipsReceived": 0,
+        "uniqueTokens": 4,
+        "medianMultiple": 2.625,
+        "telegramUserId": "9000000000005"
+      },
+      {
+        "calls": 4,
+        "score": 36.46,
+        "groups": 3,
+        "ranked": true,
+        "tipsSent": 0,
+        "milestones": 0,
+        "displayName": "synthetic_5",
+        "bestMultiple": 2.75,
+        "tipsReceived": 0,
+        "uniqueTokens": 4,
+        "medianMultiple": 2.375,
+        "telegramUserId": "9000000000004"
+      },
+      {
+        "calls": 4,
+        "score": 31.63,
+        "groups": 3,
+        "ranked": true,
+        "tipsSent": 0,
+        "milestones": 0,
+        "displayName": "synthetic_4",
+        "bestMultiple": 2.5,
+        "tipsReceived": 0,
+        "uniqueTokens": 4,
+        "medianMultiple": 2.125,
+        "telegramUserId": "9000000000003"
+      },
+      {
+        "calls": 4,
+        "score": 26.71,
+        "groups": 3,
+        "ranked": true,
+        "tipsSent": 0,
+        "milestones": 0,
+        "displayName": "synthetic_3",
+        "bestMultiple": 2.25,
+        "tipsReceived": 0,
+        "uniqueTokens": 4,
+        "medianMultiple": 1.875,
+        "telegramUserId": "9000000000002"
+      },
+      {
+        "calls": 4,
+        "score": 21.66,
+        "groups": 3,
+        "ranked": true,
+        "tipsSent": 0,
+        "milestones": 0,
+        "displayName": "synthetic_2",
+        "bestMultiple": 2,
+        "tipsReceived": 0,
+        "uniqueTokens": 4,
+        "medianMultiple": 1.625,
+        "telegramUserId": "9000000000001"
+      },
+      {
+        "calls": 4,
+        "score": 16.48,
+        "groups": 3,
+        "ranked": true,
+        "tipsSent": 0,
+        "milestones": 0,
+        "displayName": "synthetic_1",
+        "bestMultiple": 1.75,
+        "tipsReceived": 0,
+        "uniqueTokens": 4,
+        "medianMultiple": 1.375,
+        "telegramUserId": "9000000000000"
+      }
+    ],
+    "groupCallCounts": [
+      {
+        "group_id": "g0",
+        "calls": 24
+      },
+      {
+        "group_id": "g1",
+        "calls": 12
+      },
+      {
+        "group_id": "g2",
+        "calls": 12
+      }
+    ],
+    "communityTippers": []
+  },
+  "failure": "funding_refused_unfunded_process_stopped",
+  "fundingOutcomes": [
+    "Public RPC: -32603, no signature",
+    "Helius: devnet genesis verified, rate_limited, no signature",
+    "QuickNode form: required mainnet balance; no funds sent"
+  ],
+  "keysDiscarded": true
+}
