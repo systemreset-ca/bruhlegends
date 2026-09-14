@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { SiteShell, SectionLabel, TELEGRAM_BOT_URL } from "@/components/site-chrome";
+import { SiteShell, SectionLabel } from "@/components/site-chrome";
 import banner from "@/assets/bruh-banner.png.asset.json";
 
 export const Route = createFileRoute("/")({
@@ -137,14 +137,9 @@ function Landing() {
               reputation, settle the group chat debates and see who consistently finds the winners.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <a
-                href={TELEGRAM_BOT_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-md bg-primary px-6 py-3 font-mono text-sm font-bold uppercase tracking-widest text-primary-foreground glow-lime"
-              >
-                Add BRUH to your group
-              </a>
+              <span className="rounded-md bg-primary px-6 py-3 font-mono text-sm font-bold uppercase tracking-widest text-primary-foreground glow-lime">
+                Coming soon
+              </span>
               <Link
                 to="/token"
                 className="rounded-md border border-gold/50 px-6 py-3 font-mono text-sm font-bold uppercase tracking-widest text-gold transition-colors hover:bg-gold/10"
@@ -315,14 +310,9 @@ function Landing() {
             Add the bot, run <code className="font-mono text-primary">/bruh_setup</code>, and the
             next call your chat makes is on the record forever.
           </p>
-          <a
-            href={TELEGRAM_BOT_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-8 inline-block rounded-md bg-primary px-8 py-4 font-mono text-sm font-bold uppercase tracking-widest text-primary-foreground glow-lime"
-          >
-            Add BRUH to your group
-          </a>
+          <span className="mt-8 inline-block rounded-md bg-primary px-8 py-4 font-mono text-sm font-bold uppercase tracking-widest text-primary-foreground glow-lime">
+            Coming soon
+          </span>
         </div>
       </section>
     </SiteShell>
