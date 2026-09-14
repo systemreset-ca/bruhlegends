@@ -283,7 +283,8 @@ try {
       );
     }
     let funded = false;
-    for (let attempt = 0; attempt < 60; attempt++) {
+    const fundingDeadline = Date.now() + 15 * 60_000;
+    while (Date.now() < fundingDeadline) {
       if (
         (await rpc("getBalance", [wallets[0].address, { commitment: "confirmed" }])).value >=
         50000000

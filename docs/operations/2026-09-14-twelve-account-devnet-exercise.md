@@ -27,4 +27,6 @@ The live harness makes one faucet request, then waits at most 15 minutes for 0.0
 
 This harness is a test-only signer, not a new application signing/export path. It does not verify real Telegram authentication, invoke actual Telegram `/start` or `/tip`, implement SAP, reserve spends in Cloud, test production retries/withdrawals or enable live wallet spending. External candidate addresses are generated public references, not registered withdrawal permissions. No service fees, CHAD/BRUH rewards, mainnet activity, real Telegram messages or production leaderboard seed data are introduced.
 
+Final outcome: funding did not arrive. Codex stopped only the unfunded harness process after the unsuccessful funding attempts and recorded `live_incomplete`, zero transactions and discarded keys in the live results. **Do not fund the recorded address now.** A fresh run is required for the chain portion. The next-run funding loop uses a wall-clock deadline, rather than letting slow RPC calls multiply a fixed retry count; an in-flight request has its separate 20-second timeout.
+
 The fixture wallets are disposable. Once the bounded process exits their keys are lost; do not fund their addresses afterward. Re-running generates a fresh public report and fresh wallets.
