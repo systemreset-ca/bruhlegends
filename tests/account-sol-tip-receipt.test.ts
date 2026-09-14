@@ -61,6 +61,12 @@ afterEach(() => {
 describe("account SOL tip receipt proof", () => {
   it("matches exact sender-authorized SOL and recipient credit including sender network fee", () => {
     expect(matchAccountSolTipReceipt(receipt(), expected)).toEqual({ matched: true, slot: 100 });
+    expect(matchAccountSolTipReceipt(receipt(), { ...expected, feeLamports: 5000n }).matched).toBe(
+      true,
+    );
+    expect(matchAccountSolTipReceipt(receipt(), { ...expected, feeLamports: 4999n }).matched).toBe(
+      false,
+    );
   });
   it("rejects wrong identity, signature, reference and amount", () => {
     for (const changed of [

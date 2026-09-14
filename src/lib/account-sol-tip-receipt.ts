@@ -9,6 +9,7 @@ export type AccountSolTipExpectation = {
   recipient: string;
   reference: string;
   lamports: bigint;
+  feeLamports?: bigint;
 };
 
 function encoded(value: unknown, length: number): value is string {
@@ -43,7 +44,11 @@ export function matchAccountSolTipReceipt(
     new Set([expected.sender, expected.recipient, expected.reference, SYSTEM_PROGRAM]).size !== 4 ||
     typeof expected.lamports !== "bigint" ||
     expected.lamports <= 0n ||
-    expected.lamports > U64_MAX
+    expected.lamports > U64_MAX ||
+    (expected.feeLamports !== undefined &&
+      (typeof expected.feeLamports !== "bigint" ||
+        expected.feeLamports < 0n ||
+        expected.feeLamports > U64_MAX))
   )
     return denied;
 
@@ -113,6 +118,7 @@ export function matchAccountSolTipReceipt(
     return denied;
   if (
     !integer(meta["fee"]) ||
+    (expected.feeLamports !== undefined && BigInt(meta["fee"]) !== expected.feeLamports) ||
     !Array.isArray(meta["preBalances"]) ||
     !Array.isArray(meta["postBalances"]) ||
     meta["preBalances"].length !== 4 ||

@@ -11,6 +11,8 @@
 
 ## BRUH coordination
 
+- Owner clarified on 2026-09-14: Codex owns bot/backend code, Helius/Solana transaction engineering and GitHub documentation/revision management. Website design and marketing belong to the owner and Lovable. Do not edit website marketing, layout or copy unless explicitly requested. Keep engineering test-network and operational status in GitHub; necessary transaction safety/authorization belongs in the actual bot workflow.
+
 - GitHub is the durable source for code, specifications and revision history. Read `docs/AI_HANDOFF.md` and `docs/PROJECT_PLAN.md` before work; follow their source links for scope.
 - Codex owns engineering and integration; Lovable owns UI and presentation; Work owns research and documentation proposals. Record accepted changes in this repository.
 - Use `codex/` branches and reviewable PRs. Coordinate ownership before two tools edit the same files. Fetch current `main` before integrating Lovable changes; preserve published history.
