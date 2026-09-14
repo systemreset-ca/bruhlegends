@@ -32,16 +32,36 @@ const connection = new Connection(endpoint, {
 try {
   if ((await connection.getGenesisHash()) !== DEVNET_GENESIS)
     throw new Error("Wrong devnet genesis.");
-  const faucetSignature = await connection.requestAirdrop(
-    new PublicKey(sender.address),
-    10_000_000,
-  );
-  const validity = await connection.getLatestBlockhash("finalized");
-  const faucet = await connection.confirmTransaction(
-    { ...validity, signature: faucetSignature },
-    "finalized",
-  );
-  if (faucet.value.err) throw new Error("Devnet faucet transaction failed.");
+  if (process.argv.includes("--web-faucet")) {
+    console.log(
+      JSON.stringify({
+        state: "awaiting_web_faucet",
+        network: "devnet",
+        sender: sender.address,
+        recipient: recipient.address,
+      }),
+    );
+    let funded = false;
+    for (let attempt = 0; attempt < 60; attempt++) {
+      if ((await connection.getBalance(new PublicKey(sender.address), "finalized")) >= 10_000_000) {
+        funded = true;
+        break;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+    }
+    if (!funded) throw new Error("Web faucet funding not received within five minutes.");
+  } else {
+    const faucetSignature = await connection.requestAirdrop(
+      new PublicKey(sender.address),
+      10_000_000,
+    );
+    const validity = await connection.getLatestBlockhash("finalized");
+    const faucet = await connection.confirmTransaction(
+      { ...validity, signature: faucetSignature },
+      "finalized",
+    );
+    if (faucet.value.err) throw new Error("Devnet faucet transaction failed.");
+  }
   const rpc = new DevnetSolRpc(endpoint);
   const approval = await rpc.prepare({
     ...scope,
