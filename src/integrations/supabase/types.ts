@@ -167,6 +167,42 @@ export type Database = {
           },
         ]
       }
+      bruh_account_tip_credit_audit: {
+        Row: {
+          created_at: string
+          intent_id: string
+          legacy_tip_id: string
+          signature: string
+        }
+        Insert: {
+          created_at?: string
+          intent_id: string
+          legacy_tip_id: string
+          signature: string
+        }
+        Update: {
+          created_at?: string
+          intent_id?: string
+          legacy_tip_id?: string
+          signature?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bruh_account_tip_credit_audit_intent_id_fkey"
+            columns: ["intent_id"]
+            isOneToOne: true
+            referencedRelation: "bruh_account_tip_intents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bruh_account_tip_credit_audit_legacy_tip_id_fkey"
+            columns: ["legacy_tip_id"]
+            isOneToOne: true
+            referencedRelation: "tip_intents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bruh_account_tip_execution: {
         Row: {
           actual_fee_lamports: number | null
@@ -1918,6 +1954,16 @@ export type Database = {
         Returns: Json
       }
       bruh_account_tip_finalize: {
+        Args: {
+          p_fee: number
+          p_id: string
+          p_signature: string
+          p_slot: number
+          p_user_id: number
+        }
+        Returns: Json
+      }
+      bruh_account_tip_finalize_credit: {
         Args: {
           p_fee: number
           p_id: string
