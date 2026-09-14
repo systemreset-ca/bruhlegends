@@ -137,9 +137,12 @@ function Landing() {
               reputation, settle the group chat debates and see who consistently finds the winners.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <span className="rounded-md bg-primary px-6 py-3 font-mono text-sm font-bold uppercase tracking-widest text-primary-foreground glow-lime">
-                Coming soon
-              </span>
+              <a
+                href="#"
+                className="rounded-md bg-primary px-6 py-3 font-mono text-sm font-bold uppercase tracking-widest text-primary-foreground glow-lime transition-colors hover:brightness-110"
+              >
+                Open BRUH in Telegram
+              </a>
               <Link
                 to="/token"
                 className="rounded-md border border-gold/50 px-6 py-3 font-mono text-sm font-bold uppercase tracking-widest text-gold transition-colors hover:bg-gold/10"
@@ -310,9 +313,12 @@ function Landing() {
             Add the bot, run <code className="font-mono text-primary">/bruh_setup</code>, and the
             next call your chat makes is on the record forever.
           </p>
-          <span className="mt-8 inline-block rounded-md bg-primary px-8 py-4 font-mono text-sm font-bold uppercase tracking-widest text-primary-foreground glow-lime">
-            Coming soon
-          </span>
+          <a
+            href="#"
+            className="mt-8 inline-block rounded-md bg-primary px-8 py-4 font-mono text-sm font-bold uppercase tracking-widest text-primary-foreground glow-lime transition-colors hover:brightness-110"
+          >
+            Add BRUH to your group
+          </a>
         </div>
       </section>
     </SiteShell>
