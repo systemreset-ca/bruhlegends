@@ -42,7 +42,7 @@ beforeEach(() => {
   m.login.mockResolvedValue("synthetic-private-login");
   m.rpc.mockResolvedValue({ data: { sender_user_id: 123 } });
 });
-it("creates or reuses the verified private account wallet before password setup", async () => {
+it("checks the verified private account wallet before password setup", async () => {
   await handleUpdate({
     update_id: 5,
     message: {
@@ -52,9 +52,24 @@ it("creates or reuses the verified private account wallet before password setup"
       text: "/security",
     },
   });
-  expect(accountWalletForTelegram).toHaveBeenCalledWith(123, true);
+  expect(accountWalletForTelegram).toHaveBeenCalledWith(123, false);
   expect(m.login).toHaveBeenCalledWith(123, null);
   expect(m.send.mock.calls.at(-1)?.[1]).toContain("Set your separate");
+});
+it("offers curated generation instead of a password link when no wallet exists", async () => {
+  vi.mocked(accountWalletForTelegram).mockResolvedValueOnce(null);
+  await handleUpdate({
+    update_id: 7,
+    message: {
+      message_id: 7,
+      chat: { id: 123, type: "private" },
+      from: { id: 123 },
+      text: "/security",
+    },
+  });
+  expect(m.login).not.toHaveBeenCalled();
+  expect(m.send.mock.calls.at(-1)?.[1]).toContain("Welcome to BRUH Legends");
+  expect(accountWalletForTelegram).toHaveBeenCalledWith(123, false);
 });
 it("does not issue a setup link when internal wallet provisioning fails", async () => {
   vi.mocked(accountWalletForTelegram).mockRejectedValueOnce(new Error("private backend detail"));

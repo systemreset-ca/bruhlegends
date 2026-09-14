@@ -160,6 +160,7 @@ export type InlineKeyboard = {
   callback_data?: string;
   url?: string;
   web_app?: { url: string };
+  copy_text?: { text: string };
 }[][];
 
 export async function sendMessage(
