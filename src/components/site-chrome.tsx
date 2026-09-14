@@ -56,9 +56,10 @@ export function SiteFooter() {
         <div className="flex flex-wrap items-center gap-4">
           <img src={emblem.url} alt="" aria-hidden className="h-10 w-10 rounded-md opacity-90" />
           <p className="max-w-md text-sm text-muted-foreground">
-            BRUH Legends is a utility bot. Tips are approved in your own wallet, BRUH never asks for
-            your keys or seed phrase, and it never promises returns. A separate, switched-off test
-            feature can generate an encrypted practice wallet on a test network only.
+            BRUH Legends is a utility bot and never promises returns. It never asks for the seed
+            phrase of a wallet you already own. It is currently in a Solana devnet beta that
+            generates one encrypted test wallet per Telegram account — creation and balance only, no
+            spending, no key export, no retirement, no real funds. Tipping is switched off.
           </p>
         </div>
 
@@ -98,7 +99,7 @@ export function SiteFooter() {
         </div>
 
         <p className="mt-8 font-mono text-[11px] uppercase tracking-widest text-muted-foreground/70">
-          bruh.tips · bruh-legends.xyz · Solana · Non-custodial tipping
+          bruh.tips · bruh-legends.xyz · Solana devnet beta · No real funds
         </p>
       </div>
     </footer>

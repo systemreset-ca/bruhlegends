@@ -29,16 +29,16 @@ export const Route = createFileRoute("/app")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "BRUH App — Wallets, calls and leaderboards" },
+      { title: "BRUH App — Wallet, calls and leaderboards" },
       {
         name: "description",
         content:
-          "Link a Solana wallet per Telegram group, review open calls and see your group's BRUH Score ranking.",
+          "Review open calls and your group's BRUH Score ranking. Your BRUH devnet wallet is created with private bot commands, not here.",
       },
       { property: "og:title", content: "BRUH App" },
       {
         property: "og:description",
-        content: "Per-group wallet linking and call tracking for BRUH communities.",
+        content: "Call tracking and group leaderboards for BRUH communities, in Solana devnet beta.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -464,17 +464,21 @@ function MiniApp() {
         <section className="rounded-lg border border-border bg-card p-5">
           <h2 className="text-lg font-semibold">Wallet</h2>
           <div className="mt-3 rounded-md border border-border bg-background p-3 text-xs text-muted-foreground">
-            <p className="font-medium text-foreground">BRUH account wallet (test-network beta)</p>
-            <p className="mt-1">
-              A separate beta can generate one BRUH wallet for your Telegram account, shared across
-              your groups while statistics stay separate per group. It is currently switched off and
-              is not set up here. When it opens, you will create and view it with private bot
-              commands in a one-to-one chat with BRUH — never in a group.
+            <p className="font-medium text-foreground">
+              BRUH account wallet — Solana devnet beta (active)
             </p>
             <p className="mt-1">
-              Spending, key export and retirement are not available in this beta, and the wallet
-              holds no real value. The wallet you link below is your own external wallet, used only
-              to receive tips.
+              Your BRUH wallet is created and viewed in a private one-to-one chat with the bot, not
+              here. Send <span className="font-mono text-primary">/start</span> and BRUH creates or
+              reuses one encrypted wallet for your Telegram account;{" "}
+              <span className="font-mono text-primary">/wallet make</span> confirms creation and{" "}
+              <span className="font-mono text-primary">/wallet show</span> displays its address and
+              live devnet balance. Nothing needs to be linked here for it.
+            </p>
+            <p className="mt-1">
+              One wallet per Telegram account, shared across your groups while statistics stay
+              separate per group. Spending, key export and retirement are not available, it runs on
+              Solana devnet only and holds no real SOL. Tipping is switched off during this beta.
             </p>
           </div>
           {current.wallet ? (
@@ -677,7 +681,8 @@ function MiniApp() {
             </p>
           )}
           <p className="mt-1 text-sm text-muted-foreground">
-            BRUH builds the request. You approve it in your own wallet — nothing is ever held here.
+            Tipping is switched off in the current devnet wallet beta. BRUH builds the request and
+            you approve it in your own wallet — nothing is ever held here.
           </p>
           <div className="mt-4 space-y-3">
             <select

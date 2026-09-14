@@ -5,17 +5,17 @@ import banner from "@/assets/bruh-banner.png.asset.json";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "BRUH Legends — Call tracking & Solana tipping for Telegram groups" },
+      { title: "BRUH Legends — Call tracking for Telegram, in Solana devnet beta" },
       {
         name: "description",
         content:
-          "The Telegram bot that locks a baseline on every call, ranks your callers honestly, and lets the group tip them on Solana. Non-custodial. Group-isolated.",
+          "The Telegram bot that locks a baseline on every call and ranks your callers honestly. Now in a Solana devnet wallet beta: creation and balance only, no real funds.",
       },
       { property: "og:title", content: "BRUH Legends — Call it. Track it. Reward the legends." },
       {
         property: "og:description",
         content:
-          "Locked call baselines, per-group leaderboards and non-custodial Solana tipping, inside Telegram.",
+          "Locked call baselines, per-group leaderboards and a Solana devnet wallet beta, inside Telegram.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "/" },
@@ -38,8 +38,8 @@ const features = [
     body: "BRUH Score ranks callers inside their own chat. Nothing leaks across groups — not stats, not wallets, not identities.",
   },
   {
-    title: "Tips you approve yourself",
-    body: "Tips are Solana Pay requests you approve in your own wallet. BRUH never asks for your seed phrase and verifies every transfer on-chain. A separate test-network beta, currently switched off, can generate one encrypted BRUH wallet per Telegram account.",
+    title: "Test-network wallet beta",
+    body: "BRUH is running a Solana devnet beta: a private chat with the bot creates one encrypted BRUH wallet for your Telegram account, shared across your groups. Creation and balance only — no spending, no key export, no retirement, and no real SOL. Tipping is switched off while this beta runs.",
   },
 
   {
@@ -75,7 +75,7 @@ const steps = [
   {
     n: "04",
     title: "The legend gets paid",
-    body: "Reply /tip 0.5 SOL. The bot builds a Solana Pay request to that caller's group wallet. You sign it. It verifies on-chain.",
+    body: "Tipping is turned off during the devnet wallet beta. When it returns, a tip is a request you approve in your own wallet and the bot verifies it on-chain.",
   },
 ];
 
@@ -84,9 +84,9 @@ const commands = [
   ["/leaderboard 7d", "Group ranking — 7d, 30d or all time"],
   ["/stats", "Your own record in this group"],
   ["/calls", "Recent calls and where they stand"],
-  ["/tip 0.5 SOL", "Reply to someone to tip them"],
-  ["/wallet", "Private chat only — link your own wallet"],
-  ["/tips", "Pending and confirmed tip receipts"],
+  ["/start", "Private chat — creates or reuses your devnet wallet"],
+  ["/wallet make", "Private chat — confirm wallet creation"],
+  ["/wallet show", "Private chat — address and live devnet balance"],
   ["/dispute", "Flag a call for moderator review"],
   ["/privacy", "What's stored, and how to be forgotten"],
 ];
@@ -102,11 +102,11 @@ const score = [
 const faq = [
   {
     q: "Does BRUH ever hold my funds?",
-    a: "Tipping is non-custodial: no seed phrases are collected and every transfer is signed in your own wallet and verified on-chain afterwards. One exception is disclosed openly — a test-network beta, currently switched off, can generate one BRUH wallet per Telegram account whose key BRUH stores encrypted. That wallet has no spending, key export or retirement, holds no real value, and no funds are held today.",
+    a: "BRUH never asks for or stores the seed phrase of a wallet you already own. In the current Solana devnet beta, BRUH does generate one wallet for your Telegram account and keeps its key encrypted — so that specific wallet is not non-custodial. It exists on a test network only, holds no real value, and spending, key export and retirement are unavailable.",
   },
   {
     q: "Can someone see my stats in another group?",
-    a: "No. Profiles, leaderboards and call records are keyed to a single chat. A wallet you link is used for tips, and the generated test-network wallet in the switched-off beta is one per Telegram account shared across that account's groups — statistics stay separate per group either way.",
+    a: "No. Profiles, leaderboards and call records are keyed to a single chat. The generated devnet wallet is the one shared thing: it belongs to your Telegram account and is the same across every group you are in, while statistics stay separate per group.",
   },
   {
     q: "What stops a caller from spamming garbage tokens?",
@@ -125,7 +125,7 @@ function Landing() {
       <section className="arena-bg overflow-hidden border-b border-border/70">
         <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-20 lg:grid-cols-[1.05fr_1fr] lg:py-28">
           <div className="relative z-10">
-            <SectionLabel>Telegram · Solana · Non-custodial tipping</SectionLabel>
+            <SectionLabel>Telegram · Solana devnet beta · No real funds</SectionLabel>
             <h1 className="mt-6 font-display text-6xl leading-[0.92] sm:text-7xl">
               <span className="text-gold-plate">Call it.</span>{" "}
               <span className="text-lime-plate">Track it.</span>
@@ -133,8 +133,9 @@ function Landing() {
             </h1>
             <p className="mt-6 max-w-xl text-lg text-muted-foreground">
               BRUH Legends is the utility bot your group chat has been faking with screenshots. It
-              locks a baseline on every call, keeps score for real, and lets the chat tip the
-              callers who earned it — straight to their own wallet.
+              locks a baseline on every call and keeps score for real. Right now it is in a Solana
+              devnet beta: message the bot privately and it creates one encrypted test wallet for
+              your Telegram account. Tipping is switched off until the beta ends.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <a
@@ -153,7 +154,7 @@ function Landing() {
               </Link>
             </div>
             <p className="mt-6 font-mono text-xs uppercase tracking-widest text-muted-foreground">
-              No seed phrases · Tips you sign yourself · No promises of profit
+              Devnet only · Creation and balance only · No promises of profit
             </p>
           </div>
 

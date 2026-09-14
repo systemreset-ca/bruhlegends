@@ -28,7 +28,7 @@ function PrivacyRoute() {
     <PolicyPage
       title="Privacy"
       updated="February 2026"
-      intro="BRUH is a utility bot with non-custodial tipping. It records the minimum needed to score calls and verify tips, and it keeps every record scoped to the single Telegram group it came from."
+      intro="BRUH is a utility bot, currently running a Solana devnet wallet beta. It records the minimum needed to score calls, and it keeps every record scoped to the single Telegram group it came from."
       sections={[
         {
           heading: "What is stored",
@@ -41,7 +41,7 @@ function PrivacyRoute() {
           heading: "What is never stored",
           body: [
             "The private key or seed phrase of a wallet you already own. BRUH cannot sign a transaction on behalf of your own wallet — every transfer is approved by you.",
-            "A switched-off test-network feature can generate one BRUH wallet per verified Telegram account. Only that generated key is kept, always encrypted, and it is never shown in chat; spending, export and retirement are unavailable while the feature is gated.",
+            "The active Solana devnet beta generates one BRUH wallet per verified Telegram account. Only that generated key is kept, always encrypted, and it is never shown in chat; spending, key export and retirement are unavailable.",
             "General chat history. Passive detection only reads messages for token mints, only when a group has enabled it, and only for members who have not used /optout.",
           ],
         },
@@ -49,7 +49,7 @@ function PrivacyRoute() {
         {
           heading: "Group isolation",
           body: [
-            "Your linked wallet, stats and reputation are attached to a membership, not to a global profile. Being in three BRUH groups means three separate records that never aggregate. The one exception is the switched-off test-network wallet feature: a generated wallet belongs to a Telegram account and is shared across that account's groups, while call records and statistics stay separate per group.",
+            "Your stats and reputation are attached to a membership, not to a global profile. Being in three BRUH groups means three separate records that never aggregate. The one exception is the devnet wallet: a generated wallet belongs to a Telegram account and is shared across that account's groups, while call records and statistics stay separate per group.",
           ],
         },
         {
