@@ -42,8 +42,13 @@ function bytes(value: string, length: number): Uint8Array {
 }
 
 /** Persistent key must be supplied by the server secret store; never generated on boot. */
-export async function importAccountWrappingKey(keyHex: string): Promise<CryptoKey> {
-  const raw = bytes(keyHex, 32);
+export async function importAccountWrappingKey(secret: string): Promise<CryptoKey> {
+  // Lovable's secure generator supplies 32 random ASCII alphanumeric bytes.
+  // Accept that exact format or an explicitly supplied 32-byte lowercase hex key.
+  // No trimming, padding, truncation or fallback to a weaker/default key.
+  const raw = /^[A-Za-z0-9]{32}$/.test(secret)
+    ? new TextEncoder().encode(secret)
+    : bytes(secret, 32);
   try {
     if (raw.every((byte) => byte === 0)) throw new Error("Invalid wrapping key.");
     return await crypto.subtle.importKey("raw", raw as BufferSource, "AES-GCM", false, [

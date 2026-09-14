@@ -12,6 +12,16 @@ async function wrapping() {
   );
 }
 describe("persistent account-wallet encryption", () => {
+  it("accepts the secure generator format without padding and rejects malformed lengths", async () => {
+    const random = crypto.getRandomValues(new Uint8Array(32));
+    const generatedFormat = Array.from(random, (byte) => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"[byte % 62]).join("");
+    const key = await importAccountWrappingKey(generatedFormat);
+    const record = await generateAccountWallet("123", "devnet-v1", key);
+    await expect(verifyAccountWallet(record, await importAccountWrappingKey(generatedFormat))).resolves.toBeUndefined();
+    for (const invalid of [generatedFormat.slice(1), generatedFormat + "A", " " + generatedFormat, "!".repeat(32)]) {
+      await expect(importAccountWrappingKey(invalid)).rejects.toThrow();
+    }
+  });
   it("generates independently owned addresses and authenticates the stored seed", async () => {
     const key = await wrapping();
     expect(key.extractable).toBe(false);

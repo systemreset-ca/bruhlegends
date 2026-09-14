@@ -18,12 +18,14 @@ Generate a random 32-byte Solana seed and derive its Ed25519 public key using th
 Persistent server configuration names:
 
 - `BRUH_ACCOUNT_WALLETS_DEVNET_ENABLED`: off unless explicitly set to `true` after validation.
-- `BRUH_ACCOUNT_WALLET_WRAPPING_KEY`: persistent random 32-byte AES key, encoded as 64 lowercase hex characters. Never generate on boot, overwrite or rotate without a recovery/old-version plan.
+- `BRUH_ACCOUNT_WALLET_WRAPPING_KEY`: persistent secure-manager-generated 32-character ASCII alphanumeric key, or a random 32-byte key encoded as 64 lowercase hex characters. Both import exactly 32 bytes into AES-256-GCM; the alphanumeric format has about 190 bits of entropy if generated uniformly, not 256 bits. No padding, truncation or default fallback. Never generate on boot, overwrite or rotate without a recovery/old-version plan.
 - `BRUH_ACCOUNT_WALLET_KEY_VERSION`: matching durable version, e.g. `devnet-v1`.
 - `SOLANA_NETWORK`: must be exactly `devnet`.
 - Existing `BRUH_DEVNET_API_KEY` / `SOLANA_RPC_URL`: Helius devnet only, used for two bounded reads per balance request. Mainnet key is not used.
 
 The proposed SQL file is `docs/proposed-account-wallet-schema.sql`. It enables/forces RLS, revokes direct table/sequence access from public/anon/authenticated/service_role, exposes controlled service-only provisioning/read RPCs, and prevents updates/deletes of wallet/history rows. RPC authentication relies on trusted server-side verified Telegram webhook identity; these functions are not client identity verifiers.
+
+Lovable reports managed migration `0015_bruh_account_wallets_devnet.sql` applied in the original Cloud project, effective role grants checked, and empty wallet/audit tables. The reviewed migration preserves the proposed table/function semantics. Its secure generator stored the persistent key without revealing it, but produces the 32-character alphanumeric format; the compatibility follow-up accepts this exact format without replacing the key. Version is `devnet-v1`; creation gate remains false pending exact-source preview review. No live Telegram wallet creation or publication is claimed by this update.
 
 This devnet implementation uses the original worker's secret store. It does not establish isolation against compromise of that worker or its administrators. It is not a mainnet custody certification, nor does public GitHub visibility prove key security. Mainnet/spending/export gates remain closed.
 
