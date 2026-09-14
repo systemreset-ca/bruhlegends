@@ -4,17 +4,17 @@ import { PolicyPage } from "@/components/policy-page";
 export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
-      { title: "BRUH Privacy — What the bot stores, per group" },
+      { title: "BRUH Privacy — What the bot stores" },
       {
         name: "description",
         content:
-          "BRUH stores your Telegram id, calls, verified wallet address and confirmed tips, isolated per group. Never your own wallet's seed phrase. Export or erase your record any time.",
+          "BRUH stores your Telegram id, calls, verified wallet address and confirmed tips. Group records can contribute to local and community rankings.",
       },
       { property: "og:title", content: "BRUH Privacy Policy" },
       {
         property: "og:description",
         content:
-          "Group-isolated data, no access to your own wallet's keys, and one-command data export or erasure.",
+          "Clear data handling for calls, group records, community rankings, wallets, export and erasure.",
       },
       { property: "og:type", content: "article" },
       { name: "twitter:card", content: "summary" },
@@ -28,7 +28,7 @@ function PrivacyRoute() {
     <PolicyPage
       title="Privacy"
       updated="February 2026"
-      intro="BRUH records the minimum needed to score calls and keeps every community record scoped to the Telegram group it came from."
+      intro="BRUH records the minimum needed to score calls. Every call keeps its source group while verified performance may also contribute to community-wide rankings."
       sections={[
         {
           heading: "What is stored",
@@ -47,9 +47,9 @@ function PrivacyRoute() {
         },
 
         {
-          heading: "Group isolation",
+          heading: "Group and community rankings",
           body: [
-            "Your stats and reputation are attached to a membership, not to a global profile. Being in three BRUH groups means three separate records that never aggregate. Your BRUH account wallet follows your Telegram account across those groups, while call records and statistics stay separate per group.",
+            "Each call stays attached to the group where it was made. BRUH can use those verified records for both that group's leaderboard and a community-wide leaderboard tied to your Telegram account. Your BRUH account wallet also follows your Telegram account across groups.",
           ],
         },
         {

@@ -33,13 +33,13 @@ export const Route = createFileRoute("/app")({
       {
         name: "description",
         content:
-          "Review open calls, your group's BRUH Score ranking, wallet activity, and community history.",
+          "Review open calls, group and community BRUH Score rankings, wallet activity, and community history.",
       },
       { property: "og:title", content: "BRUH App" },
       {
         property: "og:description",
         content:
-          "Call tracking, group leaderboards, wallet tools, and community reputation for BRUH communities.",
+          "Call tracking, group and Telegram-wide leaderboards, wallet tools, and community reputation.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -477,8 +477,9 @@ function MiniApp() {
               live balance. Nothing needs to be linked here for it.
             </p>
             <p className="mt-1">
-              One wallet follows your Telegram account across every BRUH community, while calls,
-              rankings and reputation remain separate in each group.
+              One wallet follows your Telegram account across every BRUH community. Calls keep
+              their group context while your verified record can contribute to both group and
+              Telegram-wide community rankings.
             </p>
           </div>
           {current.wallet ? (

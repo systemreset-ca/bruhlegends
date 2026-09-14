@@ -15,7 +15,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "Locked call baselines, per-group leaderboards, community reputation, and wallet tools inside Telegram.",
+          "Locked call baselines, group leaderboards, Telegram-wide rankings, and wallet tools inside Telegram.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "/" },
@@ -34,12 +34,12 @@ const features = [
     body: "Every call snapshots price, market cap and liquidity the second it lands. No retroactive editing, no rewriting history after the chart moves.",
   },
   {
-    title: "Group-isolated reputation",
-    body: "BRUH Score ranks callers inside their own chat. Nothing leaks across groups — not stats, not wallets, not identities.",
+    title: "One community. Two leaderboards.",
+    body: "Build your reputation in your group, then see how you rank across the BRUH community on Telegram.",
   },
   {
     title: "One wallet. Every group.",
-    body: "Create your encrypted BRUH account wallet in a private chat with the bot. The wallet follows your Telegram account while calls, rankings and reputation remain separate in every group.",
+    body: "Create your encrypted BRUH account wallet in a private chat with the bot. It follows your Telegram account across every BRUH group you join.",
   },
 
   {
@@ -81,7 +81,7 @@ const steps = [
 
 const commands = [
   ["/call <mint>", "Record a call with a locked baseline"],
-  ["/leaderboard 7d", "Group ranking — 7d, 30d or all time"],
+  ["/leaderboard 7d", "Group and community rankings — 7d, 30d or all time"],
   ["/stats", "Your own record in this group"],
   ["/calls", "Recent calls and where they stand"],
   ["/start", "Private chat — creates or reuses your BRUH wallet"],
@@ -105,8 +105,8 @@ const faq = [
     a: "BRUH never asks for the seed phrase of a wallet you already own. Your BRUH account wallet is generated separately in a private bot chat and its key is stored encrypted.",
   },
   {
-    q: "Can someone see my stats in another group?",
-    a: "No. Profiles, leaderboards and call records are keyed to a single chat. Your BRUH account wallet is shared across your groups, but each group's statistics remain completely separate.",
+    q: "Are there group and community leaderboards?",
+    a: "Yes. Each group has its own leaderboard, and your verified calls can also build your standing across the wider BRUH community on Telegram.",
   },
   {
     q: "What stops a caller from spamming garbage tokens?",
@@ -151,7 +151,7 @@ function Landing() {
               </Link>
             </div>
             <p className="mt-6 font-mono text-xs uppercase tracking-widest text-muted-foreground">
-              Locked baselines · Group rankings · Receipts, not vibes
+              Locked baselines · Group + global rankings · Receipts, not vibes
             </p>
           </div>
 
@@ -173,7 +173,7 @@ function Landing() {
         <div className="mx-auto flex max-w-6xl flex-wrap justify-center gap-x-10 gap-y-2 px-6 py-4 font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
           <span>Locked baselines</span>
           <span className="text-gold">·</span>
-          <span>Per-group leaderboards</span>
+          <span>Group + Telegram-wide leaderboards</span>
           <span className="text-gold">·</span>
           <span>Solana Pay tips</span>
           <span className="text-gold">·</span>

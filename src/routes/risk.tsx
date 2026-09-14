@@ -38,7 +38,7 @@ function RiskRoute() {
         {
           heading: "Scores describe the past, not the future",
           body: [
-            "BRUH Score is computed from recorded calls and public price data inside one group. A high-ranked caller has a good historical record in that group and nothing more. Treat rankings as community context, never as a signal to buy.",
+            "BRUH Score is computed from recorded calls and public price data. Group rankings reflect performance inside a chat, while the community leaderboard compares verified records across BRUH on Telegram. Treat every ranking as historical community context, never as a signal to buy.",
           ],
         },
         {
