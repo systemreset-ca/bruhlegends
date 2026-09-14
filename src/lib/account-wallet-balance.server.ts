@@ -7,10 +7,12 @@ import {
 const GENESIS = "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG";
 
 /** Two bounded, read-only requests on explicit Helius devnet. No polling. */
-async function readDevnetAccount(
-  method: "getBalance" | "getTransaction",
+export async function readDevnetAccount(
+  method: "getBalance" | "getTransaction" | "getLatestBlockhash" | "getFeeForMessage",
   params: unknown[],
 ): Promise<unknown> {
+  if (!["getBalance", "getTransaction", "getLatestBlockhash", "getFeeForMessage"].includes(method))
+    throw new Error("Devnet balance unavailable.");
   const key = process.env["BRUH_DEVNET_API_KEY"]?.trim();
   const endpoint = key
     ? `https://devnet.helius-rpc.com/?api-key=${encodeURIComponent(key)}`

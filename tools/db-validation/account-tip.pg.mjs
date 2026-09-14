@@ -50,6 +50,35 @@ test("account tips reserve once, preserve signed spends and settle idempotently"
       (await db.query("SELECT bruh_account_tip_reserve($1::jsonb) AS tip", [record])).rows[0].tip;
     const transition = async (sql, args) => (await db.query(sql, args)).rows[0].tip;
     const first = await reserve(input);
+    assert.deepEqual(
+      (
+        await db.query("SELECT bruh_account_tip_find_request($1,$2) AS tip", [
+          input.requestKey,
+          123,
+        ])
+      ).rows[0].tip,
+      first,
+    );
+    assert.equal(
+      (
+        await db.query("SELECT bruh_account_tip_find_request($1,$2) AS tip", [
+          input.requestKey,
+          456,
+        ])
+      ).rows[0].tip,
+      null,
+    );
+    assert.equal(
+      (await db.query("SELECT bruh_account_tip_find_request($1,$2) AS tip", ["absent", 123]))
+        .rows[0].tip,
+      null,
+    );
+    const requestPrivileges = (
+      await db.query(
+        "SELECT has_function_privilege('anon','bruh_account_tip_find_request(text,bigint)','EXECUTE') AS anon,has_function_privilege('authenticated','bruh_account_tip_find_request(text,bigint)','EXECUTE') AS authenticated,has_function_privilege('service_role','bruh_account_tip_find_request(text,bigint)','EXECUTE') AS service",
+      )
+    ).rows[0];
+    assert.deepEqual(requestPrivileges, { anon: false, authenticated: false, service: true });
     assert.equal(first.state, "reserved");
     assert.equal(first.sender_address, address(1));
     assert.equal(first.recipient_address, address(2));
@@ -83,8 +112,13 @@ test("account tips reserve once, preserve signed spends and settle idempotently"
     await db.exec(
       "RESET ROLE; ALTER TABLE bruh_account_tip_intents DISABLE TRIGGER bruh_account_tip_intent_immutable;",
     );
-    await db.query("UPDATE bruh_account_tip_intents SET expires_at=now()-interval '1 second' WHERE id=$1",[input.id]);
-    await db.exec("ALTER TABLE bruh_account_tip_intents ENABLE TRIGGER bruh_account_tip_intent_immutable; SET ROLE service_role;");
+    await db.query(
+      "UPDATE bruh_account_tip_intents SET expires_at=now()-interval '1 second' WHERE id=$1",
+      [input.id],
+    );
+    await db.exec(
+      "ALTER TABLE bruh_account_tip_intents ENABLE TRIGGER bruh_account_tip_intent_immutable; SET ROLE service_role;",
+    );
     // Expired UI must not free funds for an already signed transaction.
     await assert.rejects(db.query("SELECT bruh_account_tip_cancel($1,123)", [input.id]));
     await assert.rejects(

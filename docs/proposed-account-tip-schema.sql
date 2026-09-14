@@ -108,6 +108,11 @@ begin
   return public.bruh_account_tip_read(v_id,v_user);
 end;
 $$;
+create function public.bruh_account_tip_find_request(p_request_key text,p_user_id bigint) returns jsonb
+language sql stable security definer set search_path=pg_catalog as $$
+  select public.bruh_account_tip_read(id,p_user_id) from public.bruh_account_tip_intents
+  where request_key=p_request_key and sender_user_id=p_user_id;
+$$;
 create function public.bruh_account_tip_signed(p_id uuid,p_user_id bigint,p_signature text,p_transaction text,p_last_height bigint) returns jsonb
 language plpgsql security definer set search_path=pg_catalog as $$
 declare i public.bruh_account_tip_intents; e public.bruh_account_tip_execution;
@@ -160,10 +165,10 @@ begin
   return public.bruh_account_tip_read(p_id,p_user_id);
 end;
 $$;
-revoke all on function public.bruh_account_tip_read(uuid,bigint),public.bruh_account_tip_reserve(jsonb),
+revoke all on function public.bruh_account_tip_find_request(text,bigint),public.bruh_account_tip_read(uuid,bigint),public.bruh_account_tip_reserve(jsonb),
  public.bruh_account_tip_signed(uuid,bigint,text,text,bigint),public.bruh_account_tip_cancel(uuid,bigint),
  public.bruh_account_tip_finalize(uuid,bigint,text,bigint,bigint) from public,anon,authenticated;
-grant execute on function public.bruh_account_tip_read(uuid,bigint),public.bruh_account_tip_reserve(jsonb),
+grant execute on function public.bruh_account_tip_find_request(text,bigint),public.bruh_account_tip_read(uuid,bigint),public.bruh_account_tip_reserve(jsonb),
  public.bruh_account_tip_signed(uuid,bigint,text,text,bigint),public.bruh_account_tip_cancel(uuid,bigint),
  public.bruh_account_tip_finalize(uuid,bigint,text,bigint,bigint) to service_role;
 commit;
