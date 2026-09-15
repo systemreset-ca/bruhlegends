@@ -24,6 +24,15 @@ test("SAP attempts are bounded, account/intent bound and atomically consumed wit
         "utf8",
       ),
     );
+    await db.exec(
+      await readFile(
+        new URL(
+          "../../drizzle/migrations/0024_bruh_secure_action_proof_window.sql",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+    );
     await db.exec("SET ROLE service_role");
     for (const [user, n] of [
       [123, 1],
@@ -95,6 +104,16 @@ test("SAP attempts are bounded, account/intent bound and atomically consumed wit
       q("SELECT bruh_secure_action_finish(123,$1,$2,$3,$4) AS value", [intent, nonce, ok, hash]);
     let c = await begin();
     assert.equal(c.allowed, true);
+    await db.exec("RESET ROLE");
+    const proofSeconds = Number(
+      (
+        await db.query(
+          "SELECT extract(epoch from (attempt_expires_at-now())) AS value FROM bruh_secure_action_credentials WHERE telegram_user_id=123",
+        )
+      ).rows[0].value,
+    );
+    assert.ok(proofSeconds > 100 && proofSeconds <= 121);
+    await db.exec("SET ROLE service_role");
     assert.equal((await begin()).allowed, false);
     assert.equal(await finish(null, true), false);
     assert.equal(await finish(c.nonce, true, "05".repeat(32), randomUUID()), false);
