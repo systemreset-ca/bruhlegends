@@ -39,10 +39,7 @@ function command(text: string, chatId = 123) {
   });
 }
 describe("private account-wallet commands", () => {
-  it("adds a private password Mini App button after generation when spending is enabled", async () => {
-    vi.stubEnv("SOLANA_NETWORK", "devnet");
-    vi.stubEnv("BRUH_ACCOUNT_TIPS_DEVNET_ENABLED", "true");
-    vi.stubEnv("BRUH_ACCOUNT_SIGNING_DEVNET_ENABLED", "true");
+  it("opens the private Mini App without generating for an old generation callback", async () => {
     await handleUpdate({
       update_id: 3,
       callback_query: {
@@ -52,16 +49,14 @@ describe("private account-wallet commands", () => {
         message: { message_id: 2, chat: { id: 123, type: "private" } },
       },
     });
-    const keyboard = mocks.edit.mock.calls.at(-1)?.[3];
-    expect(keyboard[1][0].text).toBe(
-      "Set Password for the BRUH Wallet Auth Actions via BRUH Mini App",
+    expect(mocks.wallet).not.toHaveBeenCalled();
+    expect(mocks.send.mock.calls.at(-1)?.[2].keyboard[0][0].web_app.url).toContain(
+      "/wallet-action?t=synthetic-private-token",
     );
-    expect(keyboard[1][0].web_app.url).toContain("/wallet-action?t=synthetic-private-token");
-    expect(mocks.edit.mock.calls.at(-1)?.[0]).toBe(123);
   });
   it("generates through the same account wallet and rejects extra arguments", async () => {
     await command("/generate");
-    expect(mocks.wallet).toHaveBeenLastCalledWith(123, true);
+    expect(mocks.wallet).not.toHaveBeenCalled();
     mocks.wallet.mockClear();
     await command("/generate another-wallet");
     expect(mocks.wallet).not.toHaveBeenCalled();
@@ -84,11 +79,10 @@ describe("private account-wallet commands", () => {
     expect(accountExternalWallet).not.toHaveBeenCalled();
   });
   it("welcomes new private accounts without creating and only reads on wallet show", async () => {
-    mocks.wallet.mockResolvedValueOnce(null);
     await command("/start");
-    expect(mocks.wallet).toHaveBeenLastCalledWith(123, false);
+    expect(mocks.wallet).not.toHaveBeenCalled();
     expect(mocks.send.mock.calls.at(-1)?.[1]).toContain("Welcome to BRUH Legends");
-    expect(mocks.send.mock.calls.at(-1)?.[2].keyboard[0][0].text).toBe("Generate BRUH Wallet");
+    expect(mocks.send.mock.calls.at(-1)?.[2].keyboard[0][0].text).toBe("Open BRUH Wallet Mini App");
     await command("/wallet show");
     expect(mocks.wallet).toHaveBeenLastCalledWith(123, false);
     expect(mocks.send.mock.calls.at(-1)?.[1]).toContain("Finalized balance: 0 devnet SOL");
@@ -105,13 +99,7 @@ describe("private account-wallet commands", () => {
         message: { message_id: 2, chat: { id: 123, type: "private" } },
       },
     });
-    expect(mocks.wallet).toHaveBeenCalledWith(123, true);
-    expect(mocks.edit).toHaveBeenCalledWith(
-      123,
-      2,
-      expect.stringContaining("public-address"),
-      expect.arrayContaining([[{ text: "Copy Address", copy_text: { text: "public-address" } }]]),
-    );
+    expect(mocks.wallet).not.toHaveBeenCalled();
   });
   it("denies another user's private chat and group creation callbacks", async () => {
     await command("/start", 456);

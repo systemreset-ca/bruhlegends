@@ -2,6 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { exchangeLoginTokenFn } from "@/lib/miniapp.functions";
 import {
+  readWalletOnboardingFn,
+  generateWalletOnboardingFn,
+} from "@/lib/wallet-onboarding.functions";
+import {
   secureActionPasswordError,
   newSecureActionPasswordError,
   secureActionPasswordRules,
@@ -28,6 +32,9 @@ function sol(lamports: string): string {
 }
 function WalletAction() {
   const [session, setSession] = useState<string | null>(null);
+  const [wallet, setWallet] =
+    useState<Awaited<ReturnType<typeof readWalletOnboardingFn>>["wallet"]>(null);
+  const [passwordSet, setPasswordSet] = useState(false);
   const [intentId, setIntentId] = useState<string | null>(null);
   const [tip, setTip] = useState<Awaited<ReturnType<typeof readAccountTipFn>> | null>(null);
   const [password, setPassword] = useState("");
@@ -65,16 +72,27 @@ function WalletAction() {
             data: { session: result.session, initData: rawInitData(), intentId: id },
           })
         : null;
+      const onboarding = id
+        ? null
+        : await readWalletOnboardingFn({
+            data: { session: result.session, initData: rawInitData() },
+          });
       if (cancelled) return;
       setSession(result.session);
       setIntentId(id);
       setTip(record);
-      setEnrolling(!id);
+      setWallet(onboarding?.wallet ?? null);
+      setPasswordSet(onboarding?.passwordSet ?? false);
+      setEnrolling(!id && !!onboarding?.wallet && !onboarding.passwordSet);
       setSignature(record?.signature ?? null);
       setStatus(
         record
           ? `Tip state: ${record.state}`
-          : "Create a new separate Action Password for menu execution.",
+          : !onboarding?.wallet
+            ? "Generate your internal BRUH Wallet to get started."
+            : onboarding.passwordSet
+              ? "Your internal BRUH Wallet and Action Password are ready."
+              : "Create a new separate Action Password for menu execution.",
       );
     })()
       .catch((error) => {
@@ -91,6 +109,31 @@ function WalletAction() {
       cancelled = true;
     };
   }, []);
+  async function generateWallet() {
+    if (!session || busy || !introduced) return;
+    setBusy(true);
+    setStatus("Generating your internal BRUH Wallet…");
+    try {
+      const result = await generateWalletOnboardingFn({
+        data: { session, initData: rawInitData() },
+      });
+      if (!result.wallet) throw new Error("Wallet unavailable.");
+      setWallet(result.wallet);
+      setPasswordSet(result.passwordSet);
+      setEnrolling(!result.passwordSet);
+      setStatus(
+        result.passwordSet
+          ? "Your existing wallet and Action Password are ready."
+          : "Your wallet is ready. Create a new separate Action Password for menu execution.",
+      );
+    } catch {
+      setStatus(
+        "Wallet generation or setup status could not complete. Close this app, run /start in your private bot chat and reopen its button. If a wallet was created, the same wallet will be recovered; no funds moved.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
   async function act(action: "enroll" | "send" | "check") {
     if (!session || busy || !introduced) return;
     if (action !== "check") {
@@ -119,6 +162,7 @@ function WalletAction() {
           return;
         }
         setEnrolling(false);
+        setPasswordSet(true);
         setStatus("Password saved. Existing passwords cannot be overwritten here.");
       } else if (intentId && action === "send") {
         const result = await executeAccountTipFn({
@@ -231,6 +275,55 @@ function WalletAction() {
           />
         </header>
         <p role="status">{status}</p>
+        {session && !intentId && !wallet && (
+          <section className="space-y-3">
+            <h2 className="font-sans text-lg font-medium normal-case">Your internal BRUH Wallet</h2>
+            <p className="text-sm text-muted-foreground">
+              Generate a separate wallet for your Telegram account. It follows you across BRUH
+              groups. BRUH stores its signing key encrypted; never import an external wallet key or
+              seed phrase here.
+            </p>
+            <button
+              type="button"
+              disabled={busy || !introduced}
+              onClick={() => void generateWallet()}
+              className="rounded border border-imperial bg-gold text-black px-4 py-2 disabled:opacity-50"
+            >
+              {busy ? "Generating…" : "Generate BRUH Wallet"}
+            </button>
+          </section>
+        )}
+        {wallet && !intentId && (
+          <section className="space-y-3">
+            <h2 className="font-sans text-lg font-medium normal-case">Your BRUH Wallet address</h2>
+            <code className="block break-all rounded bg-secondary p-3 text-white">
+              {wallet.address}
+            </code>
+            <p className="text-xs text-muted-foreground">
+              Solana {wallet.network}. Use this address on the matching network.
+            </p>
+            <button
+              type="button"
+              className="rounded border border-imperial px-4 py-2"
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(wallet.address);
+                  setStatus("Wallet address copied.");
+                } catch {
+                  setStatus("Copy unavailable on this device. Select and copy the address above.");
+                }
+              }}
+            >
+              Copy Address
+            </button>
+            {passwordSet && (
+              <p className="text-sm text-muted-foreground">
+                Action Password is set. Return to your group to initiate a tip and review its
+                private authorization screen.
+              </p>
+            )}
+          </section>
+        )}
         {(enrolling || intentId) && (
           <p id="password-rules" className="text-xs text-muted-foreground">
             {enrolling

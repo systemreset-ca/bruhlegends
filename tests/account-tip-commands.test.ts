@@ -42,7 +42,7 @@ beforeEach(() => {
   m.login.mockResolvedValue("synthetic-private-login");
   m.rpc.mockResolvedValue({ data: { sender_user_id: 123 } });
 });
-it("checks the verified private account wallet before password setup", async () => {
+it("opens password and wallet setup inside the private Mini App without generating in chat", async () => {
   await handleUpdate({
     update_id: 5,
     message: {
@@ -52,39 +52,9 @@ it("checks the verified private account wallet before password setup", async () 
       text: "/security",
     },
   });
-  expect(accountWalletForTelegram).toHaveBeenCalledWith(123, false);
+  expect(accountWalletForTelegram).not.toHaveBeenCalled();
   expect(m.login).toHaveBeenCalledWith(123, null);
-  expect(m.send.mock.calls.at(-1)?.[1]).toContain("Set your separate");
-});
-it("offers curated generation instead of a password link when no wallet exists", async () => {
-  vi.mocked(accountWalletForTelegram).mockResolvedValueOnce(null);
-  await handleUpdate({
-    update_id: 7,
-    message: {
-      message_id: 7,
-      chat: { id: 123, type: "private" },
-      from: { id: 123 },
-      text: "/security",
-    },
-  });
-  expect(m.login).not.toHaveBeenCalled();
-  expect(m.send.mock.calls.at(-1)?.[1]).toContain("Welcome to BRUH Legends");
-  expect(accountWalletForTelegram).toHaveBeenCalledWith(123, false);
-});
-it("does not issue a setup link when internal wallet provisioning fails", async () => {
-  vi.mocked(accountWalletForTelegram).mockRejectedValueOnce(new Error("private backend detail"));
-  await handleUpdate({
-    update_id: 6,
-    message: {
-      message_id: 6,
-      chat: { id: 123, type: "private" },
-      from: { id: 123 },
-      text: "/security",
-    },
-  });
-  expect(m.login).not.toHaveBeenCalled();
-  expect(m.send.mock.calls.at(-1)?.[1]).toContain("not a password-format error");
-  expect(m.send.mock.calls.at(-1)?.[1]).not.toContain("private backend detail");
+  expect(m.send.mock.calls.at(-1)?.[1]).toContain("Open the BRUH Mini App");
 });
 afterEach(() => vi.unstubAllEnvs());
 const tip = (text = "/tip 0.001 SOL", target = 456) =>
