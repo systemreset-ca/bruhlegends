@@ -1,11 +1,9 @@
-import { pbkdf2, randomBytes, timingSafeEqual, createHash } from "node:crypto";
-import { promisify } from "node:util";
+import { randomBytes, timingSafeEqual, createHash } from "node:crypto";
 import { admin } from "./db.server";
 import { resolveSession, verifyInitData } from "./session.server";
 import { accountWalletsEnabled } from "./account-wallet.server";
 import { newSecureActionPasswordError } from "./secure-action-password";
 
-const derive = promisify(pbkdf2);
 export function accountTipGate(): void {
   if (
     !accountWalletsEnabled() ||
@@ -51,11 +49,30 @@ export async function secureActionHash(
     userId <= 0
   )
     throw new Error("Invalid Secure Action Password.");
-  const salt = Buffer.concat([
-    Buffer.from(saltHex, "hex"),
-    Buffer.from(`bruh-secure-action-v1:${userId}`),
-  ]);
-  return derive(password, salt, 600000, 32, "sha256");
+  const salt = new Uint8Array(
+    Buffer.concat([Buffer.from(saltHex, "hex"), Buffer.from(`bruh-secure-action-v1:${userId}`)]),
+  );
+  const passwordBytes = new TextEncoder().encode(password);
+  try {
+    // Cloudflare's node:crypto PBKDF2 compatibility implementation can exhaust
+    // the request budget. Native WebCrypto preserves the exact PBKDF2 output.
+    const key = await crypto.subtle.importKey(
+      "raw",
+      passwordBytes as BufferSource,
+      "PBKDF2",
+      false,
+      ["deriveBits"],
+    );
+    const bits = await crypto.subtle.deriveBits(
+      { name: "PBKDF2", hash: "SHA-256", salt: salt as BufferSource, iterations: 600000 },
+      key,
+      256,
+    );
+    return Buffer.from(bits);
+  } finally {
+    passwordBytes.fill(0);
+    salt.fill(0);
+  }
 }
 export async function enrollSecureAction(input: {
   session: string;

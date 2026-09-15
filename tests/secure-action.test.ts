@@ -19,6 +19,13 @@ beforeAll(async () => {
   expectedHash = hash.toString("hex");
   hash.fill(0);
 });
+it("keeps the established PBKDF2 verifier output when using native WebCrypto", async () => {
+  const hash = await secureActionHash(password, salt, 123);
+  expect(hash.toString("hex")).toBe(
+    "828a89dbc129535cab2e6ba558c43a48f0af778c515dff7d5b26d7b6752602ef",
+  );
+  hash.fill(0);
+});
 beforeEach(() => {
   vi.resetAllMocks();
   for (const [name, value] of Object.entries({
