@@ -176,6 +176,13 @@
       "when": 1789477200000,
       "tag": "0024_bruh_secure_action_proof_window",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1789495934156,
+      "tag": "0025_bruh_secure_action_proof_window",
+      "breakpoints": true
     }
   ]
 }
