@@ -1,5 +1,14 @@
 # BRUH current handoff
 
+## Secure Action Password lease-order fix — source in review
+
+The owner's first real password enrollment resolved the existing wallet and reported no credential,
+but failed after `bruh_secure_action_setup_begin`. Bounded Cloud inspection proved PBKDF2-SHA256 at
+600,000 iterations exceeded the 30-second lease in the Worker; `bruh_secure_action_enroll` therefore
+returned false. The fix derives and scopes the password hash before acquiring the one-use lease, then
+enrolls immediately and zeroes the hash buffer in all outcomes. No password, hash, salt or encrypted
+key was inspected. See [diagnosis and validation](operations/2026-09-15-password-enrollment-lease-order.md).
+
 ## Existing-wallet Mini App status fix — source ready
 
 The first published Mini App onboarding screen could resolve an existing encrypted wallet but then
