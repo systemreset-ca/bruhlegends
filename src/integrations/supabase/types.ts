@@ -2057,6 +2057,10 @@ export type Database = {
         Args: { p_user_id: number }
         Returns: string
       }
+      bruh_secure_action_password_set: {
+        Args: { p_user_id: number }
+        Returns: boolean
+      }
       claim_telegram_outbox: {
         Args: { p_lease_seconds?: number; p_limit?: number }
         Returns: {

@@ -18,6 +18,12 @@ test("SAP attempts are bounded, account/intent bound and atomically consumed wit
       "proposed-account-tip-authorization.sql",
     ])
       await db.exec(await readFile(new URL(`../../docs/${file}`, import.meta.url), "utf8"));
+    await db.exec(
+      await readFile(
+        new URL("../../drizzle/migrations/0022_bruh_secure_action_status.sql", import.meta.url),
+        "utf8",
+      ),
+    );
     await db.exec("SET ROLE service_role");
     for (const [user, n] of [
       [123, 1],
@@ -52,6 +58,7 @@ test("SAP attempts are bounded, account/intent bound and atomically consumed wit
       },
     ]);
     const q = async (sql, args = []) => (await db.query(sql, args)).rows[0].value;
+    assert.equal(await q("SELECT bruh_secure_action_password_set(123) AS value"), false);
     const lease = await q("SELECT bruh_secure_action_setup_begin(123) AS value");
     assert.ok(lease);
     assert.equal(await q("SELECT bruh_secure_action_setup_begin(123) AS value"), null);
@@ -70,6 +77,7 @@ test("SAP attempts are bounded, account/intent bound and atomically consumed wit
       ]),
       true,
     );
+    assert.equal(await q("SELECT bruh_secure_action_password_set(123) AS value"), true);
     assert.equal(
       await q("SELECT bruh_secure_action_enroll(123,$1,$2,$3) AS value", [
         lease,
@@ -137,10 +145,16 @@ test("SAP attempts are bounded, account/intent bound and atomically consumed wit
     await assert.rejects(signed("AQID"));
     const grants = (
       await db.query(
-        "SELECT has_function_privilege('service_role','bruh_account_tip_signed(uuid,bigint,text,text,bigint)','EXECUTE') AS old,has_function_privilege('anon','bruh_secure_action_begin(bigint,uuid)','EXECUTE') AS anon,has_function_privilege('authenticated','bruh_account_tip_authorized_signed(uuid,bigint,text,text,text,bigint)','EXECUTE') AS authenticated",
+        "SELECT has_function_privilege('service_role','bruh_account_tip_signed(uuid,bigint,text,text,bigint)','EXECUTE') AS old,has_function_privilege('anon','bruh_secure_action_begin(bigint,uuid)','EXECUTE') AS anon,has_function_privilege('authenticated','bruh_account_tip_authorized_signed(uuid,bigint,text,text,text,bigint)','EXECUTE') AS authenticated,has_function_privilege('service_role','bruh_secure_action_password_set(bigint)','EXECUTE') AS status_service,has_function_privilege('anon','bruh_secure_action_password_set(bigint)','EXECUTE') AS status_anon",
       )
     ).rows[0];
-    assert.deepEqual(grants, { old: false, anon: false, authenticated: false });
+    assert.deepEqual(grants, {
+      old: false,
+      anon: false,
+      authenticated: false,
+      status_service: true,
+      status_anon: false,
+    });
     await assert.rejects(db.query("SELECT * FROM bruh_secure_action_credentials"));
     await assert.rejects(db.query("SELECT * FROM bruh_account_tip_authorizations"));
     await db.exec("RESET ROLE;");
