@@ -10,15 +10,11 @@ export async function walletOnboarding(
   const wallet = await accountWalletForTelegram(userId, generate);
   if (!wallet) return { wallet: null, passwordSet: false };
   const db = await admin();
-  const result = await db
-    .from("bruh_secure_action_credentials")
-    .select("telegram_user_id")
-    .eq("telegram_user_id", userId)
-    .maybeSingle();
-  if (result.error)
+  const result = await db.rpc("bruh_secure_action_password_set", { p_user_id: userId });
+  if (result.error || typeof result.data !== "boolean")
     throw new Error("Wallet setup status unavailable. Reopen the app with a fresh /security link.");
   return {
     wallet: { address: wallet.address, network: wallet.network },
-    passwordSet: !!result.data,
+    passwordSet: result.data,
   };
 }

@@ -1,5 +1,14 @@
 # BRUH current handoff
 
+## Existing-wallet Mini App status fix — source ready
+
+The first published Mini App onboarding screen could resolve an existing encrypted wallet but then
+failed while directly reading `bruh_secure_action_credentials`, whose table grants are intentionally
+revoked from `service_role`. The follow-up replaces that read with a `SECURITY DEFINER` boolean RPC
+available only to `service_role`; salts and hashes remain inaccessible. Apply managed migration 0022,
+publish the reviewed commit, then have the owner open a fresh private `/start` Mini App link. See
+[implementation record](operations/2026-09-14-existing-wallet-status-fix.md).
+
 ## Published account-tip backend — current status
 
 [Publication evidence](operations/2026-09-14-account-tip-backend-publication.md): original project published reviewed `5d5f171e34beca103ba852e7d234cc7a27ec98f6` after 173 tests/types/build, exact managed migrations 0018–0021, role checks and configured Helius devnet read. Tip/signing gates are enabled on devnet; new private-action route is HTTP 200 and unauthenticated webhook POST 401. Real-user private /security setup and funded-tip/finalized-history/community acceptance remain pending. Keep mainnet and unfinished export/withdrawal/retirement/token features disabled.
