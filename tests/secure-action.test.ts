@@ -58,7 +58,7 @@ it("requires matching resolved session and fresh server-verified initData", asyn
   await expect(secureActionUser("session-token", "signed-init-data")).rejects.toThrow();
   expect(admin).not.toHaveBeenCalled();
 });
-it("enrolls only a salted account-bound hash after the throttled setup lease", async () => {
+it("derives a salted account-bound hash and uses a setup lease only for the immediate write", async () => {
   expect(
     await enrollSecureAction({
       session: "session-token",

@@ -67,13 +67,15 @@ export async function enrollSecureAction(input: {
   if (newSecureActionPasswordError(input.password))
     throw new Error("Invalid Secure Action Password.");
   if (input.password !== input.confirmation) throw new Error("Passwords do not match.");
-  const db = await admin();
-  const lease = await db.rpc("bruh_secure_action_setup_begin", { p_user_id: userId });
-  if (lease.error || typeof lease.data !== "string" || !validIntentId(lease.data))
-    throw new Error("Secure Action Password setup unavailable or already complete.");
   const salt = randomBytes(16).toString("hex");
   const hash = await secureActionHash(input.password, salt, userId);
   try {
+    // PBKDF2 can exceed a short database lease in constrained Worker runtimes.
+    // Derive first, then acquire the one-use lease immediately before enrollment.
+    const db = await admin();
+    const lease = await db.rpc("bruh_secure_action_setup_begin", { p_user_id: userId });
+    if (lease.error || typeof lease.data !== "string" || !validIntentId(lease.data))
+      throw new Error("Secure Action Password setup unavailable or already complete.");
     const result = await db.rpc("bruh_secure_action_enroll", {
       p_user_id: userId,
       p_nonce: lease.data,
