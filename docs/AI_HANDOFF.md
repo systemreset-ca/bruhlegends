@@ -1,5 +1,15 @@
 # BRUH current handoff
 
+## Secure Action Password native WebCrypto fix — source in progress
+
+A fresh real enrollment after the lease-order deployment still terminated before any database call.
+Bounded Cloud diagnosis isolated the remaining cause to the Worker-hostile JavaScript compatibility
+implementation of `node:crypto` PBKDF2 at 600,000 iterations. `secureActionHash` now uses native
+WebCrypto with the same algorithm, account-bound salt, iteration count and 256-bit output; a fixed
+compatibility vector protects existing verifier semantics. See
+[implementation record](operations/2026-09-15-secure-action-webcrypto.md). No schema, wallet, secret,
+website, mainnet, reward or token behavior changes.
+
 ## Secure Action Password tip-proof window — source in progress
 
 The real enrollment timing diagnosis also applies to tip authorization: the action-bound database
