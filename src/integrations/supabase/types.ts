@@ -2053,6 +2053,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      bruh_secure_action_password_set: {
+        Args: { p_user_id: number }
+        Returns: boolean
+      }
       bruh_secure_action_setup_begin: {
         Args: { p_user_id: number }
         Returns: string
