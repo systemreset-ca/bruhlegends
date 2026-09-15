@@ -169,6 +169,13 @@
       "when": 1789440548777,
       "tag": "0023_apply_pending_journal",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1789477200000,
+      "tag": "0024_bruh_secure_action_proof_window",
+      "breakpoints": true
     }
   ]
 }

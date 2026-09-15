@@ -1,5 +1,14 @@
 # BRUH current handoff
 
+## Secure Action Password tip-proof window — source in progress
+
+The real enrollment timing diagnosis also applies to tip authorization: the action-bound database
+begin call supplies the verifier, so PBKDF2 cannot run before its nonce is issued. Managed migration
+0024 extends that nonce from 30 seconds to two minutes while preserving the exact intent binding,
+lockout, single-use grant, atomic consumption and 60-second grant expiry. See
+[implementation record](operations/2026-09-15-secure-action-proof-window.md). No wallet, website,
+secret, mainnet or economic behavior changes.
+
 ## Secure Action Password lease-order fix — source in review
 
 The owner's first real password enrollment resolved the existing wallet and reported no credential,
