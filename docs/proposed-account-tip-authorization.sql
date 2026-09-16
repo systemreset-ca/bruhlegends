@@ -4,7 +4,7 @@ create table public.bruh_secure_action_credentials (
  telegram_user_id bigint primary key check(telegram_user_id between 1 and 4503599627370495),
  salt_hex text not null check(salt_hex ~ '^[0-9a-f]{32}$'),
  hash_hex text not null check(hash_hex ~ '^[0-9a-f]{64}$'),
- iterations integer not null check(iterations=600000),
+ iterations integer not null check(iterations=100000),
  failures integer not null default 0 check(failures between 0 and 5),
  locked_until timestamptz, next_attempt_at timestamptz,
  attempt_nonce uuid, attempt_intent_id uuid, attempt_expires_at timestamptz,
@@ -59,7 +59,7 @@ begin
  if not exists(select 1 from public.bruh_account_wallets where telegram_user_id=p_user_id and network='devnet' and status='active') then raise exception 'Wallet unavailable'; end if;
  if exists(select 1 from public.bruh_secure_action_credentials where telegram_user_id=p_user_id) then return false; end if;
  if p_nonce is null or not exists(select 1 from public.bruh_secure_action_setup_leases where telegram_user_id=p_user_id and nonce=p_nonce and expires_at>now()) then return false; end if;
- insert into public.bruh_secure_action_credentials(telegram_user_id,salt_hex,hash_hex,iterations) values(p_user_id,p_salt,p_hash,600000);
+ insert into public.bruh_secure_action_credentials(telegram_user_id,salt_hex,hash_hex,iterations) values(p_user_id,p_salt,p_hash,100000);
  insert into public.bruh_secure_action_audit(telegram_user_id,event_type) values(p_user_id,'enrolled');
  update public.bruh_secure_action_setup_leases set nonce=null,expires_at=null where telegram_user_id=p_user_id;
  return true;

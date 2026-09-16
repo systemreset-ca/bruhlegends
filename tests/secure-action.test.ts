@@ -6,6 +6,7 @@ import { resolveSession, verifyInitData } from "../src/lib/session.server";
 import {
   authorizeAccountTip,
   enrollSecureAction,
+  SECURE_ACTION_PBKDF2_ITERATIONS,
   secureActionHash,
   secureActionUser,
 } from "../src/lib/secure-action.server";
@@ -19,10 +20,10 @@ beforeAll(async () => {
   expectedHash = hash.toString("hex");
   hash.fill(0);
 });
-it("keeps the established PBKDF2 verifier output when using native WebCrypto", async () => {
+it("keeps the production PBKDF2 verifier output stable", async () => {
   const hash = await secureActionHash(password, salt, 123);
   expect(hash.toString("hex")).toBe(
-    "828a89dbc129535cab2e6ba558c43a48f0af778c515dff7d5b26d7b6752602ef",
+    "5e71452320ca98a6737737aebf93a17b197f312cbeb5cb45ebf9a22e09431c02",
   );
   hash.fill(0);
 });
@@ -47,7 +48,7 @@ beforeEach(() => {
           nonce: id,
           saltHex: salt,
           hashHex: expectedHash,
-          iterations: 600000,
+          iterations: SECURE_ACTION_PBKDF2_ITERATIONS,
         },
       };
     if (name === "bruh_secure_action_finish") return { data: args.p_ok };

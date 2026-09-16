@@ -4,6 +4,8 @@ import { resolveSession, verifyInitData } from "./session.server";
 import { accountWalletsEnabled } from "./account-wallet.server";
 import { newSecureActionPasswordError } from "./secure-action-password";
 
+export const SECURE_ACTION_PBKDF2_ITERATIONS = 100000;
+
 export function accountTipGate(): void {
   if (
     !accountWalletsEnabled() ||
@@ -64,7 +66,12 @@ export async function secureActionHash(
       ["deriveBits"],
     );
     const bits = await crypto.subtle.deriveBits(
-      { name: "PBKDF2", hash: "SHA-256", salt: salt as BufferSource, iterations: 600000 },
+      {
+        name: "PBKDF2",
+        hash: "SHA-256",
+        salt: salt as BufferSource,
+        iterations: SECURE_ACTION_PBKDF2_ITERATIONS,
+      },
       key,
       256,
     );
@@ -142,7 +149,7 @@ export async function authorizeAccountTip(
     !c.saltHex ||
     !c.hashHex ||
     !/^[0-9a-f]{64}$/.test(c.hashHex) ||
-    c.iterations !== 600000
+    c.iterations !== SECURE_ACTION_PBKDF2_ITERATIONS
   )
     throw new Error("Authorization unavailable or temporarily locked.");
   const hash = await secureActionHash(password, c.saltHex, userId);

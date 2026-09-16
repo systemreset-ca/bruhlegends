@@ -1,5 +1,15 @@
 # BRUH current handoff
 
+## Secure Action Password production PBKDF2 cap — source in progress
+
+Production accepted native WebCrypto but rejected PBKDF2 iteration counts above
+100,000. At diagnosis time no credential or enrollment audit event existed, so
+the application and database work factor can be changed coherently without
+invalidating any user. Migration `0026_bruh_secure_action_runtime_pbkdf2.sql`
+sets the database constraint and controlled enrollment function to 100,000; the
+server uses the same exported constant. See
+[the production compatibility record](operations/2026-09-15-secure-action-runtime-pbkdf2.md).
+
 ## Secure Action Password native WebCrypto fix — source in progress
 
 A fresh real enrollment after the lease-order deployment still terminated before any database call.
