@@ -2016,32 +2016,6 @@ export type Database = {
       }
       bruh_account_wallet_provision: { Args: { p_record: Json }; Returns: Json }
       bruh_account_wallet_read: { Args: { p_user_id: string }; Returns: Json }
-      bruh_account_wallet_export_begin: {
-        Args: { p_export_id: string; p_user_id: number }
-        Returns: Json
-      }
-      bruh_account_wallet_export_consume: {
-        Args: { p_id: string; p_token_hash: string; p_user_id: number }
-        Returns: Json
-      }
-      bruh_account_wallet_export_finish: {
-        Args: {
-          p_export_id: string
-          p_nonce: string
-          p_ok: boolean
-          p_token_hash: string
-          p_user_id: number
-        }
-        Returns: boolean
-      }
-      bruh_account_wallet_export_read: {
-        Args: { p_id: string; p_user_id: number }
-        Returns: Json
-      }
-      bruh_account_wallet_export_request: {
-        Args: { p_user_id: number }
-        Returns: Json
-      }
       bruh_community_leaderboard: {
         Args: {
           p_limit: number
