@@ -1,5 +1,15 @@
 # BRUH current handoff
 
+## Protected devnet wallet export — source ready
+
+`/wallet keys` now creates an account/wallet-bound ten-minute request and opens a fresh verified
+private Mini App action. The existing Secure Action Password authorizes one 60-second grant and one
+key reveal; the UI clears it after 60 seconds. Forced-RLS storage retains only request/grant hashes
+and immutable audit metadata. The separate `BRUH_ACCOUNT_WALLET_EXPORT_DEVNET_ENABLED` gate remains
+off until migration 0028, effective-role checks and managed validation pass in the original BRUH
+project. See [the implementation and rollout record](operations/2026-09-16-protected-wallet-export.md).
+Retirement, withdrawal, mainnet, rewards and swaps remain disabled.
+
 ## Secure Action Password production PBKDF2 cap — source in progress
 
 Production accepted native WebCrypto but rejected PBKDF2 iteration counts above

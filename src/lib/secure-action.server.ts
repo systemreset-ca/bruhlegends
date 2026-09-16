@@ -6,6 +6,11 @@ import { newSecureActionPasswordError } from "./secure-action-password";
 
 export const SECURE_ACTION_PBKDF2_ITERATIONS = 100000;
 
+export function secureWalletActionGate(): void {
+  if (!accountWalletsEnabled() || process.env["SOLANA_NETWORK"] !== "devnet")
+    throw new Error("Wallet authorization unavailable.");
+}
+
 export function accountTipGate(): void {
   if (
     !accountWalletsEnabled() ||
@@ -21,7 +26,7 @@ export function grantHash(token: string): string {
   return createHash("sha256").update(token).digest("hex");
 }
 export async function secureActionUser(session: string, initData: string): Promise<number> {
-  accountTipGate();
+  secureWalletActionGate();
   if (session.length < 8 || session.length > 200 || initData.length > 4096)
     throw new Error("Authentication unavailable.");
   const resolved = await resolveSession(session);

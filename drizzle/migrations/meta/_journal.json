@@ -197,6 +197,13 @@
       "when": 1789550659371,
       "tag": "0027_bruh_secure_action_runtime_pbkdf2",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1789554000000,
+      "tag": "0028_bruh_account_wallet_export",
+      "breakpoints": true
     }
   ]
 }

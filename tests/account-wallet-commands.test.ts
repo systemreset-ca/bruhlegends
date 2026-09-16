@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
   edit: vi.fn(),
   wallet: vi.fn(),
   balance: vi.fn(),
+  exportRequest: vi.fn(),
 }));
 vi.mock("../src/lib/telegram.server", () => ({
   sendMessage: mocks.send,
@@ -23,6 +24,10 @@ vi.mock("../src/lib/account-wallet.server", () => ({
 vi.mock("../src/lib/account-wallet-balance.server", () => ({
   accountWalletBalance: mocks.balance,
 }));
+vi.mock("../src/lib/account-wallet-export.server", () => ({
+  walletExportGate: vi.fn(),
+  requestWalletExport: mocks.exportRequest,
+}));
 import { handleUpdate } from "../src/lib/bot.server";
 vi.mock("../src/lib/account-external-wallet.server", () => ({ accountExternalWallet: vi.fn() }));
 import { accountExternalWallet } from "../src/lib/account-external-wallet.server";
@@ -30,6 +35,12 @@ beforeEach(() => {
   vi.clearAllMocks();
   mocks.wallet.mockResolvedValue({ id: "wallet", address: "public-address", network: "devnet" });
   mocks.balance.mockResolvedValue("0");
+  mocks.exportRequest.mockResolvedValue({
+    id: "11111111-1111-4111-8111-111111111111",
+    address: "public-address",
+    network: "devnet",
+    status: "pending",
+  });
 });
 afterEach(() => vi.unstubAllEnvs());
 function command(text: string, chatId = 123) {
@@ -114,11 +125,15 @@ describe("private account-wallet commands", () => {
     });
     expect(mocks.wallet).not.toHaveBeenCalled();
   });
-  it("does not export keys or destroy a wallet through placeholders", async () => {
+  it("opens a private one-time export action while keeping destroy unavailable", async () => {
     await command("/wallet keys");
     await command("/wallet destroy");
     expect(mocks.wallet).not.toHaveBeenCalled();
-    expect(mocks.send.mock.calls[0]?.[1]).toContain("not enabled");
+    expect(mocks.exportRequest).toHaveBeenCalledWith(123);
+    expect(mocks.send.mock.calls[0]?.[1]).toContain("Private BRUH Wallet key export");
+    expect(mocks.send.mock.calls[0]?.[2].keyboard[0][0].web_app.url).toContain(
+      "export=11111111-1111-4111-8111-111111111111",
+    );
     expect(mocks.send.mock.calls[1]?.[1]).toContain("unchanged");
   });
   it("shows unavailable balance honestly and never renders storage errors", async () => {

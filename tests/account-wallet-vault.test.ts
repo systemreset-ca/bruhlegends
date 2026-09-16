@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
+import bs58 from "bs58";
 import {
+  exportAccountWalletSecret,
   generateAccountWallet,
   importAccountWrappingKey,
   verifyAccountWallet,
@@ -14,11 +16,21 @@ async function wrapping() {
 describe("persistent account-wallet encryption", () => {
   it("accepts the secure generator format without padding and rejects malformed lengths", async () => {
     const random = crypto.getRandomValues(new Uint8Array(32));
-    const generatedFormat = Array.from(random, (byte) => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"[byte % 62]).join("");
+    const generatedFormat = Array.from(
+      random,
+      (byte) => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"[byte % 62],
+    ).join("");
     const key = await importAccountWrappingKey(generatedFormat);
     const record = await generateAccountWallet("123", "devnet-v1", key);
-    await expect(verifyAccountWallet(record, await importAccountWrappingKey(generatedFormat))).resolves.toBeUndefined();
-    for (const invalid of [generatedFormat.slice(1), generatedFormat + "A", " " + generatedFormat, "!".repeat(32)]) {
+    await expect(
+      verifyAccountWallet(record, await importAccountWrappingKey(generatedFormat)),
+    ).resolves.toBeUndefined();
+    for (const invalid of [
+      generatedFormat.slice(1),
+      generatedFormat + "A",
+      " " + generatedFormat,
+      "!".repeat(32),
+    ]) {
       await expect(importAccountWrappingKey(invalid)).rejects.toThrow();
     }
   });
@@ -57,5 +69,17 @@ describe("persistent account-wallet encryption", () => {
       await expect(generateAccountWallet(user, "v1", key)).rejects.toThrow();
     }
     await expect(importAccountWrappingKey("00".repeat(32))).rejects.toThrow();
+  });
+  it("exports the conventional 64-byte Solana secret only from the authenticated envelope", async () => {
+    const key = await wrapping();
+    const record = await generateAccountWallet("123", "v1", key);
+    const encoded = await exportAccountWalletSecret(record, key);
+    const decoded = bs58.decode(encoded);
+    expect(decoded).toHaveLength(64);
+    expect(bs58.encode(decoded.slice(32))).toBe(record.address);
+    await expect(
+      exportAccountWalletSecret({ ...record, telegramUserId: "456" }, key),
+    ).rejects.toThrow();
+    await expect(exportAccountWalletSecret(record, await wrapping())).rejects.toThrow();
   });
 });

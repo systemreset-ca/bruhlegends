@@ -12,6 +12,7 @@ import { accountWalletsEnabled, accountWalletForTelegram } from "./account-walle
 import { accountWalletBalance } from "./account-wallet-balance.server";
 import { accountExternalWallet } from "./account-external-wallet.server";
 import { prepareAccountTip } from "./account-tip-preparation.server";
+import { requestWalletExport, walletExportGate } from "./account-wallet-export.server";
 import { loadParticipation } from "./participation.server";
 import {
   startSeason,
@@ -37,6 +38,15 @@ function accountSpendingEnabled(): boolean {
   );
 }
 
+function accountExportEnabled(): boolean {
+  try {
+    walletExportGate();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function sendAccountAction(userId: number, intentId?: string) {
   const token = await createLoginToken(userId, null);
   const url = new URL("/wallet-action", appUrl());
@@ -57,6 +67,24 @@ async function sendAccountAction(userId: number, intentId?: string) {
         ],
       ],
     },
+  );
+}
+
+async function sendWalletExportAction(userId: number) {
+  const request = await requestWalletExport(userId);
+  const token = await createLoginToken(userId, null);
+  const url = new URL("/wallet-action", appUrl());
+  url.searchParams.set("t", token);
+  url.searchParams.set("export", request.id);
+  await sendMessage(
+    userId,
+    [
+      "<b>Private BRUH Wallet key export</b>",
+      `Wallet: <code>${escapeHtml(request.address)}</code>`,
+      "Open the private Mini App and enter your Action Password. The key can be revealed once and is removed from the screen after 60 seconds.",
+      "Anyone with the exported key controls the wallet. Never paste it into Telegram or send it to another person.",
+    ].join("\n"),
+    { keyboard: [[{ text: "Export wallet key", web_app: { url: url.toString() } }]] },
   );
 }
 
@@ -141,11 +169,11 @@ function helpText() {
   if (!accountWalletsEnabled()) return HELP;
   return HELP.replace(
     "/wallet — link or review your wallet (DM only)",
-    "/generate · /wallet make · /wallet show — internal devnet wallet\n/wallet add &lt;address&gt; · /wallet external — unverified external address\n/wallet keys · /wallet destroy — unavailable until protected lifecycle flows are ready",
+    "/generate · /wallet make · /wallet show — internal devnet wallet\n/wallet add &lt;address&gt; · /wallet external — unverified external address\n/wallet keys — protected one-time Mini App export\n/wallet destroy — unavailable until protected retirement is ready",
   ).replace(
     "<i>BRUH is non-custodial. It never holds keys or funds — every transfer is approved in your own wallet.</i>",
     accountSpendingEnabled()
-      ? "<i>Devnet SOL tips require your private Secure Action Password approval. Export and retirement remain unavailable.</i>"
+      ? `<i>Devnet SOL tips require your private Secure Action Password approval. ${accountExportEnabled() ? "Protected key export is available privately;" : "Key export remains disabled;"} retirement remains unavailable.</i>`
       : "<i>Account wallets are devnet-only beta. BRUH stores encrypted keys; spending, export and retirement are not enabled yet.</i>",
   );
 }
@@ -157,7 +185,7 @@ function privacyText() {
     "One wallet is shared across your BRUH groups. Calls and tips retain group attribution and eligible activity also contributes to your community-wide ranking.",
     "Named community tip rankings use public verified transfers; private, anonymous and pseudonymous tips are not exposed there.",
     "Account wallet creation events are retained for audit. Group /forgetme does not destroy a funded account wallet.",
-    "Never send keys to Telegram chat. Export and retirement are not enabled in this beta.",
+    `Never send keys to Telegram chat. ${accountExportEnabled() ? "Protected key export requires a fresh private Mini App action and your Action Password." : "Key export is disabled."} Retirement is not enabled.`,
   ].join("\n\n");
 }
 
@@ -427,12 +455,21 @@ async function handleAccountWalletDm(message: TgMessage, args: string[]) {
     );
     return;
   }
-  if (action === "keys" || action === "destroy") {
+  if (action === "keys") {
+    try {
+      await sendWalletExportAction(userId);
+    } catch {
+      await sendMessage(
+        message.chat.id,
+        "Protected wallet export is unavailable. Confirm your wallet and Action Password are set, then try again later. Your wallet is unchanged.",
+      );
+    }
+    return;
+  }
+  if (action === "destroy") {
     await sendMessage(
       message.chat.id,
-      action === "keys"
-        ? "Private key export is not enabled yet. Your wallet is unchanged. Keys will only be exported through an authenticated private app flow."
-        : "Wallet retirement is not enabled yet: pending transfers and all token balances must be checked first. Your wallet and history are unchanged.",
+      "Wallet retirement is not enabled yet: pending transfers and all token balances must be checked first. Your wallet and history are unchanged.",
     );
     return;
   }
@@ -463,7 +500,7 @@ async function handleAccountWalletDm(message: TgMessage, args: string[]) {
         "One wallet for your Telegram account across BRUH groups.",
         "DEVNET ONLY — do not send real SOL or mainnet tokens.",
         accountSpendingEnabled()
-          ? "BRUH stores the encrypted signing key. Set /security privately, then reply to a group member with /tip &lt;amount&gt; SOL and authorize the exact transfer. Export remains unavailable."
+          ? `BRUH stores the encrypted signing key. Set /security privately, then reply to a group member with /tip &lt;amount&gt; SOL and authorize the exact transfer. ${accountExportEnabled() ? "Use /wallet keys for a protected one-time export." : "Export is currently disabled."}`
           : "BRUH stores the encrypted signing key. Bot-wallet spending and export are not enabled yet.",
       ].join("\n"),
       {
