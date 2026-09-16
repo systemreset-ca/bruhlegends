@@ -21,7 +21,9 @@ const exportId = "11111111-1111-4111-8111-111111111111";
 const nonce = "22222222-2222-4222-8222-222222222222";
 const password = "SyntheticExportHorse!";
 const salt = "01".repeat(16);
-const wrappingSecret = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+const wrappingSecret = Array.from({ length: 32 }, (_, index) =>
+  (index % 16).toString(16).padStart(2, "0"),
+).join("");
 const rpc = vi.fn();
 let envelope: Awaited<ReturnType<typeof generateAccountWallet>>;
 let expectedHash: string;
