@@ -6,3 +6,5 @@ c088f3799e29149fa0a93f2cfc8635844da6f3fb:.env:generic-api-key:2
 c088f3799e29149fa0a93f2cfc8635844da6f3fb:.env:generic-api-key:5
 # Reviewed runtime-generated AES key declaration with a non-secret version label.
 fdabfb2acae4c586f503744a0afd7feac66b76fa:services/custody-signer/devnet-smoke.ts:generic-api-key:20
+# Reviewed deterministic test-only wrapping-key fixture; replaced with runtime construction in the next commit.
+0ee9eb57d5afd75b5b52db77f3b411fc5e7b999d:tests/account-wallet-export.test.ts:generic-api-key:24

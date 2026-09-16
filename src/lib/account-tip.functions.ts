@@ -36,7 +36,7 @@ export const enrollSecureActionFn = createServerFn({ method: "POST" })
           "Use 15–128 standard keyboard characters, at least one capitalized letter and one special character. No spaces or emoji.",
         "Secure Action Password setup unavailable or already complete.":
           "Setup could not proceed: a password may already be set, another setup may be in progress, or the setup service is unavailable. Changing the characters will not fix this. If you already set a password, use it to authorize your tip.",
-        "Account tips unavailable.":
+        "Wallet authorization unavailable.":
           "Wallet authorization is currently unavailable. This is not a password-format error.",
       };
       return {

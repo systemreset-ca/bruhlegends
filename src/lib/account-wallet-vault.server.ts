@@ -124,6 +124,44 @@ export async function verifyAccountWallet(
   }
 }
 
+/**
+ * Deliberate protected export only. The caller must consume a fresh,
+ * action-bound authorization before invoking this function. The plaintext
+ * bytes are kept only long enough to encode the conventional Solana
+ * 64-byte secret key (seed + public key), then zeroed.
+ */
+export async function exportAccountWalletSecret(
+  record: AccountWalletEnvelope,
+  key: CryptoKey,
+): Promise<string> {
+  const snapshot = { ...record };
+  if (key.extractable || key.algorithm.name !== "AES-GCM") throw new Error("Invalid wrapping key.");
+  const seed = new Uint8Array(
+    await crypto.subtle.decrypt(
+      {
+        name: "AES-GCM",
+        iv: bytes(snapshot.ivHex, 12) as BufferSource,
+        additionalData: scope(snapshot) as BufferSource,
+        tagLength: 128,
+      },
+      key,
+      bytes(snapshot.ciphertextHex, 48) as BufferSource,
+    ),
+  );
+  const secret = new Uint8Array(64);
+  try {
+    const publicKey = ed25519.getPublicKey(seed);
+    if (seed.length !== 32 || bs58.encode(publicKey) !== snapshot.address)
+      throw new Error("Invalid wallet envelope.");
+    secret.set(seed, 0);
+    secret.set(publicKey, 32);
+    return bs58.encode(secret);
+  } finally {
+    seed.fill(0);
+    secret.fill(0);
+  }
+}
+
 /** Internal constrained signer. No arbitrary message signing or raw-key export. */
 export async function signAccountWalletSolTip(
   record: AccountWalletEnvelope,

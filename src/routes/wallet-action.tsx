@@ -18,6 +18,7 @@ import {
   readAccountTipFn,
   reconcileAccountTipFn,
 } from "@/lib/account-tip.functions";
+import { readWalletExportFn, revealWalletExportFn } from "@/lib/account-wallet-export.functions";
 
 export const Route = createFileRoute("/wallet-action")({ ssr: false, component: WalletAction });
 function rawInitData(): string {
@@ -37,6 +38,11 @@ function WalletAction() {
   const [passwordSet, setPasswordSet] = useState(false);
   const [intentId, setIntentId] = useState<string | null>(null);
   const [tip, setTip] = useState<Awaited<ReturnType<typeof readAccountTipFn>> | null>(null);
+  const [exportId, setExportId] = useState<string | null>(null);
+  const [walletExport, setWalletExport] = useState<Awaited<
+    ReturnType<typeof readWalletExportFn>
+  > | null>(null);
+  const [exportedSecret, setExportedSecret] = useState<string | null>(null);
   const [password, setPassword] = useState("");
   const [confirmation, setConfirmation] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -60,10 +66,12 @@ function WalletAction() {
       const url = new URL(window.location.href);
       const token = url.searchParams.get("t");
       const id = url.searchParams.get("tip");
+      const requestedExport = url.searchParams.get("export");
       url.searchParams.delete("t");
       window.history.replaceState({}, "", url.toString());
       if (!token || !rawInitData())
         throw new Error("Open this button inside your private Telegram BRUH chat.");
+      if (id && requestedExport) throw new Error("Private action link is invalid.");
       const result = await exchangeLoginTokenFn({ data: { token } });
       if (!result.session)
         throw new Error("This private link expired. Request a fresh link from the bot.");
@@ -72,15 +80,27 @@ function WalletAction() {
             data: { session: result.session, initData: rawInitData(), intentId: id },
           })
         : null;
-      const onboarding = id
-        ? null
-        : await readWalletOnboardingFn({
-            data: { session: result.session, initData: rawInitData() },
-          });
+      const exportRecord = requestedExport
+        ? await readWalletExportFn({
+            data: {
+              session: result.session,
+              initData: rawInitData(),
+              exportId: requestedExport,
+            },
+          })
+        : null;
+      const onboarding =
+        id || requestedExport
+          ? null
+          : await readWalletOnboardingFn({
+              data: { session: result.session, initData: rawInitData() },
+            });
       if (cancelled) return;
       setSession(result.session);
       setIntentId(id);
       setTip(record);
+      setExportId(requestedExport);
+      setWalletExport(exportRecord);
       setWallet(onboarding?.wallet ?? null);
       setPasswordSet(onboarding?.passwordSet ?? false);
       setEnrolling(!id && !!onboarding?.wallet && !onboarding.passwordSet);
@@ -88,11 +108,13 @@ function WalletAction() {
       setStatus(
         record
           ? `Tip state: ${record.state}`
-          : !onboarding?.wallet
-            ? "Generate your internal BRUH Wallet to get started."
-            : onboarding.passwordSet
-              ? "Your internal BRUH Wallet and Action Password are ready."
-              : "Create a new separate Action Password for menu execution.",
+          : exportRecord
+            ? "Review the wallet address, then enter your Action Password for a one-time key reveal."
+            : !onboarding?.wallet
+              ? "Generate your internal BRUH Wallet to get started."
+              : onboarding.passwordSet
+                ? "Your internal BRUH Wallet and Action Password are ready."
+                : "Create a new separate Action Password for menu execution.",
       );
     })()
       .catch((error) => {
@@ -164,6 +186,20 @@ function WalletAction() {
         setEnrolling(false);
         setPasswordSet(true);
         setStatus("Password saved. Existing passwords cannot be overwritten here.");
+      } else if (exportId && action === "send") {
+        const result = await revealWalletExportFn({
+          data: { ...context, exportId, password: supplied },
+        });
+        setExportedSecret(result.secretKey);
+        setStatus(
+          "Private key revealed once. Save it securely now; it will disappear from this screen in 60 seconds.",
+        );
+        window.setTimeout(() => {
+          setExportedSecret(null);
+          setStatus(
+            "Private key cleared from this screen. Request a new /wallet keys action if needed.",
+          );
+        }, result.clearAfterSeconds * 1000);
       } else if (intentId && action === "send") {
         const result = await executeAccountTipFn({
           data: { ...context, intentId, password: supplied },
@@ -186,7 +222,9 @@ function WalletAction() {
       setStatus(
         action === "enroll"
           ? "Password setup could not reach the service. Close this app, run /security in your private bot chat, and open the new button."
-          : "Tip authorization or confirmation could not complete. The cause may be an expired private session, an incorrect password, a temporary lockout, or a transaction/service issue. This is not a request to add special characters.",
+          : exportId
+            ? "Wallet export authorization could not complete. The link may be expired or already used, the password may be incorrect, or a temporary lockout may apply. Request a fresh /wallet keys link if needed."
+            : "Tip authorization or confirmation could not complete. The cause may be an expired private session, an incorrect password, a temporary lockout, or a transaction/service issue. This is not a request to add special characters.",
       );
     } finally {
       setBusy(false);
@@ -324,7 +362,7 @@ function WalletAction() {
             )}
           </section>
         )}
-        {(enrolling || intentId) && (
+        {(enrolling || intentId || exportId) && (
           <p id="password-rules" className="text-xs text-muted-foreground">
             {enrolling
               ? secureActionPasswordRules
@@ -345,6 +383,42 @@ function WalletAction() {
             <dd>{tip.reference}</dd>
           </dl>
         )}
+        {walletExport && (
+          <section className="space-y-3">
+            <h2 className="font-sans text-lg font-medium normal-case">Export this BRUH Wallet</h2>
+            <code className="block break-all rounded bg-secondary p-3 text-white">
+              {walletExport.address}
+            </code>
+            <p className="text-sm text-muted-foreground">
+              This is a one-time devnet export. Anyone with the exported private key controls this
+              wallet. Never paste it into Telegram, a website, or a message.
+            </p>
+          </section>
+        )}
+        {exportedSecret && (
+          <section className="space-y-3 rounded border border-gold p-3" aria-live="assertive">
+            <h2 className="font-sans text-lg font-medium normal-case">Private key</h2>
+            <code className="block break-all rounded bg-secondary p-3 text-white select-all">
+              {exportedSecret}
+            </code>
+            <button
+              type="button"
+              className="rounded border border-imperial bg-gold px-4 py-2 font-medium text-black"
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(exportedSecret);
+                  setStatus(
+                    "Private key copied. Store it securely; the on-screen copy still clears automatically.",
+                  );
+                } catch {
+                  setStatus("Clipboard unavailable. Select and copy the key before it clears.");
+                }
+              }}
+            >
+              Copy private key
+            </button>
+          </section>
+        )}
         {session && (
           <form
             onSubmit={(event) => {
@@ -353,7 +427,7 @@ function WalletAction() {
             }}
             className="space-y-3"
           >
-            {(enrolling || intentId) && (
+            {(enrolling || intentId || exportId) && (
               <label className="block">
                 Secure Action Password
                 <div className="relative">
@@ -420,13 +494,17 @@ function WalletAction() {
                 </div>
               </label>
             )}
-            {(enrolling || intentId) && (
+            {(enrolling || intentId || exportId) && (
               <button
                 disabled={busy || !introduced}
                 type="submit"
                 className="border border-imperial bg-gold text-black font-medium rounded px-4 py-2 disabled:opacity-50"
               >
-                {enrolling ? "Set password" : "Authorize this exact tip"}
+                {enrolling
+                  ? "Set password"
+                  : exportId
+                    ? "Reveal private key once"
+                    : "Authorize this exact tip"}
               </button>
             )}
             {intentId && (
