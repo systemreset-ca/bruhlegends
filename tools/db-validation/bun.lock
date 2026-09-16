@@ -1,0 +1,15 @@
+{
+  "lockfileVersion": 1,
+  "configVersion": 0,
+  "workspaces": {
+    "": {
+      "name": "bruh-db-validation",
+      "devDependencies": {
+        "@electric-sql/pglite": "0.3.14",
+      },
+    },
+  },
+  "packages": {
+    "@electric-sql/pglite": ["@electric-sql/pglite@0.3.14", "https://europe-west4-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@electric-sql/pglite/-/pglite-0.3.14.tgz", {}, "sha512-3DB258dhqdsArOI1fIt7cb9RpUOgcDg5hXWVgVHAeqVQ/qxtFy605QKs4gx6mFq3jWsSPqDN8TgSEsqC3OfV9Q=="],
+  }
+}

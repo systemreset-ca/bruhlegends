@@ -376,6 +376,89 @@ export type Database = {
           },
         ]
       }
+      bruh_account_wallet_export_authorizations: {
+        Row: {
+          consumed_at: string | null
+          created_at: string
+          expires_at: string
+          export_intent_id: string
+          telegram_user_id: number
+          token_hash: string
+        }
+        Insert: {
+          consumed_at?: string | null
+          created_at?: string
+          expires_at: string
+          export_intent_id: string
+          telegram_user_id: number
+          token_hash: string
+        }
+        Update: {
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          export_intent_id?: string
+          telegram_user_id?: number
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bruh_account_wallet_export_authorizations_export_intent_id_fkey"
+            columns: ["export_intent_id"]
+            isOneToOne: false
+            referencedRelation: "bruh_account_wallet_export_intents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bruh_account_wallet_export_authorizations_telegram_user_id_fkey"
+            columns: ["telegram_user_id"]
+            isOneToOne: false
+            referencedRelation: "bruh_secure_action_credentials"
+            referencedColumns: ["telegram_user_id"]
+          },
+        ]
+      }
+      bruh_account_wallet_export_intents: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          network: string
+          revealed_at: string | null
+          status: string
+          telegram_user_id: number
+          wallet_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          network: string
+          revealed_at?: string | null
+          status?: string
+          telegram_user_id: number
+          wallet_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          network?: string
+          revealed_at?: string | null
+          status?: string
+          telegram_user_id?: number
+          wallet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bruh_account_wallet_export_intents_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "bruh_account_wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bruh_account_wallets: {
         Row: {
           address: string
@@ -2014,8 +2097,6 @@ export type Database = {
         }
         Returns: Json
       }
-      bruh_account_wallet_provision: { Args: { p_record: Json }; Returns: Json }
-      bruh_account_wallet_read: { Args: { p_user_id: string }; Returns: Json }
       bruh_account_wallet_export_begin: {
         Args: { p_export_id: string; p_user_id: number }
         Returns: Json
@@ -2042,6 +2123,8 @@ export type Database = {
         Args: { p_user_id: number }
         Returns: Json
       }
+      bruh_account_wallet_provision: { Args: { p_record: Json }; Returns: Json }
+      bruh_account_wallet_read: { Args: { p_user_id: string }; Returns: Json }
       bruh_community_leaderboard: {
         Args: {
           p_limit: number
